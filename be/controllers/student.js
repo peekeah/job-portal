@@ -18,9 +18,11 @@ exports.create = async(req, res, next) => {
         const response = new student(req.body);
         await response.save();
 
+        const token = jwt.sign({ email: req.body.email }, process.env.JWT_SECRET);
+
         res.send({
             status: true,
-            data: 'successfully created user'
+            data: { token }
         })
 
     } catch (err) {

@@ -18,9 +18,11 @@ exports.createCompany = async (req, res, next) => {
         
         await new company(req.body).save();
 
+        const token = jwt.sign({ email: req.body.email }, process.env.JWT_SECRET);
+
         res.send({
             status: true,
-            data: 'successfully create company'
+            data: { token }
         })
 
     } catch (err) {
