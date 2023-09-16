@@ -17,6 +17,10 @@ const companySchema = new mongoose.Schema({
         type: 'string',
         required: true
     },
+    password: {
+        type: 'string',
+        required: true
+    },
     contact_no: {
         type: 'string',
         required: true
