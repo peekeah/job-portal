@@ -13,8 +13,8 @@ exports.createCompany = async (req, res, next) => {
 
         if(!req.body.password) throw new ErrorResponse('password is required', 400);
 
-        req.body.password = hashPassword(req.body.password);
-
+        req.body.password = await hashPassword(req.body.password);
+        
         await new company(req.body).save();
 
         res.send({
@@ -48,6 +48,35 @@ exports.login = async(req, res, next) => {
         res.send({
             status: true,
             data: { token }
+        })
+
+    } catch (err) {
+        next(err);
+    }
+}
+
+exports.updateProfile = async(req, res, next) => {
+    try {
+
+        if(req.body.name){
+            delete req.body.name;
+        }
+
+        if(req.body.password){
+            req.body.password = await hashPassword(req.body.password);
+        }
+
+        if(req.body.founding_year){
+            delete req.body.founding_year;
+        }
+
+        const response = await company.findOneAndUpdate({ email: req.body.tokenData.email }, req.body, {
+            new: true
+        });
+
+        res.send({
+            status: true,
+            data: response
         })
 
     } catch (err) {

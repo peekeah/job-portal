@@ -54,3 +54,24 @@ exports.login = async(req, res, next) => {
         next(err);
     }
 }
+
+exports.updateProfile = async(req, res, next) => {
+    try {
+
+        if(req.body.password){
+            req.body.password = await hashPassword(req.body.password);
+        }
+
+        const response = await student.findOneAndUpdate({ email: req.body.tokenData.email }, req.body, {
+            new: true
+        });
+
+        res.send({
+            status: true,
+            data: response
+        })
+
+    } catch (err) {
+        next(err);
+    }
+}
