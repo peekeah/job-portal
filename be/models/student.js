@@ -35,10 +35,9 @@ const studentSchema = new mongoose.Schema({
     interest: [String],
     skills: {
         type: [String],
-        // required: true,
         validate: {
             validator: function (v) {
-                return v.length > 1
+                return v.length > 4
             },
             message: 'Minimum 5 skills required'
         }
