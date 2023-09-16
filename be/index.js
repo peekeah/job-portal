@@ -3,7 +3,8 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const studentRouter = require('./routes/student')
+const studentRouter = require('./routes/student');
+const { errorHandler } = require('./utils/errorHandler');
 
 const app = express();
 app.use(express.json());
@@ -20,6 +21,9 @@ app.get('/', async(req, res) => {
 // routes
 app.use('/api/student', studentRouter)
 
+
+// Error handler
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 8000;
 

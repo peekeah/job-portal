@@ -1,4 +1,5 @@
-const student = require("../models/student")
+const student = require("../models/student");
+const { ErrorResponse } = require("../utils/errorHandler");
 
 exports.create = async(req, res, next) => {
     try {
@@ -6,10 +7,7 @@ exports.create = async(req, res, next) => {
         const existStudent = await student.findOne({ email: req.body.email });
 
         if(existStudent){
-            return res.status(403).send({
-                status: false,
-                error: 'student already exist'
-            })
+            throw new ErrorResponse('Student already exists', 403);
         }
 
         const response = new student(req.body);
@@ -21,9 +19,6 @@ exports.create = async(req, res, next) => {
         })
 
     } catch (err) {
-        res.status(500).send({
-            status: false,
-            error: err.message
-        })
+        next(err);
     }
 }
