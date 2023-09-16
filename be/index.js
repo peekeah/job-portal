@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const studentRouter = require('./routes/student');
+const companyRouter = require('./routes/company');
 const { errorHandler } = require('./utils/errorHandler');
 
 const app = express();
@@ -19,7 +20,8 @@ app.get('/', async(req, res) => {
 
 
 // routes
-app.use('/api/student', studentRouter)
+app.use('/api/student', studentRouter);
+app.use('/api/company', companyRouter);
 
 
 // Error handler
