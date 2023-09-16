@@ -1,5 +1,6 @@
 const company = require("../models/company");
 const job = require("../models/job");
+const student = require("../models/student");
 const { ErrorResponse } = require("../utils/errorHandler");
 
 exports.getJobs = async (req, res, next) => {
@@ -51,7 +52,8 @@ exports.applyJob = async (req, res, next) => {
             throw new ErrorResponse('you already applied for this job');
         }
 
-        const jobData = await job.findByIdAndUpdate(jobId, { $push: { 'applicants.applied': studentId } });
+        await job.findByIdAndUpdate(jobId, { $push: { 'applicants.applied': studentId } });
+        await student.findByIdAndUpdate(studentId, { $push: { 'applied_jobs': { job_id: jobId } } })
 
         res.send({
             status: true,
@@ -71,7 +73,7 @@ exports.getAppliedStudents = async (req, res, next) => {
         if (!jobId) throw new ErrorResponse('job id not provided', 400);
 
         const studentsList = await job.findOne({ _id: jobId })
-            .populate('applicants.applied')
+            .populate('applicants.applied', '-applied_jobs')
             .populate('applicants.shortlisted')
             .populate('applicants.hired')
 
@@ -126,6 +128,18 @@ exports.selectCandidate = async (req, res, next) => {
 
         const schemaField = `applicants.${applicantStatus}`;
         await job.findByIdAndUpdate(jobId, { $push: { [schemaField]: studentId } });
+
+        await student.findOneAndUpdate({
+            _id: studentId,
+            'applied_jobs.job_id': jobId,
+        },
+            {
+                $set: {
+                    'applied_jobs.$.status': applicantStatus,
+                },
+            },
+            { new: true },
+        )
 
         res.send({
             status: true,

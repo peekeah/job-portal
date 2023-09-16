@@ -8,7 +8,8 @@ const router = express.Router();
 router.post('/login', student.login);
 router.post('/create', student.create);
 
-router.use(auth.isAuthenticated)
+router.use(auth.isAuthenticated);
+router.use(auth.authorizeStudent);
 router.post('/profile', student.updateProfile);
 
 

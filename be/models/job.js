@@ -1,21 +1,5 @@
 const mongoose = require('mongoose');
 
-// const applicantsSchema = new mongoose.Schema({
-//     applied: {
-//         type: [mongoose.Schema.ObjectId],
-//         ref: "student",
-//     },
-//     shortlisted: {
-//         type: [mongoose.Schema.ObjectId],
-//         ref: "student",
-//     },
-//     hired: {
-//         type: [mongoose.Schema.ObjectId],
-//         ref: "student",
-//     }
-// })
-
-
 const applicantsSchema = new mongoose.Schema({
     applied: [
         {

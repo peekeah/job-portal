@@ -15,6 +15,18 @@ const collegeSchema = new mongoose.Schema({
     },
 })
 
+const appliedJobsSchema = new mongoose.Schema({
+    job_id: {
+        type: mongoose.Schema.ObjectId,
+        ref: "job"
+    },
+    status: {
+        type: 'string',
+        enum: ['applied', 'shortlisted', 'hired'],
+        default: 'applied'
+    }
+});
+
 const studentSchema = new mongoose.Schema({
     name: {
         type: 'string',
@@ -48,7 +60,8 @@ const studentSchema = new mongoose.Schema({
     },
     bio: {
         type: 'string'
-    }
+    },
+    applied_jobs: [appliedJobsSchema]
 });
 
 
