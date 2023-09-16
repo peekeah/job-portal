@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const studentRouter = require('./routes/student');
 const companyRouter = require('./routes/company');
+const jobRouter = require('./routes/job');
 const { errorHandler } = require('./utils/errorHandler');
 
 const app = express();
@@ -22,6 +23,7 @@ app.get('/', async(req, res) => {
 // routes
 app.use('/api/student', studentRouter);
 app.use('/api/company', companyRouter);
+app.use('/api/job', jobRouter);
 
 
 // Error handler

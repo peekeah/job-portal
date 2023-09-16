@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const company = require('../models/company');
 const { ErrorResponse } = require('../utils/errorHandler');
 const { comparePassword, hashPassword } = require('../utils/bcrypt');
+const job = require('../models/job');
 
 exports.createCompany = async (req, res, next) => {
     try {
