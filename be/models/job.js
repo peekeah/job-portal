@@ -1,19 +1,42 @@
 const mongoose = require('mongoose');
 
-const Applicants = new mongoose.Schema({
-    applied: {
-        type: mongoose.Schema.ObjectId,
-        ref: "company"
-    },
-    shortlisted: {
-        type: mongoose.Schema.ObjectId,
-        ref: "company"
-    },
-    hired: {
-        type: mongoose.Schema.ObjectId,
-        ref: "company"
-    }
+// const applicantsSchema = new mongoose.Schema({
+//     applied: {
+//         type: [mongoose.Schema.ObjectId],
+//         ref: "student",
+//     },
+//     shortlisted: {
+//         type: [mongoose.Schema.ObjectId],
+//         ref: "student",
+//     },
+//     hired: {
+//         type: [mongoose.Schema.ObjectId],
+//         ref: "student",
+//     }
+// })
+
+
+const applicantsSchema = new mongoose.Schema({
+    applied: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: "student"
+        },
+    ],
+    shortlisted: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: "student"
+        },
+    ],
+    hired: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: "student"
+        },
+    ]
 })
+
 
 const jobSchema = new mongoose.Schema({
     company: {
@@ -46,7 +69,7 @@ const jobSchema = new mongoose.Schema({
         type: [String],
         require: true
     },
-    applicants: Applicants
+    applicants: applicantsSchema
 });
 
 
