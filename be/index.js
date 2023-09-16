@@ -3,6 +3,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
+const studentRouter = require('./routes/student')
 
 const app = express();
 app.use(express.json());
@@ -14,6 +15,10 @@ app.get('/', async(req, res) => {
         data: 'job portal app'
     })
 })
+
+
+// routes
+app.use('/api/student', studentRouter)
 
 
 const PORT = process.env.PORT || 8000;
