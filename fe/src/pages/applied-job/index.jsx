@@ -35,7 +35,7 @@ function AppliedJobs() {
 
     return (
         <div className={styles.container}>
-            <h1>Jobs</h1>
+            <h1>Applied Jobs</h1>
 
             {
                 appliedJobs.length > 0 ?
@@ -44,7 +44,8 @@ function AppliedJobs() {
                             <th className={styles.table}>#</th>
                             <th className={styles.table}>Company Name</th>
                             <th className={styles.table}>Job Role</th>
-                            <th className={styles.table}>Ctc</th>
+                            <th className={styles.table}>Description</th>
+                            <th className={styles.table}>CTC</th>
                             <th className={styles.table}>Location</th>
                             <th className={styles.table}>Status</th>
                         </tr>
@@ -55,6 +56,7 @@ function AppliedJobs() {
                                         <td className={styles.table}>{id + 1}</td>
                                         <td className={styles.table}>{job.job_id.company.name}</td>
                                         <td className={styles.table}>{job.job_id.job_role}</td>
+                                        <td className={styles.table}>{job.job_id.description}</td>
                                         <td className={styles.table}>{job.job_id.ctc}</td>
                                         <td className={styles.table}>{job.job_id.location}</td>
                                         <td className={styles.table}>{job.status}</td>

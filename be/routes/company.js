@@ -11,5 +11,6 @@ router.post('/signup', company.createCompany)
 router.use([isAuthenticated, authorizeCompany]);
 router.get('/profile', company.getProfile);
 router.post('/profile', company.updateProfile);
+router.get('/posted-jobs', company.postedJobs)
 
 module.exports = router;

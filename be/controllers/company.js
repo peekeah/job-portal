@@ -97,3 +97,15 @@ exports.updateProfile = async(req, res, next) => {
         next(err);
     }
 }
+
+exports.postedJobs = async(req, res, next) => {
+    try {
+        const result = await job.find({ company: req.body.companyData._id }).populate('company')
+        res.send({
+            status: true,
+            data: result
+        })
+    } catch (err) {
+        next(err);
+    }
+}

@@ -1,6 +1,6 @@
 .container{
     min-height: 100vh;
-    padding: 5rem;
+    padding: 3.5rem;
 }
 
 .sidebar{
@@ -15,6 +15,6 @@
 .table{
     border: 1px solid black;
     border-collapse: collapse;
-    padding: 5px 5px;
+    padding: 6px 10px;
 }
 

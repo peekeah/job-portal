@@ -7,9 +7,7 @@ import styles from './index.module.css';
 function Dashboard() {
     const [jobs, setJobs] = useState([]);
 
-    const { config, userData } = useContext(UserContext);
-
-    console.log(userData);
+    const { config } = useContext(UserContext);
 
     useEffect(() => {
         const url = process.env.REACT_APP_BACKEND_URL;
@@ -36,6 +34,7 @@ function Dashboard() {
             alert(response.data.data);
 
         } catch (err) {
+            alert(err.response.data.error)
             console.log(err);
         }
     }
