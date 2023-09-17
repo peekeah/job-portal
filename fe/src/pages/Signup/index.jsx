@@ -6,7 +6,7 @@ import CompanySignupForm from '../../components/companySignupForm';
 function Signup() {
 
     const [formData, setFormData] = useState({
-        userType: 'company'
+        userType: 'student'
     })
 
     const handleChange = (e) => {
