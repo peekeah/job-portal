@@ -12,6 +12,7 @@ router.use(auth.isAuthenticated);
 router.use(auth.authorizeStudent);
 router.get('/profile', student.getProfile);
 router.post('/profile', student.updateProfile);
+router.get('/applied-jobs', student.getAppliedJobs);
 
 
 module.exports = router;

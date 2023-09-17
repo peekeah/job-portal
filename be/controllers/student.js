@@ -4,14 +4,14 @@ const student = require("../models/student");
 const { hashPassword, comparePassword } = require("../utils/bcrypt");
 const { ErrorResponse } = require("../utils/errorHandler");
 
-exports.create = async(req, res, next) => {
+exports.create = async (req, res, next) => {
     try {
 
         const existStudent = await student.findOne({ email: req.body.email });
 
         if (existStudent) throw new ErrorResponse('Student already exists', 403);
 
-        if(!req.body.password) throw new ErrorResponse('password is required', 400);
+        if (!req.body.password) throw new ErrorResponse('password is required', 400);
 
         req.body.password = await hashPassword(req.body.password);
 
@@ -31,20 +31,20 @@ exports.create = async(req, res, next) => {
 }
 
 
-exports.login = async(req, res, next) => {
+exports.login = async (req, res, next) => {
     try {
-        
+
         const { email, password } = req.body;
 
-        if(!email || !password) throw new ErrorResponse("Email & password must be provided", 400);
+        if (!email || !password) throw new ErrorResponse("Email & password must be provided", 400);
 
         const existStudent = await student.findOne({ email: req.body.email });
 
-        if(!existStudent) throw new ErrorResponse('Student not found', 403);
+        if (!existStudent) throw new ErrorResponse('Student not found', 403);
 
         const isMatch = await comparePassword(password, existStudent.password);
 
-        if(!isMatch) throw new ErrorResponse('Password mismatch', 403);
+        if (!isMatch) throw new ErrorResponse('Password mismatch', 403);
 
         const token = jwt.sign({ email: existStudent.email }, process.env.JWT_SECRET);
 
@@ -57,7 +57,7 @@ exports.login = async(req, res, next) => {
     }
 }
 
-exports.getProfile = async(req, res, next) => {
+exports.getProfile = async (req, res, next) => {
     try {
         res.send({
             status: true,
@@ -68,10 +68,10 @@ exports.getProfile = async(req, res, next) => {
     }
 }
 
-exports.updateProfile = async(req, res, next) => {
+exports.updateProfile = async (req, res, next) => {
     try {
 
-        if(req.body.password){
+        if (req.body.password) {
             req.body.password = await hashPassword(req.body.password);
         }
 
@@ -84,6 +84,28 @@ exports.updateProfile = async(req, res, next) => {
             data: response
         })
 
+    } catch (err) {
+        next(err);
+    }
+}
+
+
+exports.getAppliedJobs = async (req, res, next) => {
+    try {
+        const studentData = await student.findById(req.body.studentData._id)
+            .populate({
+                path: 'applied_jobs.job_id',
+                populate: {
+                    path: 'company',
+                    model: 'company',
+                    select: '-password -applicants'
+                }
+            });
+
+        res.send({
+            status: true,
+            data: studentData.applied_jobs
+        });
     } catch (err) {
         next(err);
     }
