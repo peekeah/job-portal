@@ -9,6 +9,7 @@ router.post('/login', company.login);
 router.post('/signup', company.createCompany)
 
 router.use([isAuthenticated, authorizeCompany]);
+router.get('/profile', company.getProfile);
 router.post('/profile', company.updateProfile);
 
 module.exports = router;

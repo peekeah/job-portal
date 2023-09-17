@@ -10,6 +10,7 @@ router.post('/signup', student.create);
 
 router.use(auth.isAuthenticated);
 router.use(auth.authorizeStudent);
+router.get('/profile', student.getProfile);
 router.post('/profile', student.updateProfile);
 
 

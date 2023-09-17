@@ -57,6 +57,17 @@ exports.login = async(req, res, next) => {
     }
 }
 
+exports.getProfile = async(req, res, next) => {
+    try {
+        res.send({
+            status: true,
+            data: req.body.studentData
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
 exports.updateProfile = async(req, res, next) => {
     try {
 
