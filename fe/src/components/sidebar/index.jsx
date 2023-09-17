@@ -41,7 +41,7 @@ export default function Sidebar() {
             </>
           ))
         }
-        {/* <div className={styles.sidebarBtn} onClick={() => navigate('/applied-jobs')}>Applied Jobs</div> */}
+        <div className={styles.sidebarBtn} onClick={() => navigate('/profile')}>Profile</div>
         <div className={styles.sidebarBtn} onClick={logout}>Logout</div>
       </div>
     </div>

@@ -8,6 +8,7 @@ import AppliedJobs from "./pages/applied-job";
 import PostedJobs from "./pages/posted-jobs";
 import AppliedCandidates from './pages/applied-candidates';
 import PostJob from "./pages/post-job";
+import Profile from "./pages/profile";
 
 function App() {
   return (
@@ -17,8 +18,11 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
+
+
         {/* student routes */}
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/applied-jobs" element={<AppliedJobs />} />
       
         {/* company routes */}

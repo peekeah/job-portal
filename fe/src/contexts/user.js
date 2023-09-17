@@ -30,7 +30,7 @@ const UserState = (props) => {
         if (auth && userType) {
             getProfileData();
         }
-    }, [])
+    }, [auth])
 
     const handleLogin = (token, userType) => {
         localStorage.setItem("token", token);
