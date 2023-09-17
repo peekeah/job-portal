@@ -15,6 +15,7 @@ function Dashboard() {
         const getJobs = async () => {
             try {
                 const response = await axios.get(`${url}/job`);
+                // console.log(response.data.data);
                 setJobs(response.data.data);
             } catch (err) {
                 console.log(err);

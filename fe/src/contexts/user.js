@@ -12,7 +12,7 @@ const UserState = (props) => {
 
     const config = {
         headers: {
-        "authorization": `Bearer ${token}`,
+            "authorization": `Bearer ${token}`,
         },
     };
 
@@ -27,12 +27,10 @@ const UserState = (props) => {
     );
 
     useEffect(() => {
-        try {
+        if (auth && userType) {
             getProfileData();
-        } catch (err) {
-            console.log(err);
         }
-    }, [auth, userType])
+    }, [])
 
     const handleLogin = (token, userType) => {
         localStorage.setItem("token", token);
@@ -54,11 +52,15 @@ const UserState = (props) => {
         setUserType(null);
     };
 
-    const getProfileData = async() => {
-        const url = `${host}/${userType}/profile`;
-        const res = await axios.get(url, config);
-        setUserData(res.data.data);
-        return res.data.data;
+    const getProfileData = async () => {
+        try {
+            const url = `${host}/${userType}/profile`;
+            const res = await axios.get(url, config);
+            setUserData(res.data.data);
+            return res.data.data;
+        } catch (err) {
+            console.log(err);
+        }
     }
 
 
@@ -74,7 +76,7 @@ const UserState = (props) => {
                 handleLogin,
                 handleLogout,
             }}
-            >
+        >
             {props.children}
         </UserContext.Provider>
     );

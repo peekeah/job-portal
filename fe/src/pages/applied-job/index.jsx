@@ -14,24 +14,23 @@ function AppliedJobs() {
     const navigate = useNavigate();
 
     useEffect(() => {
-
         if (!auth || userType !== 'student') {
             navigate('/dashboard');
         }
 
-        const getData = async () => {
-            try {
-                const url = `${process.env.REACT_APP_BACKEND_URL}/student/applied-jobs`;
-                const res = await axios.get(url, config);
-                setAppliedJobs(res.data.data);
-            } catch (err) {
-                console.log(err);
-            }
-        }
-
         getData();
 
-    }, [])
+    }, []);
+
+    const getData = async () => {
+        try {
+            const url = `${process.env.REACT_APP_BACKEND_URL}/student/applied-jobs`;
+            const res = await axios.get(url, config);
+            setAppliedJobs(res.data.data);
+        } catch (err) {
+            console.log(err);
+        }
+    }
 
     return (
         <div className={styles.container}>
