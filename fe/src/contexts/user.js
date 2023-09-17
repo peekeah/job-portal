@@ -26,9 +26,12 @@ const UserState = (props) => {
         localStorage.getItem("userType") || null
     );
 
-
     useEffect(() => {
-        getProfileData();
+        try {
+            getProfileData();
+        } catch (err) {
+            console.log(err);
+        }
     }, [auth, userType])
 
     const handleLogin = (token, userType) => {
@@ -37,7 +40,6 @@ const UserState = (props) => {
         localStorage.setItem("userType", userType);
         setUserType(userType);
     };
-
 
     const handleLogout = () => {
         if (localStorage.getItem("token")) {

@@ -7,6 +7,10 @@ import styles from './index.module.css';
 function Dashboard() {
     const [jobs, setJobs] = useState([]);
 
+    const { config, userData } = useContext(UserContext);
+
+    console.log(userData);
+
     useEffect(() => {
         const url = process.env.REACT_APP_BACKEND_URL;
 
@@ -25,7 +29,15 @@ function Dashboard() {
 
 
     const applyJob = async(e) => {
+        try {
+            const jobId = e.target.name;
+            const url = process.env.REACT_APP_BACKEND_URL;
+            const response = await axios.post(`${url}/job/apply/${jobId}`, {}, config);
+            alert(response.data.data);
 
+        } catch (err) {
+            console.log(err);
+        }
     }
 
     return (
