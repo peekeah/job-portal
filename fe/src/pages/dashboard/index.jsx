@@ -26,7 +26,6 @@ function Dashboard() {
 
     const applyJob = async(e) => {
 
-        console.log(e.target.name)
     }
 
     return (

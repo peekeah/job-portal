@@ -1,8 +1,15 @@
-import { useState } from 'react';
-import styles from './index.module.css';
+import { useContext, useState } from 'react';
 import axios from 'axios';
 
+import { useNavigate } from 'react-router-dom';
+import { UserContext } from '../../contexts/user';
+import styles from './index.module.css';
+
 function CompanySignupForm() {
+
+    const navigate = useNavigate();
+    const { handleLogin, getProfileData } = useContext(UserContext);
+
     const [formData, setFormData] = useState({
         name: '',
         founding_year: '',
@@ -26,8 +33,11 @@ function CompanySignupForm() {
         try {
             const url = `${process.env.REACT_APP_BACKEND_URL}/company/signup`;
             const response = await axios.post(url, formData);
+
             const token = response.data.data.token;
-            localStorage.setItem('token', JSON.stringify(token));
+            handleLogin(token, 'company');
+            getProfileData(token, 'company');
+            navigate('/dashboard');
 
         } catch (err) {
             alert(err.response.data.error)

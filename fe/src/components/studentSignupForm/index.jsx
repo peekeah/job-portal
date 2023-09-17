@@ -1,10 +1,16 @@
 import axios from 'axios';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 
 import styles from './index.module.css';
 import DynamicInput from '../dynamicInput';
+import { useNavigate } from 'react-router-dom';
+import { UserContext } from '../../contexts/user';
 
 function StudentSignupForm() {
+
+    const navigate = useNavigate();
+    const { handleLogin, getProfileData } = useContext(UserContext);
+
     const [formData, setFormData] = useState({
         name: '',
         mobile: '',
@@ -41,8 +47,11 @@ function StudentSignupForm() {
         try {
             const url = `${process.env.REACT_APP_BACKEND_URL}/student/signup`;
             const response = await axios.post(url, payload);
+
             const token = response.data.data.token;
-            localStorage.setItem('token', JSON.stringify(token));
+            handleLogin(token, 'student');
+            getProfileData(token, 'student');
+            navigate('/dashboard');
 
         } catch (err) {
             alert(err.response.data.error)

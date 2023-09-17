@@ -8,7 +8,7 @@ import { UserContext } from '../../contexts/user';
 function Login() {
     const navigate = useNavigate();
 
-    const { handleLogin } = useContext(UserContext);
+    const { handleLogin, getProfileData } = useContext(UserContext);
 
     const [user, setUser] = useState({
         email: '',
@@ -39,7 +39,6 @@ function Login() {
             alert(err.response.data.error)
             console.log(err);
         }
-
     }
 
     const handleReset = () => {

@@ -4,14 +4,15 @@ import { createContext, useEffect, useState } from "react";
 const UserContext = createContext();
 
 const UserState = (props) => {
-    const URL = process.env.REACT_APP_API;
+    const host = process.env.REACT_APP_BACKEND_URL
 
     const token = localStorage.getItem("token")
         ? localStorage.getItem("token")
         : "";
+
     const config = {
         headers: {
-        "access-token": token,
+        "authorization": `Bearer ${token}`,
         },
     };
 
@@ -20,20 +21,43 @@ const UserState = (props) => {
     );
 
     const [userData, setUserData] = useState([]);
-    const [userType, setUserType] = useState(null);
+
+    const [userType, setUserType] = useState(
+        localStorage.getItem("userType") || null
+    );
+
+
+    useEffect(() => {
+        getProfileData();
+    }, [auth, userType])
 
     const handleLogin = (token, userType) => {
         localStorage.setItem("token", token);
         setAuth(true);
+        localStorage.setItem("userType", userType);
         setUserType(userType);
     };
+
 
     const handleLogout = () => {
         if (localStorage.getItem("token")) {
             localStorage.removeItem("token");
         }
+
+        if (localStorage.getItem("userType")) {
+            localStorage.removeItem("userType");
+        }
+
         setAuth(false);
+        setUserType(null);
     };
+
+    const getProfileData = async() => {
+        const url = `${host}/${userType}/profile`;
+        const res = await axios.get(url, config);
+        setUserData(res.data.data);
+        return res.data.data;
+    }
 
 
     return (
@@ -44,6 +68,7 @@ const UserState = (props) => {
                 userData,
                 token,
                 config,
+                getProfileData,
                 handleLogin,
                 handleLogout,
             }}
