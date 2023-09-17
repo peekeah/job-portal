@@ -1,7 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
-import styles from './index.module.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+
+import Sidebar from '../../components/sidebar'
+import styles from './index.module.css';
 import { UserContext } from '../../contexts/user';
 import AppliedStudentsTable from '../../components/appliedStudentTable';
 
@@ -94,9 +96,12 @@ function AppliedCandidates() {
 
     return (
         <div className={styles.container}>
+            <Sidebar />
+            <div className={styles.rightContainer}>¸
             <AppliedStudentsTable students={appliedStudents} filterType="Applied" handleChange={handleChange} handleSubmit={handleSubmit} />
             <AppliedStudentsTable students={shortlistedStudents} filterType="Shortlisted" handleChange={handleChange} handleSubmit={handleSubmit} />
             <AppliedStudentsTable students={hiredStudents} filterType="Hired" handleChange={handleChange} handleSubmit={handleSubmit} />
+            </div>
         </div>
     )
 }

@@ -1,8 +1,6 @@
 .container{
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    padding: 3rem 3rem;
+    display: flex; 
 }
 
 .sidebar{
@@ -12,6 +10,7 @@
 
 .rightContainer{
     padding: 3.7rem 3rem;
+    overflow: auto !important;
 }
 
 .table{

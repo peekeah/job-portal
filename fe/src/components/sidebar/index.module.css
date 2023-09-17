@@ -1,7 +1,3 @@
-.container{
-    display: flex;
-}
-
 .sidebar{
     padding-top: 4rem;
     width: 215px;
@@ -18,15 +14,3 @@
     cursor: pointer;
     display: block;
 }
-
-.rightContainer{
-    padding: 3.7rem 3rem;
-    overflow: auto !important;
-}
-
-.table{
-    border: 1px solid black;
-    border-collapse: collapse;
-    padding: 5px 5px;
-}
-
