@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import axios from 'axios';
 
 import styles from './index.module.css';
 import { useNavigate } from 'react-router-dom';
+import { UserContext } from '../../contexts/user';
 
 function Login() {
     const navigate = useNavigate();
+
+    const { handleLogin } = useContext(UserContext);
 
     const [user, setUser] = useState({
         email: '',
@@ -29,8 +32,8 @@ function Login() {
         try {
             const response = await axios.post(host, user);
             const token = response.data.data.token;
-            localStorage.setItem('token', JSON.stringify(token));
-            navigate('/home');
+            handleLogin(token, user.userType);
+            navigate('/dashboard');
 
         } catch (err) {
             alert(err.response.data.error)
