@@ -6,7 +6,7 @@ const student = require('../controllers/student');
 const router = express.Router();
 
 router.post('/login', student.login);
-router.post('/create', student.create);
+router.post('/signup', student.create);
 
 router.use(auth.isAuthenticated);
 router.use(auth.authorizeStudent);

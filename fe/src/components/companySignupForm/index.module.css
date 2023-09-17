@@ -1,0 +1,15 @@
+.submitBtn{
+    height: 2rem;
+    width: 5rem;
+    background: green;
+    color: white;
+    cursor: pointer;
+}
+
+.resetBtn{
+    height: 2rem;
+    width: 5rem;
+    background: red;
+    color: white;
+    cursor: pointer;
+}

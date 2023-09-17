@@ -6,7 +6,7 @@ const { isAuthenticated, authorizeCompany } = require('../middlewares/auth');
 const router = express.Router();
 
 router.post('/login', company.login);
-router.post('/create', company.createCompany)
+router.post('/signup', company.createCompany)
 
 router.use([isAuthenticated, authorizeCompany]);
 router.post('/profile', company.updateProfile);
