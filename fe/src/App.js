@@ -6,6 +6,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/dashboard";
 import AppliedJobs from "./pages/applied-job";
 import PostedJobs from "./pages/posted-jobs";
+import AppliedCandidates from './pages/applied-candidates';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
       
         {/* company routes */}
         <Route path="/posted-jobs" element={<PostedJobs />} />
+        <Route path="/applied-students/:id" element={<AppliedCandidates />} />
       </Routes>
     </BrowserRouter>
   );

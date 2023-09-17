@@ -14,6 +14,7 @@ function AppliedJobs() {
     const navigate = useNavigate();
 
     useEffect(() => {
+        console.log(config)
         if (!auth || userType !== 'student') {
             navigate('/dashboard');
         }

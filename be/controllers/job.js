@@ -81,7 +81,7 @@ exports.getAppliedStudents = async (req, res, next) => {
 
         res.send({
             status: true,
-            data: studentsList.applicants
+            data: studentsList.applicants || []
         })
 
     } catch (err) {
@@ -98,7 +98,7 @@ exports.selectCandidate = async (req, res, next) => {
             throw new ErrorResponse('missing mandatory field');
         }
 
-        if (!['shortlisted', 'hired'].includes(applicantStatus)) {
+        if (!['applied','shortlisted', 'hired'].includes(applicantStatus)) {
             throw new ErrorResponse('wrong value for applicantStatus', 400);
         }
 
@@ -143,7 +143,7 @@ exports.selectCandidate = async (req, res, next) => {
 
         res.send({
             status: true,
-            data: 'student selection successfull'
+            data: 'successfully updated status'
         })
 
     } catch (err) {

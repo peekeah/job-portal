@@ -32,7 +32,7 @@ function PostedJobs() {
 
     }, [])
 
-    const handleClick = () => navigate('/list')
+    const handleClick = (e) => navigate(`/applied-students/${e.target.name.toString()}`)
 
     return (
         <div className={styles.container}>
@@ -47,7 +47,7 @@ function PostedJobs() {
                     <th className={styles.table}>Stipend</th>
                     <th className={styles.table}>Location</th>
                     <th className={styles.table}>Required Skills</th>
-                    <th className={styles.table}>'Applied Candidates'</th>
+                    <th className={styles.table}>Applied Candidates</th>
                 </tr>
                 {
                     postedJobs.map((job, id) => (
@@ -62,7 +62,7 @@ function PostedJobs() {
                                 <td className={styles.table}>{job.location}</td>
                                 <td className={styles.table}>{job.skills_required.join(', ')}</td>
                                 <td className={styles.table}>
-                                    <button onClick={handleClick}>Applied Candidates</button>
+                                    <button name={job._id} onClick={handleClick}>Applied Candidates</button>
                                 </td>
                             </tr>
                         </>

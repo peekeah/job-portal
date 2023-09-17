@@ -18,3 +18,10 @@
     padding: 5px 5px;
 }
 
+.updateBtn{
+    height: 2rem;
+    width: 5rem;
+    background: green;
+    color: white;
+    cursor: pointer;
+}

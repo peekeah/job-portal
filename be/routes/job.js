@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/', job.getJobs)
 
 router.post('/apply/:id', [isAuthenticated, authorizeStudent], job.applyJob);
-router.get('/applied-students/:id', [isAuthenticated, authorizeStudent], job.getAppliedStudents)
+router.get('/applied-students/:id', [isAuthenticated, authorizeCompany], job.getAppliedStudents)
 
 router.post('/select-candidate', [isAuthenticated, authorizeCompany], job.selectCandidate);
 router.post('/', [isAuthenticated, authorizeCompany], job.postJob)
