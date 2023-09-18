@@ -4,13 +4,19 @@ import axios from 'axios';
 import { UserContext } from '../../contexts/user';
 import styles from './index.module.css';
 import Sidebar from '../../components/sidebar';
+import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
     const [jobs, setJobs] = useState([]);
 
-    const { config, userType } = useContext(UserContext);
+    const { config, userType, auth } = useContext(UserContext);
+    const navigate = useNavigate();
 
     useEffect(() => {
+
+        if(!auth){
+            navigate('/');
+        }
         const url = process.env.REACT_APP_BACKEND_URL;
 
         const getJobs = async () => {

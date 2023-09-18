@@ -1,13 +1,25 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import StudentSignupForm from '../../components/studentSignupForm';
 import styles from './index.module.css';
 import CompanySignupForm from '../../components/companySignupForm';
+import { UserContext } from '../../contexts/user';
+import { useNavigate } from 'react-router-dom';
 
 function Signup() {
 
     const [formData, setFormData] = useState({
         userType: 'student'
-    })
+    });
+
+    const navigate = useNavigate();
+    const { auth } = useContext(UserContext);
+
+    useEffect(() => {
+        if (auth) {
+            navigate('/dashboard');
+        }
+
+    }, [])
 
     const handleChange = (e) => {
         const { name, value } = e.target;

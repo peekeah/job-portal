@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 
 import styles from './index.module.css';
@@ -8,13 +8,20 @@ import { UserContext } from '../../contexts/user';
 function Login() {
     const navigate = useNavigate();
 
-    const { handleLogin, getProfileData } = useContext(UserContext);
+    const { handleLogin, auth } = useContext(UserContext);
 
     const [user, setUser] = useState({
         email: '',
         password: '',
         userType: 'student'
     });
+
+    useEffect(() => {
+        if (auth) {
+            navigate('/dashboard');
+        }
+
+    }, [])
 
     const handleChange = (e) => {
         const { name, value } = e.target;
