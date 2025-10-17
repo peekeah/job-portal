@@ -1,11 +1,17 @@
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import styles from "./index.module.css"
+import { redirect, usePathname } from "next/navigation";
 
 export default function Home() {
+
   return (
-    <div className={styles.container} >
-      <Link href="/login" className={styles.loginBtn}>Login</Link>
-      <Link href="/signup" className={styles.signupBtn}>Signup</Link>
+    <div className="flex items-center justify-center gap-4 h-full">
+      <Button>
+        <Link href={"/login"}>Login</Link>
+      </Button>
+      <Button>
+        <Link href={"/signup"}>Signup</Link>
+      </Button>
     </div>
   );
 }
