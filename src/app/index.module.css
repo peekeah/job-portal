@@ -1,0 +1,22 @@
+.container{
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.2rem;
+    background-color: whitesmoke;
+}
+
+.loginBtn{
+    height: 2rem;
+    width: 5rem;
+    background: blue;
+    color: white;
+}
+
+.signupBtn{
+    height: 2rem;
+    width: 5rem;
+    background: green;
+    color: white;
+}
