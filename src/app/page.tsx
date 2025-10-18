@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { redirect, usePathname } from "next/navigation";
 
 export default function Home() {
 
