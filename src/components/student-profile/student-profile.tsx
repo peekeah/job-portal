@@ -1,49 +1,40 @@
-import { useContext } from 'react';
-import styles from './index.module.css';
-import { UserContext } from '../../contexts/user';
+const userData = {
+  name: "Pranay Sharma",
+  mobile: "+91 9876543210",
+  email: "pranay.sharma@example.com",
+  college: {
+    name: "Indian Institute of Technology, Bombay",
+    branch: "Computer Science and Engineering",
+    joining_year: 2021,
+  },
+  interest: ["Artificial Intelligence", "Web3", "Chess", "Music Production"],
+  skills: ["JavaScript", "TypeScript", "React", "Next.js", "Node.js", "Express", "Prisma", "PostgreSQL"],
+};
 
 function StudentProfile() {
-    const { userData } = useContext(UserContext);
 
-    return (
-        <>
-            <h1>Student Profile</h1>
-            <table className={styles.table} style={{ marginTop: '1.2rem' }}>
-                <tr className={styles.table}>
-                    <td className={styles.table} >Name</td>
-                    <td className={styles.table} >{userData.name}</td>
-                </tr>
-                <tr className={styles.table}>
-                    <td className={styles.table} >Mobile</td>
-                    <td className={styles.table} >{userData.mobile}</td>
-                </tr>
-                <tr className={styles.table}>
-                    <td className={styles.table} >Email</td>
-                    <td className={styles.table} >{userData.email}</td>
-                </tr>
-                <tr className={styles.table}>
-                    <td className={styles.table} >College Name</td>
-                    <td className={styles.table} >{userData.college.name}</td>
-                </tr>
-                <tr className={styles.table}>
-                    <td className={styles.table} >College Branch</td>
-                    <td className={styles.table} >{userData?.college?.branch}</td>
-                </tr>
-                <tr className={styles.table}>
-                    <td className={styles.table} >College Joining Year</td>
-                    <td className={styles.table} >{userData?.college?.joining_year}</td>
-                </tr>
-                <tr className={styles.table}>
-                    <td className={styles.table} >Interests</td>
-                    <td className={styles.table} >{userData?.interest.join(', ')}</td>
-                </tr>
-                <tr className={styles.table}>
-                    <td className={styles.table} >Skills</td>
-                    <td className={styles.table} >{userData?.skills.join(', ')}</td>
-                </tr>
-            </table>
-        </>
-    )
+  return (
+    <div className='p-5'>
+      <h1 className='py-1 text-2xl font-semibold'>Student Profile</h1>
+
+      <div className='grid grid-cols-2 w-1/2 mx-auto pt-42'>
+        <div >Name</div>
+        <div >{userData?.name}</div>
+        <div >Mobile</div>
+        <div >{userData?.mobile}</div>
+        <div >Email</div>
+        <div >{userData?.email}</div>
+        <div >College Name</div>
+        <div >{userData?.college.name}</div>
+        <div >College Branch</div>
+        <div >{userData?.college?.branch}</div>
+        <div >College Joining Year</div>
+        <div >{userData?.college?.joining_year}</div>
+        {/* <div >Interests</div> */}
+        {/* <div >{userData?.interest?.join(', ')}</div> */}
+      </div >
+    </div>
+  )
 }
 
 export default StudentProfile

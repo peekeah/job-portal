@@ -10,7 +10,7 @@ const Profile = () => {
   return (
     <div>
       {
-        userType === 'student' ? <StudentProfile /> : <CompanyProfile />
+        userType !== 'student' ? <StudentProfile /> : <CompanyProfile />
       }
     </div>
   )

@@ -1,56 +1,33 @@
 import { useContext } from 'react';
-import styles from './index.module.css';
-import { UserContext } from '../../contexts/user';
+import { UserContext } from '@/contexts/user';
 
-function CompanyProfile() {
-    const { userData } = useContext(UserContext);
+export default function CompanyProfile() {
+  const { userData } = useContext(UserContext);
 
-    return (
-        <>
-            <h1>Company Profile</h1>
-
-            <table className={styles.table} style={{ marginTop: '1.2rem'}}>
-                <tr className={styles.table}>
-                    <td className={styles.table}>Company Name</td>
-                    <td className={styles.table}>{userData.name}</td>
-                </tr>
-                <tr className={styles.table}>
-                    <td className={styles.table}>Year Founded</td>
-                    <td className={styles.table}>{userData.founding_year}</td>
-                </tr>
-                <tr className={styles.table}>
-                    <td className={styles.table}>Company Type</td>
-                    <td className={styles.table}>{userData.company_type}</td>
-
-                </tr>
-                <tr className={styles.table}>
-                    <td className={styles.table}>Email</td>
-                    <td className={styles.table}>{userData.email}</td>
-                </tr>
-                <tr className={styles.table}>
-                    <td className={styles.table}>Phone No</td>
-                    <td className={styles.table}>{userData.contact_no}</td>
-                </tr>
-                <tr className={styles.table}>
-                    <td className={styles.table}>Website</td>
-                    <td className={styles.table}>{userData.website}</td>
-                </tr>
-                <tr className={styles.table}>
-                    <td className={styles.table}>State</td>
-                    <td className={styles.table}>{userData.state}</td>
-                </tr>
-                <tr className={styles.table}>
-                    <td className={styles.table}>Company Size</td>
-                    <td className={styles.table}>{userData.size}</td>
-                </tr>
-                <tr className={styles.table}>
-                    <td className={styles.table}>Company Bio</td>
-                    <td className={styles.table}>{userData.bio}</td>
-                </tr>
-            </table>
-
-        </>
-    )
+  return (
+    <div className='p-8'>
+      <h1 className='pb-3 font-semibold text-2xl'>Company Profile</h1>
+      <div className='grid grid-cols-2 place-content-center w-1/2 mx-auto mt-42 gap-3'>
+        <div>Company Name</div>
+        <div>{userData?.name}</div>
+        <div>Year Founded</div>
+        <div>{userData?.founding_year}</div>
+        <div>Company Type</div>
+        <div>{userData?.company_type}</div>
+        <div>Email</div>
+        <div>{userData?.email}</div>
+        <div>Phone No</div>
+        <div>{userData?.contact_no}</div>
+        <div>Website</div>
+        <div>{userData?.website}</div>
+        <div>State</div>
+        <div>{userData?.state}</div>
+        <div>Company Size</div>
+        <div>{userData?.size}</div>
+        <div>Company Bio</div>
+        <div>{userData?.bio}</div>
+      </div>
+    </div>
+  )
 }
 
-export default CompanyProfile
