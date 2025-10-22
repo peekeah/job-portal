@@ -1,16 +1,14 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
 import company from "@/models/company";
 import { hashPassword } from "@/utils/bcrypt";
 import { errorHandler, CustomError } from "@/utils/errorHandler";
+import { NextRequest, NextResponse } from "next/server";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ status: false, error: "Method Not Allowed" });
-  }
+export async function POST(req: NextRequest) {
+
 
   try {
-    const payload = req.body;
+    const payload = await req.json();
 
     if (!payload.email) throw new CustomError("email is required", 400);
 
@@ -24,11 +22,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const token = jwt.sign({ email: payload.email }, process.env.JWT_SECRET || "secret");
 
-    res.status(200).json({
+    NextResponse.json({
       status: true,
       data: { token },
     });
   } catch (err) {
-    errorHandler(err, res);
+    console.log("hiee:", err)
+    NextResponse.json(errorHandler(err))
   }
 }

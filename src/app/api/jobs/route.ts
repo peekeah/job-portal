@@ -25,11 +25,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await new job(req.body).save();
 
       return res.status(200).json({ status: true, data: "successfully posted job" });
-    } 
+    }
     else {
       return res.status(405).json({ status: false, error: "Method Not Allowed" });
     }
   } catch (err) {
-    errorHandler(err, res);
+    errorHandler(err);
   }
 }
