@@ -12,9 +12,7 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("cdx:", credentials)
         await connectToDatabase();
-
         const existUser = await user.findOne({ email: credentials?.email });
 
         if (!existUser) throw new Error("No user found with this email");
@@ -47,4 +45,3 @@ export const authOptions = {
     },
   },
 };
-

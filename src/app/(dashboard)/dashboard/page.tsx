@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { getJobColumns } from '@/components/data-table/job-columns';
 import { jobMockData } from '@/mock/job-mock';
 
+
 const Dashboard = () => {
 
   const [jobs, setJobs] = useState([]);
@@ -43,7 +44,6 @@ const Dashboard = () => {
       console.log(err);
     }
   }
-
 
   return (
     <div className='p-10'>
