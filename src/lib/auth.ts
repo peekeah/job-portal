@@ -2,6 +2,31 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { connectToDatabase } from "@/utils/db";
 import user from "@/models/user";
 import { comparePassword } from "@/utils/bcrypt";
+import { AuthOptions } from "next-auth";
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      email: string;
+      user_type: string;
+    }
+  }
+
+  interface User {
+    id: string;
+    email: string;
+    user_type: string;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    id: string;
+    email?: string;
+    user_type: string;
+  }
+}
 
 export const authOptions = {
   providers: [
@@ -22,6 +47,7 @@ export const authOptions = {
         return {
           id: existUser._id.toString(),
           email: existUser.email,
+          user_type: existUser.userType || "user",
         };
       }
     }),
@@ -35,13 +61,19 @@ export const authOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async jwt({ token, user }: { token: any, user: any }) {
-      if (user) token.id = user.id;
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.user_type = user.user_type;
+      }
       return token;
     },
-    async session({ session, token }: any) {
-      if (token) session.user.id = token.id as string;
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string;
+        session.user.user_type = token.user_type;
+      }
       return session;
     },
   },
-};
+} satisfies AuthOptions
