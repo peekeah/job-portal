@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getToken } from "./lib/token";
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const token = await getToken(req)
 
   const isProtectedRoute = path.startsWith("/dashboard");
 

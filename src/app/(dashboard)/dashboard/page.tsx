@@ -1,36 +1,54 @@
-import axios from 'axios';
-import React, { useContext } from 'react'
-import { UserContext } from '@/contexts/user'
+"use client"
+
+import axios, { AxiosError } from 'axios';
+import React from 'react'
 import { DataTable } from '@/components/data-table/data-table';
 import { Card, CardContent } from '@/components/ui/card';
 import { getJobColumns } from '@/components/data-table/job-columns';
-import { jobMockData } from '@/mock/job-mock';
 import { Button } from '@/components/ui/button';
+import useSWR from 'swr';
+import { fetcher } from '@/lib/fetcher';
 
-const getData = async () => {
-  const res = await fetch(process.env.BACKEND_URI + "/api/jobs")
-  if (!res.ok) {
-    return {}
-    // throw new Error("Failed to fetch data")
-  }
-  return res.json()
+export type Company = {
+  _id: string;
+  name: string;
+  founding_year: number;
+  company_type: string;
+  email: string;
+};
+
+export type Job = {
+  _id: string;
+  company: Company;
+  job_role: string;
+  description: string;
+  ctc: number;
+  stipend: number;
+  location: string;
+  skills_required: string[];
+};
+
+export type Response = {
+  status: boolean;
+  data: Job[]
 }
 
-const Dashboard = async () => {
-  const res = await fetch(process.env.BACKEND_URI + "/api/jobs")
-  console.log("rr:", res)
+const Dashboard = () => {
 
-  // const columns = getJobColumns("student")
+  const { data: resData, error, isLoading } = useSWR<Response>('/api/jobs', fetcher)
+  const jobs = resData?.data;
 
-  const applyJob = async (e) => {
+  const handleApplyJob = async (jobId: string) => {
     try {
-      const jobId = e.target.name;
-      const url = process.env.REACT_APP_BACKEND_URL;
-      const response = await axios.post(`${url}/job/apply/${jobId}`, {});
+      const response = await axios.post(`/api/jobs/apply/${jobId}`, {});
       alert(response.data.data);
 
     } catch (err) {
-      alert(err.response.data.error)
+      if (err instanceof AxiosError) {
+        alert(err?.response?.data?.error)
+      } else {
+        alert("something went wrong")
+      }
       console.log(err);
     }
   }
@@ -42,27 +60,19 @@ const Dashboard = async () => {
         <CardContent>
           <div className='divide-y-2 divide-gray-300 max-w-2xl mx-auto'>
             {
-              jobMockData?.map((job) => (
-                <div className='p-5 flex justify-between items-center' key={job.id}>
+              jobs?.map((job) => (
+                <div className='p-5 flex justify-between items-center' key={job._id}>
                   <div >
-                    <div>{job.companyName}</div>
-                    <div>{job.jobRole}</div>
+                    <div>{job.company.name}</div>
+                    <div>{job.job_role}</div>
                     <div>{job.ctc}</div>
                     <div>{job.description}</div>
                   </div>
-                  <div><Button>Apply</Button></div>
+                  <div><Button onClick={() => handleApplyJob(job._id)}>Apply</Button></div>
                 </div>
               ))
             }
           </div>
-          {/*
-          <DataTable
-            className="h-72"
-            columns={columns}
-            // data={jobs?.length ? jobs : []}
-            data={jobMockData}
-          />
-          */}
         </CardContent>
       </Card>
 

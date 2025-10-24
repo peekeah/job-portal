@@ -1,16 +1,34 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import job from "@/models/job";
 import student from "@/models/student";
 import { errorHandler, CustomError } from "@/utils/errorHandler";
+import { NextRequest, NextResponse } from "next/server"
+import { getToken } from "@/lib/token"
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") return res.status(405).json({ status: false, error: "Method Not Allowed" });
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
 
   try {
-    const jobId = req.query.id as string;
-    const studentData = req.body.studentData;
-
+    const jobId = params.id;
     if (!jobId) throw new CustomError("Job id missing", 400);
+
+    const token = await getToken(req)
+    if (!token) {
+      throw new CustomError("unauthorized", 401)
+    }
+
+    if (token.user_type !== "student") {
+      throw new CustomError("only students can apply for the job", 403)
+    }
+
+    const studentData = await student.findOne({ email: token?.email })
+
+    if (!studentData) {
+      throw new CustomError("student not found", 403)
+    }
+
+    if (!jobId) {
+      throw new CustomError("Job id missing", 400);
+    }
+
     if (!studentData?._id) throw new CustomError("Student data missing", 400);
 
     const found = await job.findOne({
@@ -27,8 +45,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await job.findByIdAndUpdate(jobId, { $push: { "applicants.applied": studentData._id } });
     await student.findByIdAndUpdate(studentData._id, { $push: { applied_jobs: { job_id: jobId } } });
 
-    res.status(200).json({ status: true, data: "successfully applied for the job" });
+    return NextResponse.json({ status: true, data: "successfully applied for the job" });
   } catch (err) {
-    errorHandler(err, res);
+    const [res, status] = errorHandler(err);
+    return NextResponse.json(res, status)
   }
 }
+
+
