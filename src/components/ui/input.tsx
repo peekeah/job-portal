@@ -9,7 +9,7 @@ interface CustomInput extends React.ComponentProps<"input"> {
 
 function Input({ className, type, label, ...props }: CustomInput) {
   return (
-    <div className="space-y-3 w-full">
+    <div className="space-y-1.5 w-full">
       {
         label ? <Label htmlFor="picture">{label}</Label> : null
       }

@@ -184,7 +184,7 @@ type CustomSelectProps = React.ComponentProps<typeof Select> & {
 
 function CustomSelect({ options, label, className, placeholder, ...props }: CustomSelectProps) {
   return (
-    <div className={cx("space-y-3", className)}>
+    <div className={cx("space-y-1.5", className)}>
       {
         label && (
           <Label className="text-sm font-medium leading-none">{label}</Label>)

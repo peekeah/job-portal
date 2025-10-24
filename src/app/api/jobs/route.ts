@@ -1,35 +1,40 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import job from "@/models/job";
 import company from "@/models/company";
 import { errorHandler, CustomError } from "@/utils/errorHandler";
+import { NextRequest, NextResponse } from "next/server"
+import { getToken } from "@/lib/token";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export async function GET(req: NextRequest) {
   try {
-    // GET all jobs
-    if (req.method === "GET") {
-      const jobs = await job.find().populate("company", "-password");
-      return res.status(200).json({ status: true, data: jobs });
-    }
+    const token = await getToken(req)
+    if (!token) throw new CustomError("unauthorized", 401)
 
-    // POST new job (company only)
-    else if (req.method === "POST") {
-      const authHeader = req.headers.authorization;
-      if (!authHeader) throw new CustomError("Token missing", 401);
-      const token = authHeader.split(" ")[1];
-      const decoded: any = require("jsonwebtoken").verify(token, process.env.JWT_SECRET || "secret");
-
-      const companyData = await company.findOne({ email: decoded.email });
-      if (!companyData) throw new CustomError("Company not found", 403);
-
-      req.body.company = companyData._id;
-      await new job(req.body).save();
-
-      return res.status(200).json({ status: true, data: "successfully posted job" });
-    }
-    else {
-      return res.status(405).json({ status: false, error: "Method Not Allowed" });
-    }
+    const jobs = await job.find().populate("company", "-password");
+    return NextResponse.json({ status: true, data: jobs });
   } catch (err) {
-    errorHandler(err);
+    const [resp, status] = errorHandler(err)
+    return NextResponse.json(resp, status)
   }
 }
+
+export async function POST(req: NextRequest) {
+  try {
+
+    const token = await getToken(req);
+    if (!token) throw new CustomError("unauthorized", 401)
+
+    const companyData = await company.findOne({ email: token.email });
+    if (!companyData) throw new CustomError("Company not found", 403);
+
+
+    const payload = await req.json()
+    payload.company = companyData._id;
+    await new job(payload).save();
+
+    return NextResponse.json({ status: true, data: "successfully posted job" }, { status: 201 });
+  } catch (err) {
+    const [resp, status] = errorHandler(err)
+    return NextResponse.json(resp, status)
+  }
+}
+

@@ -17,7 +17,7 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
           {
             role === "student" ?
               <Link href={"/dashboard/applied-jobs"} className="text-xl px-3 py-1.5 cursor-pointer">Applied Jobs</Link> :
-              <Link href={"/dashboard/posted-jobs"} className="text-xl px-3 py-1.5 cursor-pointer">Post Job</Link>
+              <Link href={"/dashboard/post-job"} className="text-xl px-3 py-1.5 cursor-pointer">Post Job</Link>
           }
           <Link href={"/dashboard/profile"} className="text-xl px-3 py-1.5 cursor-pointer">Profile</Link>
           <SignOutButton />

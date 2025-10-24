@@ -1,9 +1,10 @@
 "use client"
 import { ChangeEvent, useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { Button } from '../ui/button';
 import { CustomSelect } from '../ui/select';
 import { Input } from '../ui/input';
+import { useRouter } from 'next/navigation';
 
 const initialFormData = {
   userType: 'company',
@@ -15,13 +16,14 @@ const initialFormData = {
   contact_no: '',
   website: '',
   state: '',
-  size: '',
+  size: '1-10',
   bio: ''
 }
 
 function CompanySignupForm() {
 
   const [formData, setFormData] = useState(initialFormData)
+  const router = useRouter()
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -29,17 +31,21 @@ function CompanySignupForm() {
   }
 
   const handleSubmit = async () => {
-
     try {
-      const response = await axios.post("/api/auth/signup", formData);
+      await axios.post("/api/auth/signup", formData);
 
-      const token = response.data.data.token;
       alert("successful signup!")
       handleReset()
+      router.push("/login")
 
-    } catch (err) {
-      alert(err.response.data.error)
-      console.log(err);
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        alert(err?.response?.data?.error)
+        console.log(err);
+      } else {
+        console.log(err)
+        alert("something went wrong")
+      }
     }
   }
 
@@ -123,8 +129,13 @@ function CompanySignupForm() {
       />
       <CustomSelect
         label='Company Size'
-        value={"1-10"}
+        value={formData.size}
         className='w-48'
+        onValueChange={
+          (val) => setFormData(prev => ({
+            ...prev, ["size"]: val
+          }))
+        }
         options={[
           { value: '1-10', label: '1-10' },
           { value: '10-50', label: '10-50' },
