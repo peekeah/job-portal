@@ -1,69 +1,120 @@
 "use client"
-import { useContext, useEffect, useState } from "react"
-import { UserContext } from "@/contexts/user"
 
-import styles from "./index.module.css";
-import axios from "axios";
+import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Spinner } from "@/components/ui/spinner";
+
+
+type Job = {
+  _id: string;
+  job_role: string;
+  description: string;
+  ctc: number;
+  stipend: number;
+  location: string;
+  skills: string[];
+  company: {
+    _id: string;
+    name: string;
+    type: string;
+    website: string;
+    size: string;
+    state: string;
+  };
+};
+
+type AppliedJob = {
+  _id: string;
+  status: string;
+  job_id: Job
+}
+
+type ApiResponse = {
+  data: AppliedJob[]
+}
 
 function AppliedJobs() {
 
-    const [appliedJobs, setAppliedJobs] = useState([]);
+  const { data, error, isLoading } = useSWR<ApiResponse>("/api/student/applied-jobs", fetcher)
 
-    const { auth, userType, config } = useContext(UserContext);
-
-
-    useEffect(() => {
-        getData();
-    }, []);
-
-    const getData = async () => {
-        try {
-            const url = 'http://localhost:3000/api' + '/student/applied-jobs';
-            const res = await axios.get(url, config);
-            setAppliedJobs(res.data.data);
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
+  const appliedJobs = data?.data ?? []
+  console.log("dd:", data?.data)
+  if (error) {
     return (
-        <div className={styles.container}>
-            <div className={styles.rightContainer}>
-                <h1>Applied Jobs</h1>
-
-                {
-                    appliedJobs.length > 0 ?
-                        <table className={styles.table}>
-                            <tr>
-                                <th className={styles.table}>#</th>
-                                <th className={styles.table}>Company Name</th>
-                                <th className={styles.table}>Job Role</th>
-                                <th className={styles.table}>Description</th>
-                                <th className={styles.table}>CTC</th>
-                                <th className={styles.table}>Location</th>
-                                <th className={styles.table}>Status</th>
-                            </tr>
-                            {
-                                appliedJobs.map((job, id) => (
-                                    <>
-                                        <tr>
-                                            <td className={styles.table}>{id + 1}</td>
-                                            <td className={styles.table}>{job.job_id.company.name}</td>
-                                            <td className={styles.table}>{job.job_id.job_role}</td>
-                                            <td className={styles.table}>{job.job_id.description}</td>
-                                            <td className={styles.table}>{job.job_id.ctc}</td>
-                                            <td className={styles.table}>{job.job_id.location}</td>
-                                            <td className={styles.table}>{job.status}</td>
-                                        </tr>
-                                    </>
-                                ))
-                            }
-                        </table> : null
-                }
-
-            </div>
-        </div>
+      <div>error while fetching data</div>
     )
+  }
+
+  return (
+    <div className="flex justify-center p-6">
+      <Card className="w-full max-w-6xl shadow-sm border border-gray-200">
+        <CardHeader>
+          <CardTitle className="text-2xl font-semibold text-gray-800">
+            Applied Jobs
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-10">
+              <Spinner className="h-6 w-6 animate-spin text-gray-500" />
+              <span className="ml-2 text-gray-500">Loading...</span>
+            </div>
+          ) : appliedJobs?.length > 0 ? (
+            <Table className="w-full min-h-44">
+              <TableCaption>A list of all jobs you’ve applied for.</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10">#</TableHead>
+                  <TableHead>Company Name</TableHead>
+                  <TableHead>Job Role</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>CTC</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {
+                  appliedJobs.map((job, index) => {
+                    return (
+                      <TableRow key={job._id || index}>
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell>{job.job_id.company?.name}</TableCell>
+                        <TableCell>{job.job_id?.job_role}</TableCell>
+                        <TableCell>{job.job_id?.description}</TableCell>
+                        <TableCell>{job.job_id?.ctc}</TableCell>
+                        <TableCell>{job?.job_id?.location}</TableCell>
+                        <TableCell>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${job?.status === "applied"
+                              ? "bg-blue-100 text-blue-800"
+                              : job.status === "shortlisted"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-800"
+                              }`}
+                          >
+                            {job.status}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })
+                }
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center py-10 text-gray-500">
+              No applied jobs found.
+            </div>
+          )}
+        </CardContent>
+      </Card >
+    </div >
+
+  )
 }
 
 export default AppliedJobs

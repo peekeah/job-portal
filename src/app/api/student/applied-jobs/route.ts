@@ -1,14 +1,16 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import student from "@/models/student";
 import { errorHandler, CustomError } from "@/utils/errorHandler";
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "@/lib/token"
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "GET") return res.status(405).json({ status: false, error: "Method Not Allowed" });
+export async function GET(req: NextRequest) {
 
   try {
-    const studentData = req.body.studentData;
 
-    if (!studentData?._id) throw new CustomError("Student data missing", 400);
+    const token = await getToken(req)
+    if (!token) throw new CustomError("unauthorized", 401)
+
+    const studentData = await student.findOne({ email: token.email });
 
     const studentRecord = await student.findById(studentData._id).populate({
       path: "applied_jobs.job_id",
@@ -19,8 +21,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     });
 
-    res.status(200).json({ status: true, data: studentRecord?.applied_jobs });
+    return NextResponse.json({ status: true, data: studentRecord?.applied_jobs });
   } catch (err) {
-    errorHandler(err, res);
+    const [res, status] = errorHandler(err);
+    return NextResponse.json(res, status)
   }
 }
