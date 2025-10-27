@@ -42,8 +42,6 @@ async function postProfile(req: NextRequest) {
       body.password = await hashPassword(body.password);
     }
 
-    console.log("dd:", body)
-
     const updated = await company.findOneAndUpdate(
       { email: token.email },
       body,

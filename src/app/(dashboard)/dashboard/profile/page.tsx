@@ -5,7 +5,7 @@ import StudentProfile from '@/components/student-profile/student-profile';
 import React from 'react'
 
 const Profile = () => {
-  const userType = "company";
+  const userType = "student";
   return (
     <div>
       {
