@@ -4,7 +4,7 @@ import useSWR from "swr"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Spinner } from "@/components/ui/spinner";
-import { Job } from "../page";
+import { Job } from "../jobs";
 
 interface CompanyJob extends Job {
   applicants: {
@@ -12,7 +12,7 @@ interface CompanyJob extends Job {
   }
 }
 
-const PostedJob = () => {
+const PostedJobs = () => {
   const { data, error, isLoading } = useSWR<{ data: CompanyJob[] }>('/api/company/posted-jobs', fetcher)
   const jobs = data?.data;
 
@@ -25,7 +25,7 @@ const PostedJob = () => {
       <Card className="w-full max-w-6xl shadow-sm border border-gray-200">
         <CardHeader>
           <CardTitle className="text-2xl font-semibold text-gray-800">
-            Applied Jobs
+            Posted Jobs
           </CardTitle>
         </CardHeader>
 
@@ -79,4 +79,4 @@ const PostedJob = () => {
 
 }
 
-export default PostedJob
+export default PostedJobs

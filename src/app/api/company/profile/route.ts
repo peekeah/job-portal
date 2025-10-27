@@ -1,4 +1,4 @@
-import { getToken } from "@/lib/token";
+import { authMiddleware } from "@/lib/token";
 import company from "@/models/company";
 import { hashPassword } from "@/utils/bcrypt";
 import { CustomError, errorHandler } from "@/utils/errorHandler";
@@ -7,11 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 async function getProfile(req: NextRequest) {
   try {
 
-    const token = await getToken(req)
-
-    if (!token) {
-      throw new CustomError("Unauthenticated", 401)
-    }
+    const token = await authMiddleware(req, "company")
 
     const companyData = await company.findOne({ email: token?.email }).select("-password");
     if (!companyData) throw new CustomError("Company not found", 404);
@@ -30,11 +26,7 @@ async function getProfile(req: NextRequest) {
 async function postProfile(req: NextRequest) {
   try {
 
-    const token = await getToken(req)
-
-    if (!token) {
-      throw new CustomError("Unauthenticated", 401)
-    }
+    const token = await authMiddleware(req, "company")
 
     const body = await req.json()
 

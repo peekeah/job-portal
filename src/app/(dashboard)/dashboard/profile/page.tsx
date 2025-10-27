@@ -2,14 +2,17 @@
 
 import CompanyProfile from '@/components/company-profile/page';
 import StudentProfile from '@/components/student-profile/student-profile';
+import { useSession } from 'next-auth/react';
 import React from 'react'
 
 const Profile = () => {
-  const userType = "student";
+  const { data } = useSession()
+  const role = data?.user?.user_type
+
   return (
     <div>
       {
-        userType === 'company' ? <CompanyProfile /> : <StudentProfile />
+        role === 'company' ? <CompanyProfile /> : <StudentProfile />
       }
     </div>
   )

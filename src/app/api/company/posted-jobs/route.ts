@@ -2,17 +2,13 @@ import company from "@/models/company";
 import job from "@/models/job";
 import { errorHandler, CustomError } from "@/utils/errorHandler";
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "@/lib/token"
+import { authMiddleware } from "@/lib/token"
 
 export async function GET(req: NextRequest) {
 
   try {
 
-    const token = await getToken(req)
-
-    if (!token) {
-      throw new CustomError("Unauthenticated", 401)
-    }
+    const token = await authMiddleware(req, "company")
 
     const existCompany = await company.findOne({ email: token.email });
     if (!existCompany) throw new CustomError("Company not found", 404);

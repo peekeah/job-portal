@@ -1,5 +1,3 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import jwt from "jsonwebtoken";
 import student from "@/models/student";
 import { hashPassword } from "@/utils/bcrypt";
 import { errorHandler, CustomError } from "@/utils/errorHandler";
