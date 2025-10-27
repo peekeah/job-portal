@@ -1,50 +1,23 @@
 "use client"
-
-import useSWR from "swr";
-import { fetcher } from "@/lib/fetcher";
+import { fetcher } from "@/lib/fetcher"
+import useSWR from "swr"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Spinner } from "@/components/ui/spinner";
+import { Job } from "../page";
 
-
-export type Job = {
-  _id: string;
-  job_role: string;
-  description: string;
-  ctc: number;
-  stipend: number;
-  location: string;
-  skills: string[];
-  company: {
-    _id: string;
-    name: string;
-    type: string;
-    website: string;
-    size: string;
-    state: string;
-  };
-};
-
-type AppliedJob = {
-  _id: string;
-  status: string;
-  job_id: Job
+interface CompanyJob extends Job {
+  applicants: {
+    applied: string[]
+  }
 }
 
-export type ApiResponse = {
-  data: AppliedJob[]
-}
+const PostedJob = () => {
+  const { data, error, isLoading } = useSWR<{ data: CompanyJob[] }>('/api/company/posted-jobs', fetcher)
+  const jobs = data?.data;
 
-function AppliedJobs() {
-
-  const { data, error, isLoading } = useSWR<ApiResponse>("/api/student/applied-jobs", fetcher)
-
-  const appliedJobs = data?.data ?? []
-  console.log("dd:", data?.data)
   if (error) {
-    return (
-      <div>error while fetching data</div>
-    )
+    return (<div>error</div>)
   }
 
   return (
@@ -62,7 +35,7 @@ function AppliedJobs() {
               <Spinner className="h-6 w-6 animate-spin text-gray-500" />
               <span className="ml-2 text-gray-500">Loading...</span>
             </div>
-          ) : appliedJobs?.length > 0 ? (
+          ) : jobs && jobs?.length > 0 ? (
             <Table className="w-full min-h-44">
               <TableCaption>A list of all jobs you’ve applied for.</TableCaption>
               <TableHeader>
@@ -73,32 +46,21 @@ function AppliedJobs() {
                   <TableHead>Description</TableHead>
                   <TableHead>CTC</TableHead>
                   <TableHead>Location</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Applied Candidates</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {
-                  appliedJobs.map((job, index) => {
+                  jobs.map((job, index) => {
                     return (
                       <TableRow key={job._id || index}>
                         <TableCell>{index + 1}</TableCell>
-                        <TableCell>{job.job_id.company?.name}</TableCell>
-                        <TableCell>{job.job_id?.job_role}</TableCell>
-                        <TableCell>{job.job_id?.description}</TableCell>
-                        <TableCell>{job.job_id?.ctc}</TableCell>
-                        <TableCell>{job?.job_id?.location}</TableCell>
-                        <TableCell>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${job?.status === "applied"
-                              ? "bg-blue-100 text-blue-800"
-                              : job.status === "shortlisted"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-gray-100 text-gray-800"
-                              }`}
-                          >
-                            {job.status}
-                          </span>
-                        </TableCell>
+                        <TableCell>{job.company?.name}</TableCell>
+                        <TableCell>{job?.job_role}</TableCell>
+                        <TableCell>{job?.description}</TableCell>
+                        <TableCell>{job?.ctc}</TableCell>
+                        <TableCell>{job?.location}</TableCell>
+                        <TableCell>{job?.applicants?.applied?.length}</TableCell>
                       </TableRow>
                     )
                   })
@@ -113,8 +75,8 @@ function AppliedJobs() {
         </CardContent>
       </Card >
     </div >
-
   )
+
 }
 
-export default AppliedJobs
+export default PostedJob
