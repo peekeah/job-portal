@@ -40,7 +40,7 @@ function AppliedJobs() {
   const { data, error, isLoading } = useSWR<ApiResponse>("/api/student/applied-jobs", fetcher)
 
   const appliedJobs = data?.data ?? []
-  console.log("dd:", data?.data)
+
   if (error) {
     return (
       <div>error while fetching data</div>

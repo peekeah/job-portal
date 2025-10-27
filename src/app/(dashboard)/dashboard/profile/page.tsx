@@ -2,15 +2,14 @@
 
 import CompanyProfile from '@/components/company-profile/page';
 import StudentProfile from '@/components/student-profile/student-profile';
-import { UserContext } from '@/contexts/user';
-import React, { useContext } from 'react'
+import React from 'react'
 
 const Profile = () => {
-  const { userType } = useContext(UserContext);
+  const userType = "company";
   return (
     <div>
       {
-        userType !== 'student' ? <StudentProfile /> : <CompanyProfile />
+        userType === 'company' ? <CompanyProfile /> : <StudentProfile />
       }
     </div>
   )
