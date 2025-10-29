@@ -1,5 +1,5 @@
 import student from "@/models/student";
-import { errorHandler, CustomError } from "@/utils/errorHandler";
+import { errorHandler } from "@/utils/errorHandler";
 import { NextRequest, NextResponse } from "next/server";
 import { authMiddleware } from "@/lib/token"
 

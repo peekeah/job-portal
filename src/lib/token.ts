@@ -9,7 +9,6 @@ export function getToken(req: NextRequest | NextApiRequest) {
 
 export async function authMiddleware(req: NextRequest, role?: "company" | "student") {
   const token = await getToken(req)
-  console.log("tt:", token)
   if (!token) {
     throw new CustomError("unauthorized", 401)
   }

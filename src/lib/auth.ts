@@ -3,6 +3,8 @@ import { connectToDatabase } from "@/utils/db";
 import user from "@/models/user";
 import { comparePassword } from "@/utils/bcrypt";
 import { AuthOptions } from "next-auth";
+import { prisma } from "./db";
+import { PrismaAdapter } from "@next-auth/prisma-adapter"
 
 declare module "next-auth" {
   interface Session {
@@ -76,4 +78,6 @@ export const authOptions = {
       return session;
     },
   },
+  adapter: PrismaAdapter(prisma),
+
 } satisfies AuthOptions

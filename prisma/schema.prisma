@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserType {
+  student
+  company
+  admin
+}
+
+enum CompanySize {
+  SIZE_1_10
+  SIZE_10_50
+  SIZE_50_100
+  SIZE_100_PLUS
+}
+
+enum JobStatus {
+  applied
+  shortlisted
+  hired
+}
+
+// User Model
+model User {
+  id       String   @id @map("_id") @default(auto()) @db.ObjectId
+  email    String   @unique
+  password String
+  userType UserType @default(student)
+}
+
+// Company Model
+model Company {
+  id           String      @id @map("_id") @default(auto()) @db.ObjectId
+  name         String
+  foundingYear Int         @map("founding_year")
+  companyType  String      @map("company_type")
+  email        String
+  contactNo    String      @map("contact_no")
+  website      String?
+  state        String
+  size         CompanySize?
+  bio          String?
+}
+
+// Applicant Model
+model Applicant {
+  id          String        @id @map("_id") @default(auto()) @db.ObjectId
+  name        String
+  mobile      Int?
+  email       String        @unique
+  profilePic  String?       @map("profile_pic")
+  college     College?
+  bio         String?
+  appliedJobs AppliedJob[]
+}
+
+// Embedded type for College
+type College {
+  name        String
+  branch      String
+  joiningYear Int @map("joining_year")
+}
+
+// Embedded type for AppliedJob
+type AppliedJob {
+  jobId  String    @map("job_id") @db.ObjectId
+  status JobStatus @default(applied)
+}
+
+// Job Model
+model Job {
+  id             String       @id @map("_id") @default(auto()) @db.ObjectId
+  companyId      String       @map("company") @db.ObjectId
+  jobRole        String       @map("job_role")
+  description    String
+  ctc            Float
+  stipend        Float
+  location       String
+  skillsRequired String[]     @map("skills_required")
+  applicants     String[]     @db.ObjectId
+}
+
