@@ -45,10 +45,10 @@ export default function CompanyProfile() {
   const [formData, setFormData] = useState<Company>(initialCompany)
 
   useEffect(() => {
-    if (!isLoading && company) {
-      setFormData(company)
+    if (company) {
+      setFormData(() => company)
     }
-  }, [])
+  }, [company])
 
   const toggleEdit = () => {
     setEditContent((prev) => !prev)

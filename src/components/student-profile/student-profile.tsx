@@ -45,10 +45,10 @@ function StudentProfile() {
   const [formData, setFormData] = useState<Profile>(initialProfile)
 
   useEffect(() => {
-    if (!isLoading && userData) {
-      setFormData(prev => (userData))
+    if (userData) {
+      setFormData(() => (userData))
     }
-  }, [isLoading])
+  }, [userData])
 
   const toggleEdit = () => {
     setEditContent((prev) => !prev)
