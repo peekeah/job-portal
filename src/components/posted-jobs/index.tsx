@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Spinner } from "@/components/ui/spinner";
 import { Job } from "../jobs";
+import { useRouter } from "next/navigation";
 
 interface CompanyJob extends Job {
   applicants: {
@@ -13,6 +14,7 @@ interface CompanyJob extends Job {
 }
 
 const PostedJobs = () => {
+  const router = useRouter();
   const { data, error, isLoading } = useSWR<{ data: CompanyJob[] }>('/api/company/posted-jobs', fetcher)
   const jobs = data?.data;
 
@@ -53,7 +55,11 @@ const PostedJobs = () => {
                 {
                   jobs.map((job, index) => {
                     return (
-                      <TableRow key={job._id || index}>
+                      <TableRow
+                        className="cursor-pointer transition-all"
+                        onClick={() => router.push("/dashboard/job/" + job._id)}
+                        key={job._id || index}
+                      >
                         <TableCell>{index + 1}</TableCell>
                         <TableCell>{job.company?.name}</TableCell>
                         <TableCell>{job?.job_role}</TableCell>
@@ -73,10 +79,9 @@ const PostedJobs = () => {
             </div>
           )}
         </CardContent>
-      </Card >
-    </div >
+      </Card>
+    </div>
   )
-
 }
 
 export default PostedJobs

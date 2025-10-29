@@ -2,7 +2,7 @@ import job from "@/models/job";
 import student from "@/models/student";
 import { errorHandler, CustomError } from "@/utils/errorHandler";
 import { NextRequest, NextResponse } from "next/server"
-import { getToken } from "@/lib/token"
+import { authMiddleware } from "@/lib/token"
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
 
@@ -10,14 +10,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const jobId = params.id;
     if (!jobId) throw new CustomError("Job id missing", 400);
 
-    const token = await getToken(req)
-    if (!token) {
-      throw new CustomError("unauthorized", 401)
-    }
-
-    if (token.user_type !== "student") {
-      throw new CustomError("only students can apply for the job", 403)
-    }
+    const token = await authMiddleware(req, "student");
 
     const studentData = await student.findOne({ email: token?.email })
 

@@ -1,13 +1,12 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import job from "@/models/job";
 import student from "@/models/student";
-import { errorHandler, CustomError } from "@/utils/errorHandler";
+import { CustomError, errorHandler } from "@/utils/errorHandler";
+import { NextRequest, NextResponse } from "next/server";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") return res.status(405).json({ status: false, error: "Method Not Allowed" });
+const selectCandidates = async (req: NextRequest) => {
 
   try {
-    const { jobId, studentId, applicantStatus } = req.body;
+    const { jobId, studentId, applicantStatus } = await req.json()
 
     if (!jobId || !studentId || !applicantStatus) throw new CustomError("Missing mandatory field", 400);
     if (!["applied", "shortlisted", "hired"].includes(applicantStatus))
@@ -47,8 +46,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       { new: true }
     );
 
-    res.status(200).json({ status: true, data: "successfully updated status" });
+    return NextResponse.json({ status: true, data: "successfully updated status" })
+
   } catch (err) {
-    errorHandler(err, res);
+    const [resp, status] = errorHandler(err)
+    return NextResponse.json(resp, status)
   }
 }
+
+export const POST = selectCandidates;
