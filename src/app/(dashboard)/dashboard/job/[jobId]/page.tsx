@@ -7,35 +7,38 @@ import { useParams } from "next/navigation"
 import { useCallback } from "react";
 import useSWR from "swr";
 
-export type Applicant = {
-  _id: string;
+type Applicant = {
+  id: string;
   name: string;
   mobile: number;
   email: string;
   profile_pic: string;
-  college: {
-    name: string;
-    branch: string;
-    joining_year: number;
-    _id: string;
-  };
+  college_name: string;
+  college_branch: string;
+  college_joining_year: string;
 };
+
+export type Applicants = {
+  id: string;
+  jobId: string;
+  applicant: Applicant;
+}
 
 type ApiResponse = {
   status: true;
   data: {
-    _id: string,
-    applied: Applicant[],
-    shortlisted: Applicant[],
-    hired: Applicant[],
+    applied: Applicants[],
+    shortlisted: Applicants[],
+    hired: Applicants[],
   }
 }
 
-export type ApplicantType = Exclude<keyof ApiResponse["data"], "_id">
+export type ApplicantType = keyof ApiResponse["data"];
 
 const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
-  const { data, isLoading, error, mutate } = useSWR<ApiResponse>(`/api/jobs/${jobId}`, fetcher)
+
+  const { data, isLoading, error, mutate } = useSWR<ApiResponse>(`/api/jobs/${jobId}`, fetcher);
 
   const getApplicants = useCallback((type: ApplicantType) => {
     if (data?.data) {
@@ -51,7 +54,7 @@ const JobDetails = () => {
 
   return (
     <div className="p-10">
-      <Tabs defaultValue="applied" className="w-full">
+      <Tabs defaultValue={"applied"} className="w-full">
         <TabsList>
           <TabsTrigger
             className="cursor-pointer"

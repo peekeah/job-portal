@@ -8,27 +8,27 @@ import { Input } from '../ui/input';
 import axios from 'axios';
 
 type Company = {
-  _id: string;
+  id: string;
   name: string;
   founding_year: string;
   company_type: string;
   email: string;
   contact_no: string;
   website: string;
-  state: string;
+  address: string;
   size: string;
   bio: string;
 }
 
 const initialCompany: Company = {
-  _id: "",
+  id: "",
   name: "",
   founding_year: "",
   company_type: "",
   email: "",
   contact_no: "",
   website: "",
-  state: "",
+  address: "",
   size: "",
   bio: "",
 };
@@ -65,7 +65,10 @@ export default function CompanyProfile() {
 
   const onSave = async () => {
     try {
-      const res = await axios.post("/api/company/profile", formData)
+      const res = await axios.post("/api/company/profile", {
+        ...formData,
+        founding_year: +formData.founding_year
+      })
 
       if (!res?.data?.status) {
         throw new Error(res?.data?.error || "error while saving")
@@ -100,6 +103,7 @@ export default function CompanyProfile() {
             />
             <div>Year Founded</div>
             <Input
+              type="number"
               name="founding_year"
               value={formData?.founding_year}
               onChange={onInputChange}
@@ -128,10 +132,10 @@ export default function CompanyProfile() {
               value={formData?.website}
               onChange={onInputChange}
             />
-            <div>State</div>
+            <div>Address</div>
             <Input
-              name="state"
-              value={formData?.state}
+              name="address"
+              value={formData?.address}
               onChange={onInputChange}
             />
             <div>Company Size</div>
@@ -160,8 +164,8 @@ export default function CompanyProfile() {
             <div>{formData?.contact_no}</div>
             <div>Website</div>
             <div>{formData?.website}</div>
-            <div>State</div>
-            <div>{formData?.state}</div>
+            <div>Address</div>
+            <div>{formData?.address}</div>
             <div>Company Size</div>
             <div>{formData?.size}</div>
             <div>Company Bio</div>

@@ -8,7 +8,7 @@ import { CompanySize, UserType } from "@/generated/prisma";
 
 const Roles = ["applicant", "company", "admin"];
 
-const companySizeMap = new Map([
+export const companySizeMap = new Map([
   ["1_10", CompanySize.SIZE_1_10],
   ["10_50", CompanySize.SIZE_10_50],
   ["50_100", CompanySize.SIZE_50_100],
@@ -32,16 +32,31 @@ const applicantSchema = z.object({
   college_joining_year: z.string().optional(),
 });
 
-const companySchema = z.object({
-  name: z.string(),
-  founding_year: z.number(),
-  company_type: z.string(),
-  contact_no: z.string(),
-  website: z.string().optional(),
-  address: z.string(),
-  size: z.enum(["1-10", "10-50", "50-100", "100+"]).optional(),
-  bio: z.string().optional()
-})
+export const companySchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().min(1, "Company name is required"),
+  email: z.string().email("Invalid email address"),
+  founding_year: z
+    .number()
+    .int("Founding year must be an integer")
+    .min(1800, "Founding year seems invalid")
+    .max(new Date().getFullYear(), "Founding year cannot be in the future"),
+  company_type: z.string().min(1, "Company type is required"),
+  contact_no: z
+    .string()
+    .min(7, "Contact number too short")
+    .max(15, "Contact number too long")
+    .refine((val) => /^\+?\d+$/.test(val), "Contact number must contain only digits"),
+  website: z
+    .string()
+    .url("Invalid URL")
+    .optional()
+    .nullable()
+    .refine((val) => !val || val.startsWith("https://"), "Website must start with https://"),
+  address: z.string().min(1, "Address is required"),
+  size: z.nativeEnum(CompanySize).optional().nullable(),
+  bio: z.string().max(500, "Bio cannot exceed 500 characters").optional().nullable(),
+});
 
 export async function POST(req: NextRequest) {
 

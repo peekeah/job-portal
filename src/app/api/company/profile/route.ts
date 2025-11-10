@@ -1,20 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { authMiddleware } from "@/lib/token";
-import { hashPassword } from "@/utils/bcrypt";
-import { errorHandler } from "@/utils/errorHandler";
+import { CustomError, errorHandler } from "@/utils/errorHandler";
 import { prisma } from "@/lib/db";
+import { companySchema, companySizeMap } from "../../auth/signup/route";
 
 async function getProfile(req: NextRequest) {
   try {
 
     const token = await authMiddleware(req, "company")
 
-    // FIXME: Fix this type error
-    // const companyData = await company.findOne({ email: token?.email }).select("-password");
-    const companyData = await prisma.company.findFirstOrThrow(
+    const companyData = await prisma.company.findFirst(
       { where: { email: token?.email } }
     )
+
+    if (!companyData) {
+      throw new CustomError("company not found", 403);
+    }
+
     return NextResponse.json({
       status: true,
       data: companyData,
@@ -25,21 +28,26 @@ async function getProfile(req: NextRequest) {
   }
 }
 
+// #Fix: Need to fix input for company size
 async function postProfile(req: NextRequest) {
   try {
 
     const token = await authMiddleware(req, "company")
 
     const body = await req.json()
+    const postSchema = companySchema.partial();
+    const payload = postSchema.parse(body);
 
-    if (body.password) {
-      body.password = await hashPassword(body.password);
-    }
-
-    const updated = await company.findOneAndUpdate(
-      { email: token.email },
-      body,
-      { new: true }
+    const updated = await prisma.company.updateMany(
+      {
+        data: {
+          ...payload,
+          size: payload?.size ? companySizeMap.get(payload.size) : null
+        },
+        where: {
+          email: token.email
+        }
+      }
     );
 
     return NextResponse.json({
@@ -47,6 +55,7 @@ async function postProfile(req: NextRequest) {
       data: updated,
     });
   } catch (err) {
+    console.log("err:", err)
     const [res, status] = errorHandler(err);
     return NextResponse.json(res, status)
   }

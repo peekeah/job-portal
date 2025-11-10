@@ -4,38 +4,46 @@ import { authMiddleware } from "@/lib/token";
 import { CustomError, errorHandler } from "@/utils/errorHandler";
 import { prisma } from "@/lib/db"
 
+type Status = "applied" | "shortlisted" | "hired";
+
 async function getJobById(req: NextRequest, { params }: { params: { id: string } }) {
 
   try {
-
-    await authMiddleware(req, "company")
+    const token = await authMiddleware(req, "company")
 
     const jobId = params.id
     if (!jobId) throw new CustomError('job id not provided', 400);
 
-    const job = await prisma.job.findUniqueOrThrow({ where: { id: jobId } })
+    const company = await prisma.company.findFirst({ where: { email: token?.email } })
 
-    const applicantsIds = job.applicants
+    if (!company) throw new CustomError("Company not found", 403);
 
-    const applicants = await prisma.applicant.findMany({
+    const job = await prisma.job.findUnique({ where: { id: jobId, company_id: company.id } });
+
+    if (!job) throw new CustomError("job not found", 403);
+
+    const applicants = await prisma.appliedJob.findMany({
       where: {
-        id: { in: applicantsIds },
+        jobId: job.id,
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        mobile: true,
-        college: true,
-        bio: true,
-      }
-    })
+      include: {
+        applicant: true
+      },
+    });
 
-    const studentsList = { ...job, applicants }
+    const result: Record<Status, any[]> = {
+      applied: [],
+      shortlisted: [],
+      hired: []
+    }
+
+    applicants.forEach((el) => {
+      result[el.status].push(el);
+    })
 
     return NextResponse.json({
       status: true,
-      data: studentsList.applicants || []
+      data: result
     })
 
   } catch (err) {

@@ -8,8 +8,8 @@ import { Job } from "../jobs";
 import { useRouter } from "next/navigation";
 
 interface CompanyJob extends Job {
-  applicants: {
-    applied: string[]
+  _count: {
+    applied_jobs: number;
   }
 }
 
@@ -57,16 +57,16 @@ const PostedJobs = () => {
                     return (
                       <TableRow
                         className="cursor-pointer transition-all"
-                        onClick={() => router.push("/dashboard/job/" + job._id)}
-                        key={job._id || index}
+                        onClick={() => router.push("/dashboard/job/" + job.id)}
+                        key={job.id || index}
                       >
                         <TableCell>{index + 1}</TableCell>
-                        <TableCell>{job.company?.name}</TableCell>
+                        <TableCell>{job.company_name}</TableCell>
                         <TableCell>{job?.job_role}</TableCell>
                         <TableCell>{job?.description}</TableCell>
                         <TableCell>{job?.ctc}</TableCell>
                         <TableCell>{job?.location}</TableCell>
-                        <TableCell>{job?.applicants?.applied?.length}</TableCell>
+                        <TableCell>{job?._count.applied_jobs}</TableCell>
                       </TableRow>
                     )
                   })

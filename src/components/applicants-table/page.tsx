@@ -1,11 +1,12 @@
-import { Applicant, ApplicantType } from "@/app/(dashboard)/dashboard/job/[jobId]/page";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "../ui/button";
+import { Applicants, ApplicantType } from "@/app/(dashboard)/dashboard/job/[jobId]/page";
 import axios from "axios";
+
+import { Button } from "../ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type ApplicantTableProps = {
   jobId: string;
-  applicants: Applicant[];
+  applicants: Applicants[];
   type: ApplicantType;
   refetch: () => void
 }
@@ -43,23 +44,23 @@ const ApplicantsTable = ({ applicants, jobId, type, refetch }: ApplicantTablePro
         </TableHeader>
         <TableBody>
           {
-            applicants.map((applicant, index) => {
+            applicants.map((el, index) => {
               return (
                 <TableRow
                   className="cursor-pointer transition-all"
-                  key={applicant._id || index}
+                  key={el.id || index}
                 >
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>{applicant?.name}</TableCell>
-                  <TableCell>{applicant?.email}</TableCell>
-                  <TableCell>{applicant?.mobile}</TableCell>
+                  <TableCell>{el.applicant?.name}</TableCell>
+                  <TableCell>{el.applicant?.email}</TableCell>
+                  <TableCell>{el.applicant?.mobile}</TableCell>
                   {
                     type !== "hired" ?
                       <TableCell className="space-x-3">
                         {
                           type === "applied" ?
-                            <Button onClick={() => onActionSubmit(jobId, applicant._id, "shortlisted")}>Shortlist</Button> :
-                            <Button onClick={() => onActionSubmit(jobId, applicant._id, "hired")}>Hire</Button>
+                            <Button onClick={() => onActionSubmit(jobId, el.applicant.id, "shortlisted")}>Shortlist</Button> :
+                            <Button onClick={() => onActionSubmit(jobId, el.applicant.id, "hired")}>Hire</Button>
                         }
                       </TableCell> : null
                   }
