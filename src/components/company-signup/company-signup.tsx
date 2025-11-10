@@ -7,7 +7,7 @@ import { Input } from '../ui/input';
 import { useRouter } from 'next/navigation';
 
 const initialFormData = {
-  userType: 'company',
+  user_type: 'company',
   name: '',
   founding_year: '',
   company_type: '',
@@ -15,7 +15,7 @@ const initialFormData = {
   password: '',
   contact_no: '',
   website: '',
-  state: '',
+  address: '',
   size: '1-10',
   bio: ''
 }
@@ -32,7 +32,11 @@ function CompanySignupForm() {
 
   const handleSubmit = async () => {
     try {
-      await axios.post("/api/auth/signup", formData);
+      // #FIXME: Need to fix the enum validation for size
+      await axios.post("/api/auth/signup", {
+        ...formData,
+        founding_year: +formData.founding_year,
+      });
 
       alert("successful signup!")
       handleReset()
@@ -65,6 +69,7 @@ function CompanySignupForm() {
 
       <Input
         label="Year Founded"
+        type="number"
         placeholder="Enter founding year"
         name="founding_year"
         value={formData.founding_year}
@@ -99,6 +104,7 @@ function CompanySignupForm() {
 
       <Input
         label="Phone No"
+        type="number"
         placeholder="Enter contact number"
         name="contact_no"
         value={formData.contact_no}
@@ -114,10 +120,10 @@ function CompanySignupForm() {
       />
 
       <Input
-        label="State"
+        label="Address"
         placeholder="Enter state"
-        name="state"
-        value={formData.state}
+        name="address"
+        value={formData.address}
         onChange={handleChange}
       />
       <Input

@@ -1,10 +1,9 @@
 import CredentialsProvider from "next-auth/providers/credentials";
-import { connectToDatabase } from "@/utils/db";
-import user from "@/models/user";
-import { comparePassword } from "@/utils/bcrypt";
 import { AuthOptions } from "next-auth";
-import { prisma } from "./db";
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
+
+import { prisma } from "./db";
+import { comparePassword } from "@/utils/bcrypt";
 
 declare module "next-auth" {
   interface Session {
@@ -39,15 +38,13 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const conn = await connectToDatabase();
-        const existUser = await user.findOne({ email: credentials?.email });
+        const existUser = await prisma.user.findUniqueOrThrow({ where: { email: credentials?.email } });
 
-        if (!existUser) throw new Error("No user found with this email");
         const isPasswordValid = await comparePassword(credentials!.password, existUser!.password);
         if (!isPasswordValid) throw new Error("Invalid password");
 
         return {
-          id: existUser._id.toString(),
+          id: existUser.id,
           email: existUser.email,
           user_type: existUser.userType || "user",
         };
@@ -79,5 +76,4 @@ export const authOptions = {
     },
   },
   adapter: PrismaAdapter(prisma),
-
 } satisfies AuthOptions

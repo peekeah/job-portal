@@ -1,5 +1,5 @@
 "use client"
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { ChangeEvent, FormEventHandler, useState } from 'react';
 
 import { Input } from '../ui/input';
@@ -31,24 +31,29 @@ function StudentSignupForm() {
     const college = {
       name: formData.college_name,
       branch: formData.college_branch,
-      joining_year: formData.college_joining_year,
+      joining_year: +formData.college_joining_year,
     }
 
-    const payload = {
-      ...formData, college, userType: "student"
+    const payload: any = {
+      ...formData, college, userType: "applicant"
     }
+
+    delete payload.college_name;
+    delete payload.college_branch;
+    delete payload.college_joining_year;
 
     try {
       const url = `/api/auth/signup`;
       const response = await axios.post(url, payload);
-      console.log("resp:", response)
 
-      const token = response.data.data.token;
+      response.data.data.token;
       alert("successfully signup!")
       handleReset()
 
     } catch (err) {
-      alert(err.response.data.error)
+      if (err instanceof AxiosError) {
+        alert(err?.response?.data.message || err?.response?.data.error)
+      }
       console.log(err);
     }
   }

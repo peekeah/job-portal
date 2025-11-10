@@ -1,8 +1,8 @@
-import company from "@/models/company";
-import job from "@/models/job";
-import { errorHandler, CustomError } from "@/utils/errorHandler";
 import { NextRequest, NextResponse } from "next/server";
+
 import { authMiddleware } from "@/lib/token"
+import { errorHandler, CustomError } from "@/utils/errorHandler";
+import { prisma } from "@/lib/db"
 
 export async function GET(req: NextRequest) {
 
@@ -10,10 +10,11 @@ export async function GET(req: NextRequest) {
 
     const token = await authMiddleware(req, "company")
 
-    const existCompany = await company.findOne({ email: token.email });
-    if (!existCompany) throw new CustomError("Company not found", 404);
+    const existCompany = await prisma.user.findFirstOrThrow({
+      where: { email: token.email }
+    })
 
-    const result = await job.find({ company: existCompany._id }).populate("company");
+    const result = await prisma.job.findFirstOrThrow({ where: { companyId: existCompany.id } })
 
     return NextResponse.json({
       status: true,

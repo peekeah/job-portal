@@ -3,6 +3,11 @@ node_modules
 dist
 /generated/prisma
 
+!.env.example
+
 .env.*
 .env 
-!.env.example
+
+/src/generated/prisma
+
+/src/generated/prisma

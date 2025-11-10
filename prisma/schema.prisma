@@ -1,16 +1,18 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// Enums
+// =========================
+// ENUMS
+// =========================
 enum UserType {
-  student
+  applicant
   company
   admin
 }
@@ -28,63 +30,79 @@ enum JobStatus {
   hired
 }
 
-// User Model
-model User {
-  id       String   @id @map("_id") @default(auto()) @db.ObjectId
-  email    String   @unique
-  password String
-  userType UserType @default(student)
+// =========================
+// USER MODEL
+// =========================
+model Auth {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  user_type UserType @default(applicant)
+  user_id   String?
 }
 
-// Company Model
+// =========================
+// COMPANY MODEL
+// =========================
 model Company {
-  id           String      @id @map("_id") @default(auto()) @db.ObjectId
-  name         String
-  foundingYear Int         @map("founding_year")
-  companyType  String      @map("company_type")
-  email        String
-  contactNo    String      @map("contact_no")
-  website      String?
-  state        String
-  size         CompanySize?
-  bio          String?
+  id            String       @id @default(uuid())
+  name          String
+  founding_year Int
+  company_type  String
+  contact_no    String
+  website       String?
+  address       String
+  size          CompanySize?
+  bio           String?
+
+  jobs Job[]
 }
 
-// Applicant Model
+// =========================
+// APPLICANT MODEL
+// =========================
 model Applicant {
-  id          String        @id @map("_id") @default(auto()) @db.ObjectId
-  name        String
-  mobile      Int?
-  email       String        @unique
-  profilePic  String?       @map("profile_pic")
-  college     College?
-  bio         String?
+  id                   String  @id @default(uuid())
+  name                 String
+  mobile               String?
+  email                String  @unique
+  profile_pic          String?
+  bio                  String?
+  college_name         String?
+  college_branch       String?
+  college_joining_year String?
+
   appliedJobs AppliedJob[]
 }
 
-// Embedded type for College
-type College {
-  name        String
-  branch      String
-  joiningYear Int @map("joining_year")
-}
+// =========================
+// APPLIED JOB MODEL (replaces embedded type)
+// =========================
+model AppliedJob {
+  id           String    @id @default(uuid())
+  applicant    Applicant @relation(fields: [applicant_id], references: [id])
+  applicant_id String
 
-// Embedded type for AppliedJob
-type AppliedJob {
-  jobId  String    @map("job_id") @db.ObjectId
+  job   Job    @relation(fields: [jobId], references: [id])
+  jobId String
+
   status JobStatus @default(applied)
 }
 
-// Job Model
+// =========================
+// JOB MODEL
+// =========================
 model Job {
-  id             String       @id @map("_id") @default(auto()) @db.ObjectId
-  companyId      String       @map("company") @db.ObjectId
-  jobRole        String       @map("job_role")
-  description    String
-  ctc            Float
-  stipend        Float
-  location       String
-  skillsRequired String[]     @map("skills_required")
-  applicants     String[]     @db.ObjectId
-}
+  id         String  @id @default(uuid())
+  company_id String
+  company    Company @relation(fields: [company_id], references: [id])
 
+  job_role        String
+  description     String
+  ctc             Float
+  stipend         Float
+  location        String
+  skills_required Json
+
+  applied_jobs AppliedJob[]
+}

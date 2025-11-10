@@ -6,7 +6,7 @@ import { useState } from "react"
 
 const Singup = () => {
 
-  const [selectedRole, setSelectedRole] = useState<"student" | "company">("company")
+  const [selectedRole, setSelectedRole] = useState<"applicant" | "company">("applicant")
 
   return (
     <div className="space-y-4">
@@ -16,17 +16,17 @@ const Singup = () => {
           label="Select Role"
           placeholder="Select Role"
           options={[
-            { value: "student", label: "Student" },
+            { value: "applicant", label: "Student" },
             { value: "company", label: "Company" },
           ]}
           value={selectedRole}
           onValueChange={(val) => {
-            setSelectedRole(val as "student" | "company")
+            setSelectedRole(val as "applicant" | "company")
           }}
         />
       </div>
       {
-        selectedRole === "student" ? (
+        selectedRole === "applicant" ? (
           <StudentSignupForm />
         ) : (
           <CompanySignupForm />
