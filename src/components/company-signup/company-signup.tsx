@@ -32,7 +32,6 @@ function CompanySignupForm() {
 
   const handleSubmit = async () => {
     try {
-      // #FIXME: Need to fix the enum validation for size
       await axios.post("/api/auth/signup", {
         ...formData,
         founding_year: +formData.founding_year,

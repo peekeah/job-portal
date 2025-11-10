@@ -38,16 +38,32 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const existUser = await prisma.user.findUniqueOrThrow({ where: { email: credentials?.email } });
+        try {
+          const existUser = await prisma.auth.findUnique({ where: { email: credentials?.email } });
 
-        const isPasswordValid = await comparePassword(credentials!.password, existUser!.password);
-        if (!isPasswordValid) throw new Error("Invalid password");
+          if (!existUser) {
+            throw new Error("user does not exist")
+          }
 
-        return {
-          id: existUser.id,
-          email: existUser.email,
-          user_type: existUser.userType || "user",
-        };
+          const isPasswordValid = await comparePassword(credentials!.password, existUser!.password);
+          console.log("isPasswordValid", isPasswordValid)
+          if (!isPasswordValid) {
+            throw new Error("Invalid password");
+          }
+
+          return {
+            id: existUser.id,
+            email: existUser.email,
+            user_type: existUser.user_type || "user",
+          };
+        } catch (err) {
+          console.log("err:", err)
+          let res = "Error while login";
+          if (err instanceof Error) {
+            res = err.message;
+          }
+          throw new Error(res)
+        }
       }
     }),
   ],

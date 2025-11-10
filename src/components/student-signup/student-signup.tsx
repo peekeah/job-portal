@@ -4,6 +4,7 @@ import { ChangeEvent, FormEventHandler, useState } from 'react';
 
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
+import { useRouter } from 'next/navigation';
 
 const initialFormState = {
   name: '',
@@ -18,6 +19,7 @@ const initialFormState = {
 
 function StudentSignupForm() {
 
+  const router = useRouter();
   const [formData, setFormData] = useState(initialFormState);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -49,6 +51,7 @@ function StudentSignupForm() {
       response.data.data.token;
       alert("successfully signup!")
       handleReset()
+      router.push("/login")
 
     } catch (err) {
       if (err instanceof AxiosError) {
