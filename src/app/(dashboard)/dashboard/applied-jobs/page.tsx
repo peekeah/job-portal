@@ -8,7 +8,7 @@ import { Spinner } from "@/components/ui/spinner";
 
 
 export type Job = {
-  _id: string;
+  id: string;
   job_role: string;
   description: string;
   ctc: number;
@@ -16,7 +16,7 @@ export type Job = {
   location: string;
   skills: string[];
   company: {
-    _id: string;
+    id: string;
     name: string;
     type: string;
     website: string;
@@ -26,9 +26,9 @@ export type Job = {
 };
 
 type AppliedJob = {
-  _id: string;
+  id: string;
   status: string;
-  job_id: Job
+  job: Job
 }
 
 export type ApiResponse = {
@@ -78,25 +78,26 @@ function AppliedJobs() {
               </TableHeader>
               <TableBody>
                 {
-                  appliedJobs.map((job, index) => {
+                  appliedJobs.map((el, index) => {
+                    const job = el.job;
                     return (
-                      <TableRow key={job._id || index}>
+                      <TableRow key={job.id || index}>
                         <TableCell>{index + 1}</TableCell>
-                        <TableCell>{job.job_id.company?.name}</TableCell>
-                        <TableCell>{job.job_id?.job_role}</TableCell>
-                        <TableCell>{job.job_id?.description}</TableCell>
-                        <TableCell>{job.job_id?.ctc}</TableCell>
-                        <TableCell>{job?.job_id?.location}</TableCell>
+                        <TableCell>{job.company?.name}</TableCell>
+                        <TableCell>{job?.job_role}</TableCell>
+                        <TableCell>{job?.description}</TableCell>
+                        <TableCell>{job?.ctc}</TableCell>
+                        <TableCell>{job?.location}</TableCell>
                         <TableCell>
                           <span
                             className={`px-2 py-1 rounded-full text-xs font-medium ${job?.status === "applied"
                               ? "bg-blue-100 text-blue-800"
-                              : job.status === "shortlisted"
+                              : el.status === "shortlisted"
                                 ? "bg-green-100 text-green-800"
                                 : "bg-gray-100 text-gray-800"
                               }`}
                           >
-                            {job.status}
+                            {el.status}
                           </span>
                         </TableCell>
                       </TableRow>

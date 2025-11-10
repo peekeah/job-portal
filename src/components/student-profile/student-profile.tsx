@@ -6,32 +6,28 @@ import { Input } from "../ui/input";
 import axios from "axios";
 
 type Profile = {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   mobile: number;
   profile_pic: string;
-  college: {
-    name: string;
-    branch: string;
-    joining_year: string;
-  };
+  college_name: string;
+  college_branch: string;
+  college_joining_year: string;
   applied_jobs: {
     [key: string]: any;
   }[];
 }
 
 const initialProfile: Profile = {
-  _id: "",
+  id: "",
   name: "",
   email: "",
   mobile: 0,
   profile_pic: "",
-  college: {
-    name: "",
-    branch: "",
-    joining_year: ""
-  },
+  college_name: "",
+  college_branch: "",
+  college_joining_year: "",
   applied_jobs: [],
 };
 
@@ -54,31 +50,12 @@ function StudentProfile() {
     setEditContent((prev) => !prev)
   }
 
-
-  type CollegeKeys = keyof typeof formData.college
-
   const onInputChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e) => {
     let { name, value } = e.target;
-    setFormData((prev) => {
-      if (name.includes("college")) {
-        const [, key] = name.split(".")
-
-        const collegeKey = key as CollegeKeys
-
-        return ({
-          ...prev,
-          college: {
-            ...prev.college,
-            [collegeKey]: value
-          }
-        })
-      } else {
-        return ({
-          ...prev,
-          [name]: value
-        })
-      }
-    })
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   }
 
   const onSave = async () => {
@@ -135,20 +112,20 @@ function StudentProfile() {
                   />
                   <div>College Name</div>
                   <Input
-                    name="college.name"
-                    value={formData?.college.name}
+                    name="college_name"
+                    value={formData?.college_name}
                     onChange={onInputChange}
                   />
                   <div>College Branch</div>
                   <Input
-                    name="college.branch"
-                    value={formData?.college?.branch}
+                    name="college_branch"
+                    value={formData?.college_branch}
                     onChange={onInputChange}
                   />
                   <div>College Joining Year</div>
                   <Input
-                    name="college.joining_year"
-                    value={formData?.college?.joining_year}
+                    name="college_joining_year"
+                    value={formData?.college_joining_year}
                     onChange={onInputChange}
                   />
                 </div> :
@@ -160,17 +137,16 @@ function StudentProfile() {
                   <div>Email</div>
                   <div>{formData?.mobile}</div>
                   <div>College Name</div>
-                  <div>{formData?.college.name}</div>
+                  <div>{formData?.college_name}</div>
                   <div>College Branch</div>
-                  <div>{formData?.college?.branch}</div>
+                  <div>{formData?.college_branch}</div>
                   <div>College Joining Year</div>
-                  <div>{formData?.college?.joining_year}</div>
+                  <div>{formData?.college_joining_year}</div>
                 </div>
             }
           </>
           : null
       }
-
     </div>
   )
 }

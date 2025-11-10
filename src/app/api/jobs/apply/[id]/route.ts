@@ -1,8 +1,8 @@
-import job from "@/models/job";
-import student from "@/models/student";
-import { errorHandler, CustomError } from "@/utils/errorHandler";
 import { NextRequest, NextResponse } from "next/server"
+
+import { errorHandler, CustomError } from "@/utils/errorHandler";
 import { authMiddleware } from "@/lib/token"
+import { prisma } from "@/lib/db";
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
 
@@ -10,33 +10,40 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const jobId = params.id;
     if (!jobId) throw new CustomError("Job id missing", 400);
 
-    const token = await authMiddleware(req, "student");
+    const token = await authMiddleware(req, "applicant");
 
-    const studentData = await student.findOne({ email: token?.email })
+    const studentData = await prisma.applicant.findUnique({
+      where: {
+        email: token.email
+      }
+    })
 
     if (!studentData) {
       throw new CustomError("student not found", 403)
     }
 
-    if (!jobId) {
-      throw new CustomError("Job id missing", 400);
+    if (!studentData?.id) throw new CustomError("Student data missing", 400);
+
+
+    const job = await prisma.appliedJob.findFirst({
+      where: {
+        jobId
+      }
+    })
+
+    if (job?.status === "applied") {
+      throw new CustomError("You already applied for this job", 403);
     }
 
-    if (!studentData?._id) throw new CustomError("Student data missing", 400);
-
-    const found = await job.findOne({
-      _id: jobId,
-      $or: [
-        { "applicants.applied": { $in: studentData._id } },
-        { "applicants.shortlisted": { $in: studentData._id } },
-        { "applicants.hired": { $in: studentData._id } },
-      ],
-    });
-
-    if (found) throw new CustomError("You already applied for this job", 403);
-
-    await job.findByIdAndUpdate(jobId, { $push: { "applicants.applied": studentData._id } });
-    await student.findByIdAndUpdate(studentData._id, { $push: { applied_jobs: { job_id: jobId } } });
+    await prisma.appliedJob.updateMany({
+      where: {
+        applicant_id: studentData.id,
+        jobId: jobId,
+      },
+      data: {
+        status: "applied",
+      },
+    })
 
     return NextResponse.json({ status: true, data: "successfully applied for the job" });
   } catch (err) {

@@ -1,25 +1,30 @@
-import student from "@/models/student";
-import { errorHandler } from "@/utils/errorHandler";
 import { NextRequest, NextResponse } from "next/server";
+
+import { errorHandler } from "@/utils/errorHandler";
 import { authMiddleware } from "@/lib/token"
+import { prisma } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
 
   try {
 
     const token = await authMiddleware(req, "applicant")
-    const studentData = await student.findOne({ email: token.email });
-
-    const studentRecord = await student.findById(studentData._id).populate({
-      path: "applied_jobs.job_id",
-      populate: {
-        path: "company",
-        model: "company",
-        select: "-password -applicants",
-      },
+    const studentData = await prisma.applicant.findUniqueOrThrow({
+      where: {
+        email: token.email
+      }
     });
 
-    return NextResponse.json({ status: true, data: studentRecord?.applied_jobs });
+    const appliedJobs = await prisma.appliedJob.findMany({
+      where: {
+        applicant_id: studentData.id
+      },
+      include: {
+        job: true
+      }
+    })
+
+    return NextResponse.json({ status: true, data: appliedJobs });
   } catch (err) {
     const [res, status] = errorHandler(err);
     return NextResponse.json(res, status)

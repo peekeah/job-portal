@@ -7,7 +7,7 @@ import { errorHandler, CustomError } from "@/utils/errorHandler";
 export async function GET(req: NextRequest) {
   try {
     await authMiddleware(req)
-    const jobs = await job.find().populate("company", "-password");
+    const jobs = await prisma.job.findMany();
     return NextResponse.json({ status: true, data: jobs });
   } catch (err) {
     const [resp, status] = errorHandler(err)

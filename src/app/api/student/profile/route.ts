@@ -1,15 +1,21 @@
-import student from "@/models/student";
+import { NextRequest, NextResponse } from "next/server";
+
 import { hashPassword } from "@/utils/bcrypt";
 import { errorHandler, CustomError } from "@/utils/errorHandler";
-import { NextRequest, NextResponse } from "next/server";
 import { authMiddleware } from "@/lib/token";
+import { prisma } from "@/lib/db";
 
 async function getProfile(req: NextRequest) {
   try {
 
-    const token = await authMiddleware(req, "student")
+    const token = await authMiddleware(req, "applicant")
 
-    const studentData = await student.findOne({ email: token?.email }).select("-password");
+    const studentData = await prisma.applicant.findUnique({
+      where: {
+        email: token?.email
+      }
+    });
+
     if (!studentData) throw new CustomError("Student not found", 404);
 
     return NextResponse.json({ status: true, data: studentData });
@@ -22,7 +28,7 @@ async function getProfile(req: NextRequest) {
 
 async function postProfile(req: NextRequest) {
   try {
-    const token = await authMiddleware(req, "student")
+    const token = await authMiddleware(req, "applicant")
 
     const body = await req.json()
 
@@ -30,7 +36,12 @@ async function postProfile(req: NextRequest) {
       body.password = await hashPassword(body.password);
     }
 
-    const updated = await student.findOneAndUpdate({ email: token.email }, body, { new: true });
+    const updated = await prisma.applicant.update({
+      where: {
+        email: token.email
+      },
+      data: body
+    });
 
     return NextResponse.json({ status: true, data: updated });
 
