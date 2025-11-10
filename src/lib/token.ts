@@ -7,7 +7,9 @@ export function getToken(req: NextRequest | NextApiRequest) {
   return fetchToken({ req, secret: process.env.NEXTAUTH_SECRET });
 }
 
-export async function authMiddleware(req: NextRequest, role?: "company" | "student") {
+export type Role = "company" | "applicant" | "admin";
+
+export async function authMiddleware(req: NextRequest, role?: Role) {
   const token = await getToken(req)
   if (!token) {
     throw new CustomError("unauthorized", 401)

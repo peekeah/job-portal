@@ -1,13 +1,14 @@
 import SignOutButton from "@/components/signout"
 import { Card, CardContent } from "@/components/ui/card"
 import { authOptions } from "@/lib/auth"
+import { Role } from "@/lib/token"
 import { getServerSession } from "next-auth"
 import Link from "next/link"
 
 const Layout = async ({ children }: { children: React.ReactNode }) => {
 
   const session = await getServerSession(authOptions)
-  const role = session?.user?.user_type
+  const role = session?.user?.user_type as Role;
 
   return (
     <div className="w-full bg-slate-200 min-h-screen flex">
@@ -15,7 +16,7 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
         <CardContent className="flex flex-col gap-3 h-full">
           <Link href={"/dashboard"} className="text-xl px-3 py-1.5 cursor-pointer">Dashboard</Link>
           {
-            role === "student" ?
+            role === "applicant" ?
               <Link href={"/dashboard/applied-jobs"} className="text-xl px-3 py-1.5 cursor-pointer">Applied Jobs</Link> :
               <Link href={"/dashboard/post-job"} className="text-xl px-3 py-1.5 cursor-pointer">Post Job</Link>
           }

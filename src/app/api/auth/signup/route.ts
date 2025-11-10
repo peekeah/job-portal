@@ -6,6 +6,8 @@ import { errorHandler } from "@/utils/errorHandler";
 import { prisma } from "@/lib/db";
 import { CompanySize, UserType } from "@/generated/prisma";
 
+const Roles = ["applicant", "company", "admin"];
+
 const companySizeMap = new Map([
   ["1_10", CompanySize.SIZE_1_10],
   ["10_50", CompanySize.SIZE_10_50],
@@ -16,7 +18,7 @@ const companySizeMap = new Map([
 const payloadSchema = z.object({
   email: z.email().min(5).max(25),
   password: z.string().min(5).max(20),
-  user_type: z.enum(["applicant", "company", "admin"]).optional(),
+  user_type: z.enum(Roles).optional(),
 });
 
 const applicantSchema = z.object({

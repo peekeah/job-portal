@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
 
   try {
 
-    const token = await authMiddleware(req, "student")
+    const token = await authMiddleware(req, "applicant")
     const studentData = await student.findOne({ email: token.email });
 
     const studentRecord = await student.findById(studentData._id).populate({

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { authMiddleware } from "@/lib/token"
-import { errorHandler, CustomError } from "@/utils/errorHandler";
+import { errorHandler } from "@/utils/errorHandler";
 import { prisma } from "@/lib/db"
 
 export async function GET(req: NextRequest) {
@@ -10,11 +10,11 @@ export async function GET(req: NextRequest) {
 
     const token = await authMiddleware(req, "company")
 
-    const existCompany = await prisma.user.findFirstOrThrow({
+    const existCompany = await prisma.applicant.findFirstOrThrow({
       where: { email: token.email }
     })
 
-    const result = await prisma.job.findFirstOrThrow({ where: { companyId: existCompany.id } })
+    const result = await prisma.job.findFirstOrThrow({ where: { company_id: existCompany.id } })
 
     return NextResponse.json({
       status: true,

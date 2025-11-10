@@ -47,6 +47,7 @@ model Auth {
 model Company {
   id            String       @id @default(uuid())
   name          String
+  email         String
   founding_year Int
   company_type  String
   contact_no    String
