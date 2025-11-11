@@ -42,7 +42,7 @@ export default function PostJob() {
       const payload = { ...formData, skills_required: skills };
       const res = await axios.post("/api/jobs", payload);
       alert(res.data.data);
-      router.push("/posted-jobs");
+      router.push("/dashboard");
     } catch (err: any) {
       console.error(err);
       alert(err.response?.data?.error || "Something went wrong");
