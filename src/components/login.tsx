@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { AxiosError } from "axios"
 
 const Login = () => {
 
@@ -28,8 +29,12 @@ const Login = () => {
       }
 
       router.push("/dashboard")
-    } catch (err: any) {
-      alert(err?.response?.data?.error || "something went wrong")
+    } catch (err: unknown) {
+      let msg = "something went wrong";
+      if (err instanceof AxiosError) {
+        msg = err?.response?.data?.error;
+      }
+      alert(msg)
       console.log(err);
     }
   }

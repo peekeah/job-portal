@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { authMiddleware } from "@/lib/token";
-import { CustomError, errorHandler } from "@/utils/errorHandler";
+import { CustomError, errorHandler } from "@/lib/errorHandler";
 import { prisma } from "@/lib/db";
-import { companySchema, companySizeMap } from "../../auth/signup/route";
+import { companySchema } from "@/lib/schema";
 
 async function getProfile(req: NextRequest) {
   try {

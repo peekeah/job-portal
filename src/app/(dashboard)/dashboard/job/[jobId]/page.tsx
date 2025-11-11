@@ -38,7 +38,7 @@ export type ApplicantType = keyof ApiResponse["data"];
 const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
 
-  const { data, isLoading, error, mutate } = useSWR<ApiResponse>(`/api/jobs/${jobId}`, fetcher);
+  const { data, isLoading, mutate } = useSWR<ApiResponse>(`/api/jobs/${jobId}`, fetcher);
 
   const getApplicants = useCallback((type: ApplicantType) => {
     if (data?.data) {

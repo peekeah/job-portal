@@ -3,7 +3,7 @@ import { AuthOptions } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 
 import { prisma } from "./db";
-import { comparePassword } from "@/utils/bcrypt";
+import { comparePassword } from "@/lib/bcrypt";
 
 declare module "next-auth" {
   interface Session {

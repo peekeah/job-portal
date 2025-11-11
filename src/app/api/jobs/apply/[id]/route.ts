@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 
-import { errorHandler, CustomError } from "@/utils/errorHandler";
+import { errorHandler, CustomError } from "@/lib/errorHandler";
 import { authMiddleware } from "@/lib/token"
 import { prisma } from "@/lib/db";
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 
   try {
-    const jobId = params.id;
+    const { id: jobId } = await params
+
     if (!jobId) throw new CustomError("Job id missing", 400);
 
     const token = await authMiddleware(req, "applicant");

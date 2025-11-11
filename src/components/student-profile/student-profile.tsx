@@ -15,7 +15,7 @@ type Profile = {
   college_branch: string;
   college_joining_year: string;
   applied_jobs: {
-    [key: string]: any;
+    [key: string]: unknown;
   }[];
 }
 
@@ -34,7 +34,7 @@ const initialProfile: Profile = {
 
 function StudentProfile() {
 
-  const { data, isLoading, error } = useSWR<{ data: Profile }>("/api/student/profile", fetcher)
+  const { data, isLoading } = useSWR<{ data: Profile }>("/api/student/profile", fetcher)
   const userData = data?.data;
 
   const [editContent, setEditContent] = useState<boolean>(false)
@@ -51,7 +51,7 @@ function StudentProfile() {
   }
 
   const onInputChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e) => {
-    let { name, value } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value

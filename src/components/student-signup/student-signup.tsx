@@ -30,25 +30,14 @@ function StudentSignupForm() {
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault()
 
-    const college = {
-      name: formData.college_name,
-      branch: formData.college_branch,
-      joining_year: +formData.college_joining_year,
+    const payload: unknown = {
+      ...formData, userType: "applicant"
     }
-
-    const payload: any = {
-      ...formData, college, userType: "applicant"
-    }
-
-    delete payload.college_name;
-    delete payload.college_branch;
-    delete payload.college_joining_year;
 
     try {
       const url = `/api/auth/signup`;
-      const response = await axios.post(url, payload);
+      await axios.post(url, payload);
 
-      response.data.data.token;
       alert("successfully signup!")
       handleReset()
       router.push("/login")

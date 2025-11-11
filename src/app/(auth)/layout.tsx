@@ -1,7 +1,7 @@
-import Container from "@/components/container";
 import { ReactNode } from "react";
+import Container from "@/components/container";
 
-export default async function ({ children }: { children: ReactNode }) {
+const Layout = async function ({ children }: { children: ReactNode }) {
 
   return (
     <Container className="h-full flex flex-col">
@@ -11,3 +11,4 @@ export default async function ({ children }: { children: ReactNode }) {
   )
 }
 
+export default Layout;

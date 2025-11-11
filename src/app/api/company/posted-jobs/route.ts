@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { authMiddleware } from "@/lib/token"
-import { CustomError, errorHandler } from "@/utils/errorHandler";
+import { CustomError, errorHandler } from "@/lib/errorHandler";
 import { prisma } from "@/lib/db"
 
 export async function GET(req: NextRequest) {

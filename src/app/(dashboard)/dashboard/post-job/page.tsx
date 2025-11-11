@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,9 +43,13 @@ export default function PostJob() {
       const res = await axios.post("/api/jobs", payload);
       alert(res.data.data);
       router.push("/dashboard");
-    } catch (err: any) {
+    } catch (err: unknown) {
+      let msg = "Something went wrong";
+      if (err instanceof AxiosError) {
+        msg = err.response?.data?.error;
+      }
       console.error(err);
-      alert(err.response?.data?.error || "Something went wrong");
+      alert(msg);
     }
   };
 

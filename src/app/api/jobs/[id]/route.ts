@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { authMiddleware } from "@/lib/token";
-import { CustomError, errorHandler } from "@/utils/errorHandler";
+import { CustomError, errorHandler } from "@/lib/errorHandler";
 import { prisma } from "@/lib/db"
+import { JobStatus as Status } from "@prisma/client";
 
-type Status = "applied" | "shortlisted" | "hired";
 
-async function getJobById(req: NextRequest, { params }: { params: { id: string } }) {
+async function getJobById(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 
   try {
     const token = await authMiddleware(req, "company")
+    const { id: jobId } = await params;
 
-    const jobId = params.id
     if (!jobId) throw new CustomError('job id not provided', 400);
 
     const company = await prisma.company.findFirst({ where: { email: token?.email } })
@@ -31,7 +31,7 @@ async function getJobById(req: NextRequest, { params }: { params: { id: string }
       },
     });
 
-    const result: Record<Status, any[]> = {
+    const result: Record<Status, unknown[]> = {
       applied: [],
       shortlisted: [],
       hired: []

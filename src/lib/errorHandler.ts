@@ -1,5 +1,4 @@
-import { Prisma } from "@/generated/prisma";
-import { MongooseError } from "mongoose";
+import { Prisma } from "@prisma/client";
 import { z, ZodError } from "zod";
 
 export class CustomError extends Error {
@@ -16,10 +15,21 @@ export class CustomError extends Error {
 type Response = {
   status: number;
   message: string;
-  error: any;
+  error: unknown;
 }
 
-export const errorHandler = (err: unknown): [any, any] => {
+
+type ResponseOut = {
+  status: boolean;
+  message: string;
+  error: unknown;
+};
+
+type Status = {
+  status: number;
+}
+
+export const errorHandler = (err: unknown): [ResponseOut, Status] => {
 
   const response: Response = {
     status: 500,
@@ -51,11 +61,6 @@ export const errorHandler = (err: unknown): [any, any] => {
       default:
         response.message = `Prisma error: ${err.code}`;
     }
-  }
-
-  if (err instanceof MongooseError) {
-    response.message = err.message
-    response.status = 400
   }
 
   if (err instanceof CustomError) {

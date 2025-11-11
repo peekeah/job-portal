@@ -90,7 +90,7 @@ function AppliedJobs() {
                         <TableCell>{job?.location}</TableCell>
                         <TableCell>
                           <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${job?.status === "applied"
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${el?.status === "applied"
                               ? "bg-blue-100 text-blue-800"
                               : el.status === "shortlisted"
                                 ? "bg-green-100 text-green-800"

@@ -43,7 +43,7 @@ export const companySizeMap = new Map([
 ]);
 
 export default function CompanyProfile() {
-  const { data, error, isLoading } = useSWR<{ data: Company }>('/api/company/profile', fetcher)
+  const { data, isLoading } = useSWR<{ data: Company }>('/api/company/profile', fetcher)
   const company = data?.data;
 
   if (!isLoading && !company) {
