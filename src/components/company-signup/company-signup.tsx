@@ -16,7 +16,7 @@ const initialFormData = {
   contact_no: '',
   website: '',
   address: '',
-  size: '1-10',
+  size: 'SIZE_1_10',
   bio: ''
 }
 
@@ -142,10 +142,10 @@ function CompanySignupForm() {
           }))
         }
         options={[
-          { value: '1-10', label: '1-10' },
-          { value: '10-50', label: '10-50' },
-          { value: '50-100', label: '50-100' },
-          { value: '100+', label: '100+' },
+          { value: 'SIZE_1_10', label: '1-10' },
+          { value: 'SIZE_10_50', label: '10-50' },
+          { value: 'SIZE_50_100', label: '50-100' },
+          { value: 'SIZE_100_PLUS', label: '100+' },
         ]}
       />
       <div className='flex gap-2 py-2'>

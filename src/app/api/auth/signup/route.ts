@@ -6,19 +6,17 @@ import { errorHandler } from "@/utils/errorHandler";
 import { prisma } from "@/lib/db";
 import { CompanySize, UserType } from "@/generated/prisma";
 
-const Roles = ["applicant", "company", "admin"];
-
 export const companySizeMap = new Map([
-  ["1_10", CompanySize.SIZE_1_10],
-  ["10_50", CompanySize.SIZE_10_50],
-  ["50_100", CompanySize.SIZE_50_100],
+  ["1-10", CompanySize.SIZE_1_10],
+  ["10-50", CompanySize.SIZE_10_50],
+  ["50-100", CompanySize.SIZE_50_100],
   ["100+", CompanySize.SIZE_100_PLUS],
 ])
 
 const payloadSchema = z.object({
   email: z.email().min(5).max(25),
   password: z.string().min(5).max(20),
-  user_type: z.enum(Roles).optional(),
+  user_type: z.enum(UserType).optional(),
 });
 
 const applicantSchema = z.object({
@@ -54,7 +52,7 @@ export const companySchema = z.object({
     .nullable()
     .refine((val) => !val || val.startsWith("https://"), "Website must start with https://"),
   address: z.string().min(1, "Address is required"),
-  size: z.nativeEnum(CompanySize).optional().nullable(),
+  size: z.enum(CompanySize).optional().nullable(),
   bio: z.string().max(500, "Bio cannot exceed 500 characters").optional().nullable(),
 });
 
@@ -84,14 +82,13 @@ export async function POST(req: NextRequest) {
       res = dbRes;
     } else if (user_type === "company") {
       const companyPayload = companySchema.parse(leftPayload)
-      const companySize = companyPayload.size ? companySizeMap.get(companyPayload.size) : null;
 
       const [dbRes, _] = await prisma.$transaction([
         prisma.auth.create({
           data: { email, password, user_type: UserType.company }
         }),
         prisma.company.create({
-          data: { ...companyPayload, size: companySize }
+          data: { ...companyPayload }
         }),
       ])
 

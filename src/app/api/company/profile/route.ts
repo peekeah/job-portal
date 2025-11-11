@@ -28,7 +28,6 @@ async function getProfile(req: NextRequest) {
   }
 }
 
-// #Fix: Need to fix input for company size
 async function postProfile(req: NextRequest) {
   try {
 
@@ -42,7 +41,6 @@ async function postProfile(req: NextRequest) {
       {
         data: {
           ...payload,
-          size: payload?.size ? companySizeMap.get(payload.size) : null
         },
         where: {
           email: token.email

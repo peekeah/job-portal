@@ -1,11 +1,13 @@
 "use client"
 import useSWR from 'swr';
-import { fetcher } from '@/lib/fetcher';
+import axios from 'axios';
 import { ChangeEventHandler, useEffect, useState } from 'react';
 import { redirect } from 'next/navigation';
+
+import { fetcher } from '@/lib/fetcher';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import axios from 'axios';
+import { CustomSelect } from '../ui/select';
 
 type Company = {
   id: string;
@@ -33,6 +35,13 @@ const initialCompany: Company = {
   bio: "",
 };
 
+export const companySizeMap = new Map([
+  ["SIZE_1_10", "1-10"],
+  ["SIZE_10_50", "10-50"],
+  ["SIZE_50_100", "50-100"],
+  ["SIZE_100_PLUS", "100+"]
+]);
+
 export default function CompanyProfile() {
   const { data, error, isLoading } = useSWR<{ data: Company }>('/api/company/profile', fetcher)
   const company = data?.data;
@@ -55,7 +64,7 @@ export default function CompanyProfile() {
   }
 
 
-  const onInputChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e) => {
+  const onInputChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement> = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -139,11 +148,19 @@ export default function CompanyProfile() {
               onChange={onInputChange}
             />
             <div>Company Size</div>
-            <Input
-              name="size"
-              value={formData?.size}
-              onChange={onInputChange}
-            />
+            <CustomSelect
+              value={formData.size}
+              onValueChange={(val) => {
+                setFormData((prev) => ({ ...prev, size: val }))
+              }}
+              options={[
+                { value: "SIZE_1_10", label: "1-10" },
+                { value: "SIZE_10_50", label: "10-50" },
+                { value: "SIZE_50_100", label: "50-100" },
+                { value: "SIZE_100_PLUS", label: "100+" },
+              ]}
+            >
+            </CustomSelect>
             <div>Company Bio</div>
             <Input
               name="bio"
@@ -167,7 +184,7 @@ export default function CompanyProfile() {
             <div>Address</div>
             <div>{formData?.address}</div>
             <div>Company Size</div>
-            <div>{formData?.size}</div>
+            <div>{companySizeMap.get(formData?.size)}</div>
             <div>Company Bio</div>
             <div>{formData?.bio}</div>
           </div>
