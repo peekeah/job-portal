@@ -77,7 +77,7 @@ const Jobs = () => {
                   <div className='flex gap-4 items-center mb-3'>
                     <Avatar className='size-12'>
                       <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                      <AvatarFallback>CN</AvatarFallback>
+                      <AvatarFallback>Job</AvatarFallback>
                     </Avatar>
                     <div>
                       <div className='font-medium'>{job.company.name}</div>

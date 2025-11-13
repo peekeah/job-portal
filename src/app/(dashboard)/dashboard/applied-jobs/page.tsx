@@ -2,10 +2,13 @@
 
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Heading, Text } from "@/components/ui/typography";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export type Job = {
   id: string;
@@ -14,11 +17,12 @@ export type Job = {
   ctc: number;
   stipend: number;
   location: string;
-  skills: string[];
+  skills_required: string[];
   company: {
     id: string;
     name: string;
     type: string;
+    address: string;
     website: string;
     size: string;
     state: string;
@@ -35,6 +39,12 @@ export type ApiResponse = {
   data: AppliedJob[]
 }
 
+const badgeClasses = new Map([
+  ["applied", "bg-blue-100 text-blue-400"],
+  ["shortlisted", "bg-yellow-100 text-yellow-400"],
+  ["hired", "bg-green-100 text-green-400"],
+])
+
 function AppliedJobs() {
 
   const { data, error, isLoading } = useSWR<ApiResponse>("/api/student/applied-jobs", fetcher)
@@ -48,73 +58,68 @@ function AppliedJobs() {
   }
 
   return (
-    <div className="flex justify-center p-6">
-      <Card className="w-full max-w-6xl shadow-sm border border-gray-200">
-        <CardHeader>
-          <CardTitle className="text-2xl font-semibold text-gray-800">
-            Applied Jobs
-          </CardTitle>
-        </CardHeader>
+    <div className="flex flex-col gap-5 justify-center p-10">
+      <CardTitle className="text-2xl font-semibold text-gray-800">
+        Applied Jobs
+      </CardTitle>
 
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-10">
-              <Spinner className="h-6 w-6 animate-spin text-gray-500" />
-              <span className="ml-2 text-gray-500">Loading...</span>
-            </div>
-          ) : appliedJobs?.length > 0 ? (
-            <Table className="w-full min-h-44">
-              <TableCaption>A list of all jobs you’ve applied for.</TableCaption>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-10">#</TableHead>
-                  <TableHead>Company Name</TableHead>
-                  <TableHead>Job Role</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>CTC</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {
-                  appliedJobs.map((el, index) => {
-                    const job = el.job;
-                    return (
-                      <TableRow key={job.id || index}>
-                        <TableCell>{index + 1}</TableCell>
-                        <TableCell>{job.company?.name}</TableCell>
-                        <TableCell>{job?.job_role}</TableCell>
-                        <TableCell>{job?.description}</TableCell>
-                        <TableCell>{job?.ctc}</TableCell>
-                        <TableCell>{job?.location}</TableCell>
-                        <TableCell>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${el?.status === "applied"
-                              ? "bg-blue-100 text-blue-800"
-                              : el.status === "shortlisted"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-gray-100 text-gray-800"
-                              }`}
-                          >
-                            {el.status}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })
-                }
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="text-center py-10 text-gray-500">
-              No applied jobs found.
-            </div>
-          )}
-        </CardContent>
-      </Card >
+      {isLoading ? (
+        <div className="flex items-center justify-center py-10">
+          <Spinner className="h-6 w-6 animate-spin text-gray-500" />
+          <span className="ml-2 text-gray-500">Loading...</span>
+        </div>
+      ) : appliedJobs?.length > 0 ? (
+        <div className="grid grid-cols-2 gap-5">
+          {
+            appliedJobs?.map(el => {
+              const job = el.job;
+              const company = el.job.company;
+              const status = el.status;
+
+              return (
+                <Card key={job.id}>
+                  <CardContent>
+                    <div className="flex justify-between">
+                      <div className='flex gap-4 items-center mb-3'>
+                        <Avatar className='size-12'>
+                          <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                          <AvatarFallback>Company</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className='font-medium'>{company.name}</div>
+                          <div className='text-sm text-neutral-500'>{company.address}</div>
+                        </div>
+                      </div>
+                      <div>
+                        <Badge className={
+                          cn(
+                            "text-sm rounded-full px-2 py-1.5",
+                            badgeClasses.get(status))
+                        }>{status}</Badge>
+                      </div>
+                    </div>
+                    <Heading variant='h4'>{job.job_role}</Heading>
+                    <Text className='line-clamp-2 text-neutral-500'>{job.description}</Text>
+                    <Text className='my-2'>$ {job.ctc}k/year</Text>
+                    <Text className='text-neutral-500 space-x-1'>{job?.skills_required.map(el => (
+                      <Badge variant={"outline"}>{el}</Badge>
+                    ))}</Text>
+                    <div className='mt-4 space-x-3'>
+                      <Button variant={"outline"}>View Job</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })
+          }
+        </div>
+      ) : (
+        <div className="text-center py-10 text-gray-500">
+          No applied jobs found.
+        </div>
+      )
+      }
     </div >
-
   )
 }
 

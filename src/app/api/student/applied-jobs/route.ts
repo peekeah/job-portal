@@ -20,8 +20,12 @@ export async function GET(req: NextRequest) {
         applicant_id: studentData.id
       },
       include: {
-        job: true
-      }
+        job: {
+          include: {
+            company: true
+          }
+        }
+      },
     })
 
     return NextResponse.json({ status: true, data: appliedJobs });
