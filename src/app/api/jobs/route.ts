@@ -9,7 +9,11 @@ import { jobSchema } from "@/lib/schema";
 export async function GET(req: NextRequest) {
   try {
     await authMiddleware(req)
-    const jobs = await prisma.job.findMany();
+    const jobs = await prisma.job.findMany({
+      include: {
+        company: true
+      }
+    });
     return NextResponse.json({ status: true, data: jobs });
   } catch (err) {
     const [resp, status] = errorHandler(err)

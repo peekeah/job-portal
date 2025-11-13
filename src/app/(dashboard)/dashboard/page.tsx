@@ -6,7 +6,7 @@ import { Role } from "@/lib/token"
 
 const Dashboard = async () => {
   const session = await getServerSession(authOptions)
-  const role = session?.user?.user_type as Role;
+  const role = session?.user?.user_type as Role
   return (
     <>
       {role === "applicant" ? <Jobs /> : <PostedJobs />}

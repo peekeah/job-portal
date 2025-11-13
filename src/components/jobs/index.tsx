@@ -1,23 +1,29 @@
 "use client"
+
 import axios, { AxiosError } from 'axios';
-import React from 'react'
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import useSWR from 'swr';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { fetcher } from '@/lib/fetcher';
 import { Spinner } from '../ui/spinner';
-
+import { Heading, Text } from '../ui/typography';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Badge } from '../ui/badge';
 
 export type Job = {
   id: string;
-  company_name: string;
-  company_founding_year: number;
-  company_type: string;
   job_role: string;
   description: string;
   ctc: number;
   stipend: number;
   location: string;
+  company: {
+    name: string;
+    company_founding_year: number;
+    company_type: string;
+    address: string;
+  }
   skills_required: string[];
 };
 
@@ -55,34 +61,44 @@ const Jobs = () => {
   }
 
   return (
-    <div className='p-10 h-full'>
-      <h1 className='text-xl'>Jobs</h1>
-      <Card className='w-full h-full py-10 px-5'>
-        <CardContent>
-          <div className='divide-y-2 divide-gray-300 max-w-2xl mx-auto'>
-            {
-              isLoading ?
-                <div className="flex items-center justify-center py-10">
-                  <Spinner className="h-6 w-6 animate-spin text-gray-500" />
-                  <span className="ml-2 text-gray-500">Loading...</span>
-                </div>
-                :
-                jobs?.map((job) => (
-                  <div className='p-5 flex justify-between items-center' key={job.id}>
-                    <div >
-                      <div>{job.company_name}</div>
-                      <div>{job.job_role}</div>
-                      <div>{job.ctc}</div>
-                      <div>{job.description}</div>
-                    </div>
-                    <div><Button onClick={() => handleApplyJob(job.id)}>Apply</Button></div>
-                  </div>
-                ))
-            }
+    <div className='p-10 h-full w-full'>
+      <Heading variant={"h2"}>Jobs</Heading>
+      {
+        isLoading ? (
+          <div className="flex mt-32 items-center justify-center py-10">
+            <Spinner className="h-6 w-6 animate-spin text-gray-500" />
+            <span className="ml-2 text-gray-500">Loading...</span>
           </div>
-        </CardContent>
-      </Card>
-
+        ) :
+          <div className='grid grid-cols-2 gap-5'>
+            {jobs?.map((job) => (
+              <Card key={job.id}>
+                <CardContent>
+                  <div className='flex gap-4 items-center mb-3'>
+                    <Avatar className='size-12'>
+                      <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                      <AvatarFallback>CN</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className='font-medium'>{job.company.name}</div>
+                      <div className='text-sm text-neutral-500'>{job.company.address}</div>
+                    </div>
+                  </div>
+                  <Heading variant='h4'>{job.job_role}</Heading>
+                  <Text className='line-clamp-2 text-neutral-500'>{job.description}</Text>
+                  <Text className='my-2'>$ {job.ctc}k/year</Text>
+                  <Text className='text-neutral-500 space-x-1'>{job.skills_required.map(el => (
+                    <Badge variant={"outline"}>{el}</Badge>
+                  ))}</Text>
+                  <div className='mt-4 space-x-3'>
+                    <Button onClick={() => handleApplyJob(job.id)}>Apply</Button>
+                    <Button variant={"outline"}>View Job</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+      }
     </div>
   )
 }
