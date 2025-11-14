@@ -3,32 +3,44 @@ import { useState } from "react";
 import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash } from "lucide-react";
+import { Plus, X } from "lucide-react";
+import { Text } from "@/components/ui/typography";
+import { Badge } from "@/components/ui/badge";
+
+type Skill = {
+  id: number;
+  value: string;
+};
 
 export default function PostJob() {
-  const [skills, setSkills] = useState<string[]>([""]);
+  const [skills, setSkills] = useState<Skill[]>([]);
   const [formData, setFormData] = useState({
     job_role: "",
     description: "",
     ctc: "",
     stipend: "",
     location: "",
+    skill: ""
   });
 
   const router = useRouter();
 
-  const addSkill = () => setSkills((prev) => [...prev, ""]);
-  const removeSkill = (index: number) =>
-    setSkills((prev) => prev.filter((_, i) => i !== index));
-  const handleSkillChange = (index: number, value: string) => {
-    const updated = [...skills];
-    updated[index] = value;
-    setSkills(updated);
-  };
+  const addSkill = () => {
+    setSkills((prev) => [...prev, {
+      id: Math.floor(Math.random() * 100 + 100),
+      value: formData.skill
+    }]);
+
+    setFormData((prev) => ({ ...prev, skill: "" }))
+  }
+
+  const removeSkill = (skillId: number) => {
+    setSkills((prev) => prev.filter((skill) => skill.id !== skillId));
+  }
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -39,7 +51,7 @@ export default function PostJob() {
 
   const handleSubmit = async () => {
     try {
-      const payload = { ...formData, skills_required: skills };
+      const payload = { ...formData, skills_required: skills.map(el => el.value) };
       const res = await axios.post("/api/jobs", payload);
       alert(res.data.data);
       router.push("/dashboard");
@@ -54,15 +66,10 @@ export default function PostJob() {
   };
 
   return (
-    <div className="flex min-h-screen bg-muted/10">
-      <div className="flex-1 p-6 flex justify-center">
-        <Card className="w-full max-w-3xl shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-2xl font-semibold">Post a Job</CardTitle>
-          </CardHeader>
-
-          {/* <Separator className="my-2" /> */}
-
+    <div className="flex mx-10 my-5 bg-muted/10 justify-center">
+      <div className="">
+        <Text className="text-2xl my-5 font-semibold">Post a Job</Text>
+        <Card className="w-full py-10 px-2 min-w-2xl max-w-3xl shadow-sm">
           <CardContent className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
@@ -113,33 +120,38 @@ export default function PostJob() {
               <h4 className="text-sm font-medium text-foreground">
                 Skills Required
               </h4>
-              {skills.map((skill, index) => (
-                <div key={index} className="flex gap-2">
-                  <Input
-                    value={skill}
-                    onChange={(e) => handleSkillChange(index, e.target.value)}
-                    placeholder="Enter a skill (e.g. React, Node.js)"
-                  />
-                  {skills.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      onClick={() => removeSkill(index)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                className="w-fit"
-                onClick={addSkill}
-              >
-                <Plus className="h-4 w-4 mr-1" /> Add Skill
-              </Button>
+              <div className="flex gap-3">
+                <Input
+                  name="skill"
+                  value={formData.skill}
+                  onChange={handleChange}
+                  placeholder="Enter a skill (e.g. React, Node.js)"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="transition-all cursor-pointer"
+                  onClick={addSkill}
+                  disabled={!Boolean(formData.skill)}
+                >
+                  <Plus className="size-4" />
+                </Button>
+              </div>
+              <div className="flex gap-3 my-5">
+                {skills.map((skill) => (
+                  <Badge
+                    key={skill.id}
+                    className="flex items-center rounded-full px-3 py-2 text-base bg-primary/10 text-primary"
+                  >
+                    <p>{skill.value}</p>
+                    <button
+                      className="cursor-pointer"
+                      onClick={() => removeSkill(skill.id)}
+                    ><X className="size-4" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
             </div>
 
             <div className="pt-4">
@@ -150,7 +162,7 @@ export default function PostJob() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </div >
   );
 }
 
