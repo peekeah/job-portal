@@ -2,6 +2,7 @@
 import ApplicantsTable from "@/components/applicants-table/page";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Text } from "@/components/ui/typography";
 import { fetcher } from "@/lib/fetcher";
 import { useParams } from "next/navigation"
 import { useCallback } from "react";
@@ -53,19 +54,22 @@ const JobDetails = () => {
   }
 
   return (
-    <div className="p-10">
+    <div className="m-10">
+      <Text className="text-2xl my-5 font-semibold text-gray-800">
+        Applied Candidates
+      </Text>
       <Tabs defaultValue={"applied"} className="w-full">
         <TabsList>
           <TabsTrigger
-            className="cursor-pointer"
+            className="transition-all cursor-pointer data-[state=active]:bg-primary data-[state=active]:text-white"
             value="applied"
           >Applied</TabsTrigger>
           <TabsTrigger
-            className="cursor-pointer"
+            className="transition-all cursor-pointer data-[state=active]:bg-primary data-[state=active]:text-white"
             value="shortlisted"
           >Shortlisted</TabsTrigger>
           <TabsTrigger
-            className="cursor-pointer"
+            className="transition-all cursor-pointer data-[state=active]:bg-primary data-[state=active]:text-white"
             value="hired"
           >Hired</TabsTrigger>
         </TabsList>
@@ -103,7 +107,7 @@ const JobDetails = () => {
             </>
         }
       </Tabs>
-    </div>
+    </div >
   )
 }
 

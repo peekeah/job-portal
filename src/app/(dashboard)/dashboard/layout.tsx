@@ -8,13 +8,20 @@ import { Role } from "@/lib/token";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 
+const links = ["/dashboard", "/post-job", "/profile", "/logout"];
+
+const getSelectedLink = (path: string): string => {
+  const link = path.split("/dashboard")[1] ?? "";
+  return links.includes(link) ? link : "";
+}
+
 const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const { data } = useSession()
   const role = data?.user?.user_type as Role;
 
   const path = usePathname();
-  const selectedLink = path.split("/dashboard")[1];
+  const selectedLink = getSelectedLink(path);
 
   return (
     <Container className="max-w-7xl w-full bg-neutral-100 h-screen flex">
