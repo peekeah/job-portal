@@ -8,6 +8,11 @@ import { fetcher } from '@/lib/fetcher';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { CustomSelect } from '../ui/select';
+import { Card, CardContent } from '../ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Badge } from '../ui/badge';
+import { Heading } from '../ui/typography';
+import { Textarea } from '../ui/textarea';
 
 type Company = {
   id: string;
@@ -91,104 +96,160 @@ export default function CompanyProfile() {
     }
   }
 
+  const onCancelChanges = () => {
+    setFormData(prev => company ? company : prev);
+    setEditContent(() => false);
+  }
+
   return (
-    <div className='p-8'>
+    <div className='p-8 max-w-4xl mx-auto'>
       <h1 className='pb-3 font-semibold text-2xl'>Company Profile</h1>
-      <div className='w-1/2 mx-auto flex justify-center'>
+      <div className='mx-auto mb-4 flex justify-end'>
         {
           editContent ?
-            <Button onClick={onSave}>Save</Button> :
+            <div className='space-x-3'>
+              <Button onClick={onSave}>Save</Button>
+              <Button
+                onClick={onCancelChanges}
+                variant={"destructive"}
+              >Cancel</Button>
+            </div> :
             <Button onClick={toggleEdit}>Edit</Button>
         }
       </div>
-      {
-        editContent ?
-          <div className='grid grid-cols-2 place-content-center w-1/2 mx-auto mt-42 gap-3'>
-            <div>Company Name</div>
-            <Input
-              name="name"
-              value={formData?.name}
-              onChange={onInputChange}
-            />
-            <div>Year Founded</div>
-            <Input
-              type="number"
-              name="founding_year"
-              value={formData?.founding_year}
-              onChange={onInputChange}
-            />
-            <div>Company Type</div>
-            <Input
-              name="company_type"
-              value={formData?.company_type}
-              onChange={onInputChange}
-            />
-            <div>Email</div>
-            <Input
-              name="email"
-              value={formData?.email}
-              onChange={onInputChange}
-            />
-            <div>Phone No</div>
-            <Input
-              name="contact_no"
-              value={formData?.contact_no}
-              onChange={onInputChange}
-            />
-            <div>Website</div>
-            <Input
-              name="website"
-              value={formData?.website}
-              onChange={onInputChange}
-            />
-            <div>Address</div>
-            <Input
-              name="address"
-              value={formData?.address}
-              onChange={onInputChange}
-            />
-            <div>Company Size</div>
-            <CustomSelect
-              value={formData.size}
-              onValueChange={(val) => {
-                setFormData((prev) => ({ ...prev, size: val }))
-              }}
-              options={[
-                { value: "SIZE_1_10", label: "1-10" },
-                { value: "SIZE_10_50", label: "10-50" },
-                { value: "SIZE_50_100", label: "50-100" },
-                { value: "SIZE_100_PLUS", label: "100+" },
-              ]}
-            >
-            </CustomSelect>
-            <div>Company Bio</div>
-            <Input
-              name="bio"
-              value={formData?.bio}
-              onChange={onInputChange}
-            />
-          </div> :
-          <div className='grid grid-cols-2 place-content-center w-1/2 mx-auto mt-42 gap-3'>
-            <div>Company Name</div>
-            <div>{formData?.name}</div>
-            <div>Year Founded</div>
-            <div>{formData?.founding_year}</div>
-            <div>Company Type</div>
-            <div>{formData?.company_type}</div>
-            <div>Email</div>
-            <div>{formData?.email}</div>
-            <div>Phone No</div>
-            <div>{formData?.contact_no}</div>
-            <div>Website</div>
-            <div>{formData?.website}</div>
-            <div>Address</div>
-            <div>{formData?.address}</div>
-            <div>Company Size</div>
-            <div>{companySizeMap.get(formData?.size)}</div>
-            <div>Company Bio</div>
-            <div>{formData?.bio}</div>
-          </div>
-      }
+      <div className='space-y-5'>
+        <Card>
+          <CardContent>
+            <div className='flex gap-4 items-center mb-3'>
+              <Avatar className='size-28'>
+                <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                <AvatarFallback>Job</AvatarFallback>
+              </Avatar>
+              <div className='space-y-2'>
+                <div className='text-2xl font-bold'>{company?.name}</div>
+                <div className='space-x-2 font-medium'>
+                  <Badge
+                    variant={"outline"}
+                    className='rounded-full px-2 py-1 font-semibold'
+                  >{company?.company_type}</Badge>
+                  <Badge
+                    variant={"outline"}
+                    className='rounded-full px-2 py-1 font-semibold'
+                  >{companySizeMap.get(company?.size!)} employees</Badge>
+                  <Badge
+                    variant={"outline"}
+                    className='rounded-full px-2 py-1 font-semibold'
+                  >Founded {company?.founding_year}</Badge>
+                </div>
+                <div>
+                  <Button variant={"outline"}>Change logo</Button>
+                </div>
+              </div>
+            </div>
+            <div>
+              <Textarea
+                rows={4}
+                label='Description'
+                name="bio"
+                className="text-neutral-500"
+                value={formData?.bio}
+                onChange={onInputChange}
+                disabled={!editContent}
+              />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <Heading variant='h4' className='mb-3'>Contact Information</Heading>
+            <div className='grid grid-cols-2 gap-5'>
+              <Input
+                label="Email"
+                name="email"
+                value={formData?.email}
+                onChange={onInputChange}
+                disabled={!editContent}
+              />
+              <Input
+                label="Contact No"
+                name="contact_no"
+                value={formData?.contact_no}
+                onChange={onInputChange}
+                disabled={!editContent}
+              />
+              <Input
+                label="Location"
+                name="address"
+                value={formData?.address}
+                onChange={onInputChange}
+                disabled={!editContent}
+              />
+              <Input
+                label="Website"
+                name="website"
+                value={formData?.website}
+                onChange={onInputChange}
+                disabled={!editContent}
+              />
+            </div>
+          </CardContent>
+        </Card>
+        {/*TODO: Add these fields in backend*/}
+        <Card>
+          <CardContent>
+            <Heading variant='h4' className='mb-3'>Social Media</Heading>
+            <div className='grid grid-cols-2 gap-5'>
+              <Input
+                label="LinkedIn"
+                disabled={!editContent}
+              />
+              <Input
+                label="Twitter"
+                disabled={!editContent}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent>
+            <Heading variant='h4' className='mb-3'>Company Details</Heading>
+            <div className='grid grid-cols-2 gap-5'>
+              <Input
+                label="Industry/Domain"
+                name="company_type"
+                value={formData?.company_type}
+                onChange={onInputChange}
+                disabled={!editContent}
+              />
+              <CustomSelect
+                label="Company Size"
+                value={formData.size}
+                disabled={!editContent}
+                onValueChange={(val) => {
+                  setFormData((prev) => ({ ...prev, size: val }))
+                }}
+                options={[
+                  { value: "SIZE_1_10", label: "1-10" },
+                  { value: "SIZE_10_50", label: "10-50" },
+                  { value: "SIZE_50_100", label: "50-100" },
+                  { value: "SIZE_100_PLUS", label: "100+" },
+                ]}
+              >
+              </CustomSelect>
+
+              <Input
+                label="Year Founded"
+                type="number"
+                name="founding_year"
+                value={formData?.founding_year}
+                onChange={onInputChange}
+                disabled={!editContent}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div >
   )
 }
