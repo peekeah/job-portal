@@ -4,6 +4,9 @@ import useSWR from "swr";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import axios from "axios";
+import { Card, CardContent } from "../ui/card";
+import { Heading } from "../ui/typography";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 type Profile = {
   id: string;
@@ -75,76 +78,90 @@ function StudentProfile() {
     }
   }
 
+  const onCancel = () => {
+    setFormData(() => userData!);
+    setEditContent(() => false);
+  }
 
   return (
-    <div className='p-5'>
+    <div className='p-5 max-w-4xl mx-auto'>
       <h1 className='py-1 text-2xl font-semibold'>Student Profile</h1>
-      <div className='w-1/2 mx-auto flex justify-center'>
+      <div className='mx-auto flex justify-end mb-5'>
         {
           editContent ?
-            <Button onClick={onSave}>Save</Button> :
+            <div className="space-x-3">
+              <Button onClick={onSave}>Save</Button>
+              <Button
+                onClick={onCancel}
+                variant={"destructive"}
+              >Cancel</Button>
+            </div> :
             <Button onClick={toggleEdit}>Edit</Button>
         }
       </div>
       {
         !isLoading && userData ?
-          <>
-            {
-              editContent ?
-                <div className='grid grid-cols-2 gap-3 w-1/2 mx-auto pt-42'>
-                  <div>Name</div>
-                  <Input
-                    value={formData?.name}
-                    name="name"
-                    onChange={onInputChange}
-                  />
-                  <div>Mobile</div>
-                  <Input
-                    name="mobile"
-                    value={formData?.mobile}
-                    onChange={onInputChange}
-                  />
-                  <div>Email</div>
-                  <Input
-                    name="email"
-                    value={formData?.email}
-                    onChange={onInputChange}
-                  />
-                  <div>College Name</div>
-                  <Input
-                    name="college_name"
-                    value={formData?.college_name}
-                    onChange={onInputChange}
-                  />
-                  <div>College Branch</div>
-                  <Input
-                    name="college_branch"
-                    value={formData?.college_branch}
-                    onChange={onInputChange}
-                  />
-                  <div>College Joining Year</div>
-                  <Input
-                    name="college_joining_year"
-                    value={formData?.college_joining_year}
-                    onChange={onInputChange}
-                  />
-                </div> :
-                <div className='grid grid-cols-2 gap-3 w-1/2 mx-auto pt-42'>
-                  <div>Name</div>
-                  <div>{formData?.name}</div>
-                  <div>Mobile</div>
-                  <div>{formData?.email}</div>
-                  <div>Email</div>
-                  <div>{formData?.mobile}</div>
-                  <div>College Name</div>
-                  <div>{formData?.college_name}</div>
-                  <div>College Branch</div>
-                  <div>{formData?.college_branch}</div>
-                  <div>College Joining Year</div>
-                  <div>{formData?.college_joining_year}</div>
+          <Card>
+            <CardContent className="mb-4">
+              <div className="flex mb-5 gap-5 items-center">
+                <Avatar className='size-28'>
+                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                  <AvatarFallback>Job</AvatarFallback>
+                </Avatar>
+
+                <div className='space-y-2'>
+                  <div className='text-2xl font-bold'>{userData.name}</div>
+                  <div>
+                    <Button variant={"outline"}>Change Image</Button>
+                  </div>
                 </div>
-            }
-          </>
+              </div>
+              <div className='grid grid-cols-2 gap-5 mx-auto'>
+                <Input
+                  label="Name"
+                  value={formData?.name}
+                  name="name"
+                  onChange={onInputChange}
+                  disabled={!editContent}
+                />
+                <Input
+                  label="Contact"
+                  name="mobile"
+                  value={formData?.mobile}
+                  onChange={onInputChange}
+                  disabled={!editContent}
+                />
+                <Input
+                  label="Email"
+                  name="email"
+                  value={formData?.email}
+                  onChange={onInputChange}
+                  disabled={!editContent}
+                />
+                <Input
+                  label="College Name"
+                  name="college_name"
+                  value={formData?.college_name}
+                  onChange={onInputChange}
+                  disabled={!editContent}
+                />
+                <Input
+                  label="College Branch"
+                  name="college_branch"
+                  value={formData?.college_branch}
+                  onChange={onInputChange}
+                  disabled={!editContent}
+                />
+                <Input
+                  label="College Joining Year"
+                  name="college_joining_year"
+                  value={formData?.college_joining_year}
+                  onChange={onInputChange}
+                  disabled={!editContent}
+                />
+              </div>
+            </CardContent>
+          </Card>
           : null
       }
     </div>
