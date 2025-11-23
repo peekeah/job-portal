@@ -61,7 +61,7 @@ const Jobs = () => {
   }
 
   return (
-    <div className='p-10 h-full w-full'>
+    <div className='p-5 sm:p-7 md:p-10 lg:px-5 md:my-5 h-full w-full'>
       <Heading variant={"h2"}>Jobs</Heading>
       {
         isLoading ? (
@@ -70,7 +70,7 @@ const Jobs = () => {
             <span className="ml-2 text-gray-500">Loading...</span>
           </div>
         ) :
-          <div className='grid grid-cols-2 gap-5'>
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-5'>
             {jobs?.map((job) => (
               <Card key={job.id}>
                 <CardContent>

@@ -84,7 +84,7 @@ function StudentProfile() {
   }
 
   return (
-    <div className='p-5 max-w-4xl mx-auto'>
+    <div className='p-5 md:p-7 lg:p-5 max-w-4xl mx-auto'>
       <h1 className='py-1 text-2xl font-semibold'>Student Profile</h1>
       <div className='mx-auto flex justify-end mb-5'>
         {
@@ -116,7 +116,7 @@ function StudentProfile() {
                   </div>
                 </div>
               </div>
-              <div className='grid grid-cols-2 gap-5 mx-auto'>
+              <div className='grid md:grid-cols-2 gap-5 mx-auto'>
                 <Input
                   label="Name"
                   value={formData?.name}

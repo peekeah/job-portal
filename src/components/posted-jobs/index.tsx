@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Job } from "../jobs";
 import { useRouter } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Heading, Text } from "../ui/typography";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -26,7 +25,7 @@ const PostedJobs = () => {
   }
 
   return (
-    <div className="m-10 w-full max-w-6xl">
+    <div className="responsive-box max-w-6xl">
       <Text className="text-2xl my-5 font-semibold text-gray-800">
         Posted Jobs
       </Text>

@@ -58,8 +58,8 @@ function AppliedJobs() {
   }
 
   return (
-    <div className="flex flex-col gap-5 justify-center p-10">
-      <CardTitle className="text-2xl font-semibold text-gray-800">
+    <div className='p-5 sm:p-7 md:px-10 lg:px-5 h-full w-full'>
+      <CardTitle className="text-2xl mb-3 font-semibold text-gray-800">
         Applied Jobs
       </CardTitle>
 
@@ -69,7 +69,7 @@ function AppliedJobs() {
           <span className="ml-2 text-gray-500">Loading...</span>
         </div>
       ) : appliedJobs?.length > 0 ? (
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid lg:grid-cols-2 gap-5">
           {
             appliedJobs?.map(el => {
               const job = el.job;
