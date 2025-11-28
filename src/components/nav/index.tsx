@@ -1,7 +1,6 @@
 "use client"
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-// import { Logo } from '@/components/logo'
 import { Menu, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -85,7 +84,7 @@ export const Navbar = () => {
                   variant="outline"
                   size="sm"
                   className={cn(isScrolled && 'lg:hidden')}>
-                  <Link href="#">
+                  <Link href="/login">
                     <span>Login</span>
                   </Link>
                 </Button>
@@ -93,7 +92,7 @@ export const Navbar = () => {
                   asChild
                   size="sm"
                   className={cn(isScrolled && 'lg:hidden')}>
-                  <Link href="#">
+                  <Link href="/signup">
                     <span>Sign Up</span>
                   </Link>
                 </Button>
