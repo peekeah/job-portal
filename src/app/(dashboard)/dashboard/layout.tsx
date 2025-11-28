@@ -10,17 +10,6 @@ import SignOutButton from "@/components/signout";
 import { Role } from "@/lib/token";
 import { cn } from "@/lib/utils";
 
-const users = [
-  {
-    name: "aman",
-    city: "pune",
-  },
-  {
-    name: "pranay",
-    city: "nagpur",
-  },
-];
-
 const studentNavLinks = [
   {
     title: "Dashboard",
@@ -143,7 +132,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               className="z-20 absolute top-5 right-3"
               onClick={() => setOpenMenu(false)}
             />
-            {/* FIX: Selected link issue */}
             <div className="flex flex-col gap-3">
               {navlinks.map((link) => (
                 <Link
