@@ -88,7 +88,7 @@ const Jobs = () => {
                   <Text className='line-clamp-2 text-neutral-500'>{job.description}</Text>
                   <Text className='my-2'>$ {job.ctc}k/year</Text>
                   <Text className='text-neutral-500 space-x-1'>{job.skills_required.map(el => (
-                    <Badge variant={"outline"}>{el}</Badge>
+                    <Badge key={el} variant={"outline"}>{el}</Badge>
                   ))}</Text>
                   <div className='mt-4 space-x-3'>
                     <Button onClick={() => handleApplyJob(job.id)}>Apply</Button>

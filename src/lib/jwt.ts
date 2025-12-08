@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-export const signToken = (payload: any) => {
+export const signToken = (payload: Record<string, string | number>) => {
   try {
     const secret = process.env.JWT_SECRET || "some-random-password";
     const token = jwt.sign(
@@ -12,15 +12,15 @@ export const signToken = (payload: any) => {
     );
     return token;
   } catch (err) {
-    throw err
+    throw err;
   }
 };
 
 export const verifyToken = (token: string) => {
   try {
     const secret = process.env.JWT_SECRET || "some-random-password";
-    const decodedData = jwt.verify(token, secret)
-    return decodedData
+    const decodedData = jwt.verify(token, secret);
+    return decodedData;
   } catch (err) {
     throw err;
   }

@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import { TextEffect } from '@/components/motion-primitives/text-effect'
 import { AnimatedGroup } from '@/components/motion-primitives/animated-group'
-import { Spotlight } from '../ui/spotlight'
-import { cn } from '@/lib/utils'
 import { BackgroundBeams } from '../ui/background-beams'
 import Container from '../container'
 
@@ -40,7 +38,7 @@ export default function HeroSection() {
         </div>
         <section className='relative'>
           <Container>
-            <BackgroundBeams className='w-full h-full' />
+            <BackgroundBeams speedFactor={1.5} className='w-full h-full' />
           </Container>
 
 

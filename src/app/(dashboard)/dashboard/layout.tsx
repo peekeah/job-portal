@@ -66,7 +66,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const navlinks = role === "applicant" ? studentNavLinks : companyNavLinks;
 
   return (
-    <Container className="relative max-w-7xl w-full bg-neutral-100 h-screen flex">
+    <Container className="relative max-w-7xl w-full h-screen flex">
       <div className="hidden lg:block h-screen px-5">
         <div className="py-6">Logo</div>
         <div className="flex flex-col gap-3 ">

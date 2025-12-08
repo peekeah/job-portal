@@ -5,7 +5,6 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import axios from "axios";
 import { Card, CardContent } from "../ui/card";
-import { Heading } from "../ui/typography";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 type Profile = {

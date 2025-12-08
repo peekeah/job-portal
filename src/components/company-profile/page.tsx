@@ -135,7 +135,7 @@ export default function CompanyProfile() {
                   <Badge
                     variant={"outline"}
                     className='rounded-full px-2 py-1 font-semibold'
-                  >{companySizeMap.get(company?.size!)} employees</Badge>
+                  >{companySizeMap.get(company?.size || "") || "0"} employees</Badge>
                   <Badge
                     variant={"outline"}
                     className='rounded-full px-2 py-1 font-semibold'

@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
-import crypto from "crypto";
 import { Resend } from "resend";
 
 import { CustomError, errorHandler } from "@/lib/errorHandler";
 import { prisma } from "@/lib/db";
-import { hashPassword } from "@/lib/bcrypt";
 import { signToken } from "@/lib/jwt";
 
 function getEmailText(name: string, hash: string) {

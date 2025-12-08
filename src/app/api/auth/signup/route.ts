@@ -24,59 +24,56 @@ const applicantSchema = z.object({
   college_joining_year: z.string().optional(),
 });
 
-
 export async function POST(req: NextRequest) {
-
   try {
     const payload = await req.json();
     const { email, password: rawPwd, user_type } = payloadSchema.parse(payload);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _password, ...leftPayload } = payload;
 
     const password = await hashPassword(rawPwd);
-    let res;
 
     if (!user_type || user_type === "applicant") {
-      const parsedPayload = applicantSchema.parse(leftPayload)
+      const parsedPayload = applicantSchema.parse(leftPayload);
 
-      const [dbRes, _createRes] = await prisma.$transaction([
+      await prisma.$transaction([
         prisma.auth.create({
-          data: { email, password, user_type: UserType.applicant }
+          data: { email, password, user_type: UserType.applicant },
         }),
         prisma.applicant.create({
           data: {
-            ...parsedPayload
-          }
+            ...parsedPayload,
+          },
         }),
-      ])
-      res = dbRes;
+      ]);
     } else if (user_type === "company") {
-      const companyPayload = companySchema.parse(leftPayload)
+      const companyPayload = companySchema.parse(leftPayload);
 
-      const [dbRes, _createRes] = await prisma.$transaction([
+      await prisma.$transaction([
         prisma.auth.create({
-          data: { email, password, user_type: UserType.company }
+          data: { email, password, user_type: UserType.company },
         }),
         prisma.company.create({
-          data: { ...companyPayload }
+          data: { ...companyPayload },
         }),
-      ])
-
-      res = dbRes;
+      ]);
     } else {
-      res = prisma.auth.create({
-        data: { email, password, user_type: UserType.admin }
-      })
+      prisma.auth.create({
+        data: { email, password, user_type: UserType.admin },
+      });
     }
 
-    return NextResponse.json({
-      status: true,
-      data: "signup successfully",
-    }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        status: true,
+        data: "signup successfully",
+      },
+      { status: 201 }
+    );
   } catch (err) {
-    console.log("err::", err)
-    const [resp, status] = errorHandler(err)
-    return NextResponse.json(resp, status)
+    console.log("err::", err);
+    const [resp, status] = errorHandler(err);
+    return NextResponse.json(resp, status);
   }
 }
-

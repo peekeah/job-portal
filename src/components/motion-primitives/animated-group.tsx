@@ -1,11 +1,12 @@
 "use client";
-import { ReactNode } from "react";
+import { Children, ReactNode } from "react";
 import { motion } from "motion/react";
-import React from "react";
 
 // motion/react's Variants typing can vary between versions and sometimes
 // causes strict TypeScript errors here. Use a permissive local alias so
 // this component remains flexible across motion versions.
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Variants = Record<string, any>;
 
 export type PresetType =
@@ -110,8 +111,6 @@ function AnimatedGroup({
   className,
   variants,
   preset,
-  as = 'div',
-  asChild = 'div',
 }: AnimatedGroupProps) {
   const selectedVariants = {
     item: addDefaultVariants(preset ? presetVariants[preset] : {}),
@@ -122,22 +121,21 @@ function AnimatedGroup({
 
   // Create motion-wrapped components. Different motion versions provide
   // different factories; calling motion(as) is the most compatible approach.
-  const MotionComponent = React.useMemo(() => motion(as as any), [as]);
-  const MotionChild = React.useMemo(() => motion(asChild as any), [asChild]);
+
 
   return (
-    <MotionComponent
+    <motion.div
       initial='hidden'
       animate='visible'
       variants={containerVariants}
       className={className}
     >
-      {React.Children.map(children, (child, index) => (
-        <MotionChild key={index} variants={itemVariants}>
+      {Children.map(children, (child, index) => (
+        <motion.div key={index} variants={itemVariants}>
           {child}
-        </MotionChild>
+        </motion.div>
       ))}
-    </MotionComponent>
+    </motion.div>
   );
 }
 

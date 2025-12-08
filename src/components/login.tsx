@@ -4,41 +4,9 @@ import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { AxiosError } from "axios"
 
-/*
-const Login = () => {
-
-  return (
-    <div className="w-full grid grid-cols-2 gap-10 items-center">
-      <div className="grid place-content-center">
-        <div className="text-5xl">Login</div>
-      </div>
-      <div className="space-y-5">
-        <Input
-          name="email"
-          label="Email"
-          onChange={handleInputChange}
-        />
-        <Input
-          name="password"
-          label="Password"
-          type="password"
-          onChange={handleInputChange}
-        />
-        <Button
-          className="my-3"
-          onClick={handleSubmit}
-        >Login</Button>
-      </div>
-    </div>
-  )
-}
-*/
-
-
 import { LogoIcon } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 
 export default function Login() {
@@ -190,7 +158,7 @@ export default function Login() {
 
         <div className="p-3">
           <p className="text-accent-foreground text-center text-sm">
-            Don't have an account ?
+            Don&apos;t have an account ?
             <Button
               asChild
               variant="link"

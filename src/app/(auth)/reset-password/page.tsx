@@ -21,7 +21,7 @@ const ResetPassword = () => {
     if (!token) {
       router.push("/")
     }
-  }, [])
+  })
 
   const onInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const { name, value } = e.target;
@@ -42,7 +42,7 @@ const ResetPassword = () => {
       token,
       password: formData.password
     }
-    
+
     axios.post("/api/auth/reset-password", payload).then(res => {
       alert(res.data?.data)
       router.push("/login")

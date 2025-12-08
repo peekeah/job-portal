@@ -38,7 +38,7 @@ const PostedJobs = () => {
         ) : jobs && jobs?.length > 0 ? (
           <div className="w-full min-h-44 grid grid-cols-2 gap-5">
             {
-              jobs.map((job, index) => {
+              jobs.map((job) => {
                 return (
                   <Card key={job.id}>
                     <CardContent>
@@ -47,7 +47,7 @@ const PostedJobs = () => {
                       <Text className='my-2'>$ {job.ctc}k/year</Text>
                       <Badge className="bg-green-100 text-green-400 my-2 px-3 py-1.5 rounded-full">{job?._count.applied_jobs} applicant{job?._count.applied_jobs > 1 ? "s" : null} </Badge>
                       <Text className='text-neutral-500 space-x-1'>{job.skills_required.map(el => (
-                        <Badge variant={"outline"}>{el}</Badge>
+                        <Badge key={el} variant={"outline"}>{el}</Badge>
                       ))}</Text>
                       <div className='mt-4 space-x-3'>
                         <Button onClick={() => router.push("/dashboard/job/" + job.id)}>View Applicants</Button>
