@@ -52,3 +52,16 @@ export const jobSchema = z.object({
     )
     .min(1, { message: "At least one skill is required" })
 });
+
+export const resumeUploadSchema = z.object({
+  resume_url: z
+    .string()
+    .url("Invalid URL")
+    .min(1, "Resume URL is required"),
+});
+
+export const resumeDeleteSchema = z.object({
+  resume_url: z
+    .string()
+    .url("Invalid URL"),
+});

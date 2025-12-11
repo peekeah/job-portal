@@ -73,6 +73,7 @@ model Applicant {
   college_name         String?
   college_branch       String?
   college_joining_year String?
+  resume_url           String?
 
   appliedJobs AppliedJob[]
 }
