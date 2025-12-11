@@ -37,6 +37,7 @@ const ApplicantsTable = ({ applicants, jobId, type, refetch }: ApplicantTablePro
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Mobile</TableHead>
+            <TableHead>Resume</TableHead>
             {
               type !== "hired" ? <TableHead>Action</TableHead> : null
             }
@@ -54,6 +55,20 @@ const ApplicantsTable = ({ applicants, jobId, type, refetch }: ApplicantTablePro
                   <TableCell>{el.applicant?.name}</TableCell>
                   <TableCell>{el.applicant?.email}</TableCell>
                   <TableCell>{el.applicant?.mobile}</TableCell>
+                  <TableCell>
+                    {el.resume_url_used ? (
+                      <a
+                        href={el.resume_url_used}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline"
+                      >
+                        View resume
+                      </a>
+                    ) : (
+                      <span className="text-gray-500">N/A</span>
+                    )}
+                  </TableCell>
                   {
                     type !== "hired" ?
                       <TableCell className="space-x-3">

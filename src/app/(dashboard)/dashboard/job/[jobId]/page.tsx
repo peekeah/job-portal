@@ -23,6 +23,7 @@ export type Applicants = {
   id: string;
   jobId: string;
   applicant: Applicant;
+  resume_url_used?: string | null;
 }
 
 type ApiResponse = {

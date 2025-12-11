@@ -10,6 +10,8 @@ import { Spinner } from '../ui/spinner';
 import { Heading, Text } from '../ui/typography';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
+import EnhancedPreviewModal from '@/components/enhanced-preview-modal';
+import { useState } from 'react';
 
 export type Job = {
   id: string;
@@ -37,6 +39,10 @@ const Jobs = () => {
   const { data: resData, error, isLoading } = useSWR<Response>('/api/jobs', fetcher)
   const jobs = resData?.data;
 
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewingJobId, setPreviewingJobId] = useState<string | null>(null);
+  const [applying, setApplying] = useState(false);
+
   const handleApplyJob = async (jobId: string) => {
     try {
       const response = await axios.post(`/api/jobs/apply/${jobId}`, {});
@@ -49,6 +55,71 @@ const Jobs = () => {
         alert("something went wrong")
       }
       console.log(err);
+    }
+  }
+
+  const handleEnhanceAndApply = async (jobId: string) => {
+    try {
+      const response = await axios.post(`/api/jobs/apply-enhanced/${jobId}`, { enhance: true });
+      alert("Applied with enhanced resume");
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        alert(err?.response?.data?.error)
+      } else {
+        alert("something went wrong")
+      }
+      console.log(err);
+    }
+  }
+
+  const openPreview = async (jobId: string) => {
+    try {
+      // get current user's resume url
+      const profile = await axios.get('/api/student/profile');
+      const resumeUrl: string | null | undefined = profile?.data?.data?.resume_url;
+      if (!resumeUrl) return alert('Upload your resume first.');
+      if (!resumeUrl.toLowerCase().endsWith('.pdf')) return alert('Preview supports PDF only.');
+
+      const res = await fetch(resumeUrl);
+      if (!res.ok) throw new Error('Failed to fetch resume');
+      const pdfArrayBuffer = await res.arrayBuffer();
+
+      const aiRes = await axios.post('/api/student/process-resume', pdfArrayBuffer, {
+        headers: { 'Content-Type': 'application/pdf' },
+        responseType: 'arraybuffer',
+      });
+
+      const blob = new Blob([aiRes.data], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      setPreviewUrl(url);
+      setPreviewingJobId(jobId);
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        alert(err?.response?.data?.error)
+      } else {
+        alert('Failed to preview enhanced resume');
+      }
+      console.error(err);
+    }
+  }
+
+  const applyWithPreview = async () => {
+    if (!previewingJobId) return;
+    setApplying(true);
+    try {
+      await axios.post(`/api/jobs/apply-enhanced/${previewingJobId}`, { enhance: true });
+      alert('Applied with enhanced resume');
+      setPreviewUrl(null);
+      setPreviewingJobId(null);
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        alert(err?.response?.data?.error)
+      } else {
+        alert('Failed to apply');
+      }
+      console.error(err);
+    } finally {
+      setApplying(false);
     }
   }
 
@@ -91,14 +162,29 @@ const Jobs = () => {
                     <Badge key={el} variant={"outline"}>{el}</Badge>
                   ))}</Text>
                   <div className='mt-4 space-x-3'>
-                    <Button onClick={() => handleApplyJob(job.id)}>Apply</Button>
-                    <Button variant={"outline"}>View Job</Button>
+                  <Button onClick={() => handleApplyJob(job.id)}>Apply</Button>
+                  <Button onClick={() => openPreview(job.id)} variant={"outline"}>
+                  Preview enhanced resume (Mock)
+                  </Button>
+                  <Button onClick={() => handleEnhanceAndApply(job.id)} variant={"outline"}>
+                  Enhance resume (Mock) and apply
+                  </Button>
+                  <Button variant={"outline"}>View Job</Button>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
       }
+
+      {previewUrl && (
+        <EnhancedPreviewModal
+          fileUrl={previewUrl}
+          onApply={applyWithPreview}
+          onClose={() => {setPreviewUrl(null); setPreviewingJobId(null); }}
+          applying={applying}
+        />
+      )}
     </div>
   )
 }

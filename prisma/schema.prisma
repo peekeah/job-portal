@@ -89,7 +89,8 @@ model AppliedJob {
   job   Job    @relation(fields: [jobId], references: [id])
   jobId String
 
-  status JobStatus @default(applied)
+  status          JobStatus @default(applied)
+  resume_url_used String?
 }
 
 // =========================
