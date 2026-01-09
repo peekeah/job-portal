@@ -6,7 +6,7 @@ import { Input } from "../ui/input";
 import axios from "axios";
 import { Card, CardContent } from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Download, Trash2, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import { fetcher } from "@/lib/fetcher";
 import PDFViewer from "../pdf-viewer";
 
@@ -115,9 +115,6 @@ function StudentProfile() {
       // Create FormData for file upload
       const formData = new FormData();
       formData.append("resume", file);
-
-      console.log("rr:", formData)
-      console.log("ff;", file)
 
       // Upload to backend
       const res = await axios.put("/api/student/resume", formData, {

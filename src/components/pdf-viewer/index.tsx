@@ -5,7 +5,6 @@ import "@react-pdf-viewer/core/lib/styles/index.css";
 import { Viewer, Worker } from '@react-pdf-viewer/core';
 import axios from 'axios';
 import { useMemo, useState } from 'react'
-import { Button } from '../ui/button';
 
 const PDFViewer = () => {
     // For now, default to the uploaded resume in public/resumes. In production, pass as prop from profile.
@@ -45,9 +44,6 @@ const PDFViewer = () => {
             <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
                 <Viewer fileUrl={fileUrlToShow} />
             </Worker>
-            <Button onClick={handleProcessPdfWithAI} disabled={aiProcessing} className="mt-4">
-                {aiProcessing ? "Processing..." : "Process with AI (Mock)"}
-            </Button>
         </div>
     );
 }

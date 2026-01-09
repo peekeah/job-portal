@@ -58,20 +58,7 @@ const Jobs = () => {
     }
   }
 
-  const handleEnhanceAndApply = async (jobId: string) => {
-    try {
-      const response = await axios.post(`/api/jobs/apply-enhanced/${jobId}`, { enhance: true });
-      alert("Applied with enhanced resume");
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        alert(err?.response?.data?.error)
-      } else {
-        alert("something went wrong")
-      }
-      console.log(err);
-    }
-  }
-
+  
   const openPreview = async (jobId: string) => {
     try {
       // get current user's resume url
@@ -80,18 +67,8 @@ const Jobs = () => {
       if (!resumeUrl) return alert('Upload your resume first.');
       if (!resumeUrl.toLowerCase().endsWith('.pdf')) return alert('Preview supports PDF only.');
 
-      const res = await fetch(resumeUrl);
-      if (!res.ok) throw new Error('Failed to fetch resume');
-      const pdfArrayBuffer = await res.arrayBuffer();
-
-      const aiRes = await axios.post('/api/student/process-resume', pdfArrayBuffer, {
-        headers: { 'Content-Type': 'application/pdf' },
-        responseType: 'arraybuffer',
-      });
-
-      const blob = new Blob([aiRes.data], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      setPreviewUrl(url);
+      // Use the existing resume URL for initial preview (no blank PDF)
+      setPreviewUrl(resumeUrl);
       setPreviewingJobId(jobId);
     } catch (err) {
       if (err instanceof AxiosError) {
@@ -103,12 +80,12 @@ const Jobs = () => {
     }
   }
 
-  const applyWithPreview = async () => {
+  const applyWithEdits = async () => {
     if (!previewingJobId) return;
     setApplying(true);
     try {
-      await axios.post(`/api/jobs/apply-enhanced/${previewingJobId}`, { enhance: true });
-      alert('Applied with enhanced resume');
+      // await axios.post(`/api/jobs/apply-with-edits/${previewingJobId}`)
+      alert('Applied with edited resume');
       setPreviewUrl(null);
       setPreviewingJobId(null);
     } catch (err) {
@@ -162,14 +139,11 @@ const Jobs = () => {
                     <Badge key={el} variant={"outline"}>{el}</Badge>
                   ))}</Text>
                   <div className='mt-4 space-x-3'>
-                  <Button onClick={() => handleApplyJob(job.id)}>Apply</Button>
-                  <Button onClick={() => openPreview(job.id)} variant={"outline"}>
-                  Preview enhanced resume (Mock)
-                  </Button>
-                  <Button onClick={() => handleEnhanceAndApply(job.id)} variant={"outline"}>
-                  Enhance resume (Mock) and apply
-                  </Button>
-                  <Button variant={"outline"}>View Job</Button>
+                    <Button onClick={() => handleApplyJob(job.id)}>Apply</Button>
+                    <Button onClick={() => openPreview(job.id)} variant={"outline"}>
+                      Enhance resume
+                    </Button>
+                    <Button variant={"outline"}>View Job</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -179,8 +153,7 @@ const Jobs = () => {
 
       {previewUrl && (
         <EnhancedPreviewModal
-          fileUrl={previewUrl}
-          onApply={applyWithPreview}
+          onApply={applyWithEdits}
           onClose={() => {setPreviewUrl(null); setPreviewingJobId(null); }}
           applying={applying}
         />
