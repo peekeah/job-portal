@@ -36,24 +36,20 @@ export async function POST(
     const job = await prisma.job.findUnique({ where: { id: jobId } });
     if (!job) throw new CustomError("Job not found", 404);
 
-    // Determine resume to use
     const fileFsPath = path.join(process.cwd(), "public", applicant.resume_url);
-    console.log("fox:", fileFsPath)
 
     if (!applicant.resume_url.toLowerCase().endsWith(".pdf")) {
       throw new CustomError("Enhancement supports PDF resumes only.", 400);
     }
 
     const pdfContent = await readPdf(fileFsPath);
-    console.log("pdfcontent:", pdfContent)
 
     // Resume parser: Parse the resume & exctract the content
     const lines = groupTextItemsIntoLines(pdfContent);
     const sections = groupLinesIntoSections(lines);
     const resume = extractResumeFromSections(sections);
-    console.log("resume:", resume);
 
-    // Mock process API to enhance PDF
+    // #TODO: Make AI call for enhancement
 
     return NextResponse.json({ status: true, data: resume });
   } catch (err) {

@@ -39,9 +39,8 @@ const Jobs = () => {
   const { data: resData, error, isLoading } = useSWR<Response>('/api/jobs', fetcher)
   const jobs = resData?.data;
 
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [previewingJobId, setPreviewingJobId] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
+  const [enahncePreviewJobId, setEnahancePreviewJobId] = useState<string>("")
 
   const handleApplyJob = async (jobId: string) => {
     try {
@@ -58,36 +57,13 @@ const Jobs = () => {
     }
   }
 
-  
-  const openPreview = async (jobId: string) => {
-    try {
-      // get current user's resume url
-      const profile = await axios.get('/api/student/profile');
-      const resumeUrl: string | null | undefined = profile?.data?.data?.resume_url;
-      if (!resumeUrl) return alert('Upload your resume first.');
-      if (!resumeUrl.toLowerCase().endsWith('.pdf')) return alert('Preview supports PDF only.');
-
-      // Use the existing resume URL for initial preview (no blank PDF)
-      setPreviewUrl(resumeUrl);
-      setPreviewingJobId(jobId);
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        alert(err?.response?.data?.error)
-      } else {
-        alert('Failed to preview enhanced resume');
-      }
-      console.error(err);
-    }
-  }
-
   const applyWithEdits = async () => {
-    if (!previewingJobId) return;
+    if (!enahncePreviewJobId) return;
     setApplying(true);
     try {
       // await axios.post(`/api/jobs/apply-with-edits/${previewingJobId}`)
       alert('Applied with edited resume');
-      setPreviewUrl(null);
-      setPreviewingJobId(null);
+      setEnahancePreviewJobId("");
     } catch (err) {
       if (err instanceof AxiosError) {
         alert(err?.response?.data?.error)
@@ -140,7 +116,7 @@ const Jobs = () => {
                   ))}</Text>
                   <div className='mt-4 space-x-3'>
                     <Button onClick={() => handleApplyJob(job.id)}>Apply</Button>
-                    <Button onClick={() => openPreview(job.id)} variant={"outline"}>
+                    <Button onClick={() => setEnahancePreviewJobId(job.id)} variant={"outline"}>
                       Enhance resume
                     </Button>
                     <Button variant={"outline"}>View Job</Button>
@@ -151,10 +127,11 @@ const Jobs = () => {
           </div>
       }
 
-      {previewUrl && (
+      {enahncePreviewJobId && (
         <EnhancedPreviewModal
+          jobId={enahncePreviewJobId}
           onApply={applyWithEdits}
-          onClose={() => {setPreviewUrl(null); setPreviewingJobId(null); }}
+          onClose={() => {setEnahancePreviewJobId(""); }}
           applying={applying}
         />
       )}
