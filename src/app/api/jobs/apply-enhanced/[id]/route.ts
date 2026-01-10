@@ -8,6 +8,9 @@ import { groupLinesIntoSections } from "@/lib/resume-parser/group-lines-into-sec
 import { extractResumeFromSections } from "@/lib/resume-parser/extract-resume-from-sections";
 import { readPdf } from "@/lib/resume-parser/read-pdf";
 import path from "node:path";
+import { callLLm } from "@/lib/ai";
+import { getResumeBuilderPrompt } from "@/constant/ai-prompts";
+import { initialResume, Resume } from "@/mock/resume";
 
 export async function POST(
   req: NextRequest,
@@ -49,9 +52,25 @@ export async function POST(
     const sections = groupLinesIntoSections(lines);
     const resume = extractResumeFromSections(sections);
 
-    // #TODO: Make AI call for enhancement
+    const profile = { ...resume.profile }
+    resume.profile = { ...initialResume.profile }
+    resume.profile.summary = profile.summary
 
-    return NextResponse.json({ status: true, data: resume });
+    const llmInput = getResumeBuilderPrompt(JSON.stringify(resume), job.description)
+
+    // #TODO: Make AI call for enhancement
+    const response = await callLLm(llmInput)
+    let output = response.output[0].content[0].text;
+    output = output.replace("```json", "").replace("```", "")
+
+    const enhancedResume = JSON.parse(output) as Resume
+    enhancedResume.profile.name = profile.name
+    enhancedResume.profile.email = profile.email
+    enhancedResume.profile.phone = profile.phone
+    enhancedResume.profile.url = profile.url
+    enhancedResume.profile.location = profile.location
+
+    return NextResponse.json({ status: true, data: enhancedResume });
   } catch (err) {
     console.log("ee:", err)
     const [resBody, status] = errorHandler(err);

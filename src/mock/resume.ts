@@ -1,14 +1,60 @@
 import { Resume as ResumeOriginal } from "@/lib/resume-parser/types";
 
 type FeaturedSkill = {
-    skill: string;
+  skill: string;
 }
 
 export type Resume = Omit<ResumeOriginal, "skills"> & {
-    skills: {
-        featuredSkills: FeaturedSkill[]
-        descriptions: string[]
+  skills: {
+    featuredSkills: FeaturedSkill[]
+    descriptions: string[]
+  }
+}
+
+export const initialResume: Resume = {
+  "profile": {
+    "name": "",
+    "email": "",
+    "phone": "",
+    "url": "",
+    "summary": "",
+    "location": ""
+  },
+  "workExperiences": [
+    {
+      "company": "",
+      "jobTitle": "",
+      "date": "",
+      "descriptions": []
     }
+  ],
+  "educations": [
+    {
+      "school": "",
+      "degree": "",
+      "date": "",
+      "gpa": "",
+      "descriptions": []
+    }
+  ],
+  "projects": [
+    {
+      "project": "",
+      "date": "",
+      "descriptions": []
+    }
+  ],
+  "skills": {
+    "featuredSkills": [
+      {
+        "skill": ""
+      }
+    ],
+    "descriptions": []
+  },
+  "custom": {
+    "descriptions": []
+  }
 }
 
 export const resumeMock: Resume = {

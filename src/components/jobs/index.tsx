@@ -2,6 +2,7 @@
 
 import axios, { AxiosError } from 'axios';
 import useSWR from 'swr';
+import useSWRMutation from 'swr/mutation'
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -34,6 +35,11 @@ export type Response = {
   data: Job[]
 }
 
+const fetchEnhanceResume = async (url: string, { arg }: { arg: { jobId: string } }) => {
+  const res = await axios.post(url + arg.jobId)
+  return res.data
+}
+
 const Jobs = () => {
 
   const { data: resData, error, isLoading } = useSWR<Response>('/api/jobs', fetcher)
@@ -41,6 +47,10 @@ const Jobs = () => {
 
   const [applying, setApplying] = useState(false);
   const [enahncePreviewJobId, setEnahancePreviewJobId] = useState<string>("")
+
+  const { data: enhanceResumeData, trigger: handleEnhanceResume, isMutating } = useSWRMutation("/api/jobs/apply-enhanced/", fetchEnhanceResume)
+
+  console.log("ff:", enhanceResumeData?.data)
 
   const handleApplyJob = async (jobId: string) => {
     try {
@@ -57,11 +67,11 @@ const Jobs = () => {
     }
   }
 
+
   const applyWithEdits = async () => {
     if (!enahncePreviewJobId) return;
     setApplying(true);
     try {
-      // await axios.post(`/api/jobs/apply-with-edits/${previewingJobId}`)
       alert('Applied with edited resume');
       setEnahancePreviewJobId("");
     } catch (err) {
@@ -116,7 +126,7 @@ const Jobs = () => {
                   ))}</Text>
                   <div className='mt-4 space-x-3'>
                     <Button onClick={() => handleApplyJob(job.id)}>Apply</Button>
-                    <Button onClick={() => setEnahancePreviewJobId(job.id)} variant={"outline"}>
+                    <Button onClick={() => { setEnahancePreviewJobId(job.id); handleEnhanceResume({ jobId: job.id }); }} variant={"outline"}>
                       Enhance resume
                     </Button>
                     <Button variant={"outline"}>View Job</Button>
@@ -127,14 +137,18 @@ const Jobs = () => {
           </div>
       }
 
-      {enahncePreviewJobId && (
-        <EnhancedPreviewModal
-          jobId={enahncePreviewJobId}
-          onApply={applyWithEdits}
-          onClose={() => {setEnahancePreviewJobId(""); }}
-          applying={applying}
-        />
-      )}
+      {
+        enahncePreviewJobId && (
+          <EnhancedPreviewModal
+            jobId={enahncePreviewJobId}
+            resume={enhanceResumeData?.data}
+            isLoading={isMutating}
+            onApply={applyWithEdits}
+            onClose={() => { setEnahancePreviewJobId(""); }}
+            applying={applying}
+          />
+        )
+      }
     </div>
   )
 }
