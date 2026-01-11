@@ -30,6 +30,11 @@ enum JobStatus {
   hired
 }
 
+enum ResumeType {
+  pdf
+  json
+}
+
 // =========================
 // USER MODEL
 // =========================
@@ -73,9 +78,22 @@ model Applicant {
   college_name         String?
   college_branch       String?
   college_joining_year String?
-  resume_url           String?
 
+  resume      Resume[]
   appliedJobs AppliedJob[]
+}
+
+// =========================
+// RESUME MODEL
+// =========================
+model Resume {
+  id           String     @id @default(uuid())
+  title        String
+  type         ResumeType @default(pdf)
+  url          String?
+  json         Json?
+  applicant    Applicant  @relation(fields: [applicant_id], references: [id])
+  applicant_id String
 }
 
 // =========================

@@ -10,6 +10,14 @@ import { Upload } from "lucide-react";
 import { fetcher } from "@/lib/fetcher";
 import PDFViewer from "../pdf-viewer";
 
+type Resume = {
+  id: string;
+  title: string;
+  type: "pdf" | "url";
+  url: string;
+  applicant_id: string;
+}
+
 type Profile = {
   id: string;
   name: string;
@@ -19,7 +27,7 @@ type Profile = {
   college_name: string;
   college_branch: string;
   college_joining_year: string;
-  resume_url?: string | null;
+  resume: Resume[]
   applied_jobs: {
     [key: string]: unknown;
   }[];
@@ -34,16 +42,14 @@ const initialProfile: Profile = {
   college_name: "",
   college_branch: "",
   college_joining_year: "",
-  resume_url: null,
+  resume: [],
   applied_jobs: [],
 };
 
 
 function StudentProfile() {
-  const [showPdf, setShowPdf] = useState(false);
-  const [numPages, setNumPages] = useState<number>(1);
 
-
+  const [selectResumeToDisplay, setSelectResumeToDisplay] = useState<Resume | null>(null)
 
   const { data, isLoading, mutate } = useSWR<{ data: Profile }>("/api/student/profile", fetcher)
   const userData = data?.data;
@@ -117,7 +123,7 @@ function StudentProfile() {
       formData.append("resume", file);
 
       // Upload to backend
-      const res = await axios.put("/api/student/resume", formData, {
+      const res = await axios.post("/api/student/resume", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -137,13 +143,10 @@ function StudentProfile() {
     }
   };
 
-  const handleResumeDelete = async () => {
-    if (!formData.resume_url) return;
-
-    if (!confirm("Are you sure you want to delete your resume?")) return;
+  const handleResumeDelete = async (resumeId: string) => {
 
     try {
-      const res = await axios.delete("/api/student/resume");
+      const res = await axios.delete("/api/student/resume/" + resumeId)
 
       if (!res?.data?.status) {
         throw new Error(res?.data?.error || "Failed to delete resume");
@@ -237,63 +240,72 @@ function StudentProfile() {
                 <div className="md:col-span-2 border-t pt-5 mt-5">
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Resume</h3>
-
-                    {formData?.resume_url ? (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Resume uploaded
-                            </p>
-                          </div>
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => setShowPdf((v) => !v)}
-                          >
-                            {showPdf ? "Hide PDF" : "View PDF"}
-                          </Button>
-                        </div>
-
-                        {showPdf && <PDFViewer />}
-                        <Button
-                          onClick={handleResumeDelete}
-                          variant="destructive"
-                          size="sm"
-                          className="gap-2"
-                        >
-                          Delete Resume
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        <label className="relative flex items-center justify-center w-full p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 transition">
-                          <input
-                            type="file"
-                            accept=".pdf,.doc,.docx"
-                            onChange={handleResumeUpload}
-                            disabled={isUploadingResume}
-                            className="hidden"
-                          />
-                          <div className="text-center space-y-2">
-                            <Upload className="size-8 mx-auto text-gray-400" />
-                            <div>
-                              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Click to upload resume
-                              </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                PDF or Word documents (Max 5MB)
-                              </p>
-                            </div>
-                          </div>
-                        </label>
-                        {isUploadingResume && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Uploading...
+                    <label className="relative flex items-center justify-center w-full p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 transition">
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={handleResumeUpload}
+                        disabled={isUploadingResume}
+                        className="hidden"
+                      />
+                      <div className="text-center space-y-2">
+                        <Upload className="size-8 mx-auto text-gray-400" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Click to upload resume
                           </p>
-                        )}
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            PDF or Word documents (Max 5MB)
+                          </p>
+                        </div>
                       </div>
-                    )}
+                    </label>
+
+                    {formData?.resume.length ? (
+                      <>
+                        {
+                          formData.resume.map(el => (
+                            <div key={el.id} className="space-y-3">
+                              <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    {el.title}
+                                  </p>
+                                </div>
+                                {
+                                  selectResumeToDisplay ?
+                                    <Button
+                                      variant="secondary"
+                                      size="sm"
+                                      onClick={() => setSelectResumeToDisplay(null)}
+                                    > Hide PDF</Button>
+                                    :
+                                    <Button
+                                      variant="secondary"
+                                      size="sm"
+                                      onClick={() => setSelectResumeToDisplay(el)}
+                                    >Show PDF</Button>
+                                }
+                                <Button
+                                  onClick={() => handleResumeDelete(el.id)}
+                                  variant="destructive"
+                                  size="sm"
+                                  className="gap-2"
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                        }
+                      </>
+                    ) : null}
+
+                    {selectResumeToDisplay &&
+                      <PDFViewer
+                        resumeUrl={selectResumeToDisplay.url}
+                        onClose={() => setSelectResumeToDisplay(null)}
+                      />}
                   </div>
                 </div>
               </div>

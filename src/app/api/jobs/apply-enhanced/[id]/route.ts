@@ -24,28 +24,28 @@ export async function POST(
 
     const applicant = await prisma.applicant.findUnique({
       where: { email: token.email },
+      include: { resume: true }
     });
     if (!applicant) throw new CustomError("Applicant not found", 404);
-
-    // Validate existing resume
-    if (!applicant.resume_url) {
-      throw new CustomError(
-        "No resume uploaded. Please upload a resume first.",
-        400
-      );
-    }
 
     // Validate job exists
     const job = await prisma.job.findUnique({ where: { id: jobId } });
     if (!job) throw new CustomError("Job not found", 404);
 
-    const fileFsPath = path.join(process.cwd(), "public", applicant.resume_url);
+    const existResume = await prisma.resume.findFirst({
+      where: {
+        type: "pdf",
+        applicant_id: applicant.id
+      }
+    })
 
-    if (!applicant.resume_url.toLowerCase().endsWith(".pdf")) {
-      throw new CustomError("Enhancement supports PDF resumes only.", 400);
+    if (!existResume?.url) {
+      throw new CustomError("Resume is not upload, upload the resume first", 403)
     }
 
-    const pdfContent = await readPdf(fileFsPath);
+    const resumeUrl = path.join(process.cwd(), "public", existResume.url)
+
+    const pdfContent = await readPdf(resumeUrl);
 
     // Resume parser: Parse the resume & exctract the content
     const lines = groupTextItemsIntoLines(pdfContent);
@@ -59,7 +59,7 @@ export async function POST(
     const llmInput = getResumeBuilderPrompt(JSON.stringify(resume), job.description)
 
     // #TODO: Make AI call for enhancement
-    const response = await callLLm(llmInput)
+    const response = await callLLm(llmInput, "gpt-5.2")
     let output = response.output[0].content[0].text;
     output = output.replace("```json", "").replace("```", "")
 
@@ -69,6 +69,16 @@ export async function POST(
     enhancedResume.profile.phone = profile.phone
     enhancedResume.profile.url = profile.url
     enhancedResume.profile.location = profile.location
+
+    // Save in the DB
+    await prisma.resume.create({
+      data: {
+        title: "some-title",
+        type: "json",
+        json: JSON.stringify(resume),
+        applicant_id: applicant.id,
+      }
+    })
 
     return NextResponse.json({ status: true, data: enhancedResume });
   } catch (err) {

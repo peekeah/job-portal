@@ -5,7 +5,7 @@ import { errorHandler, CustomError } from "@/lib/errorHandler";
 import { authMiddleware } from "@/lib/token";
 import { prisma } from "@/lib/db";
 
-async function putResume(req: NextRequest) {
+async function postResume(req: NextRequest) {
   try {
 
     const token = await authMiddleware(req, "applicant");
@@ -39,17 +39,15 @@ async function putResume(req: NextRequest) {
       where: { email: token.email },
     });
 
-    console.log("s:", student)
-
     if (!student) {
       throw new CustomError("Student not found", 404);
     }
 
     // Generate unique filename
     const filename = `${student.id}-${Date.now()}-${file.name}`;
-    const uploadDir = path.join(process.cwd(), "public", "resumes");
+    const uploadDir = path.join(process.cwd(), "public/resumes");
     const filepath = path.join(uploadDir, filename);
-    const publicPath = `/resumes/${filename}`;
+    const publicUrl = path.join("/resumes", filename)
 
     // Create directory if it doesn't exist
     try {
@@ -63,13 +61,17 @@ async function putResume(req: NextRequest) {
     await writeFile(filepath, Buffer.from(bytes));
 
     // Update database
-    const updated = await prisma.applicant.update({
-      where: { email: token.email },
-      data: { resume_url: publicPath },
-    });
+    const newResume = await prisma.resume.create({
+      data: {
+        title: filename,
+        type: "pdf",
+        url: publicUrl,
+        applicant_id: student.id
+      }
+    })
 
     return NextResponse.json(
-      { status: true, data: updated },
+      { status: true, data: newResume },
       { status: 200 }
     );
   } catch (err) {
@@ -78,25 +80,4 @@ async function putResume(req: NextRequest) {
   }
 }
 
-async function deleteResume(req: NextRequest) {
-  try {
-    const token = await authMiddleware(req, "applicant");
-
-    const updated = await prisma.applicant.update({
-      where: {
-        email: token.email,
-      },
-      data: {
-        resume_url: null,
-      },
-    });
-
-    return NextResponse.json({ status: true, data: updated }, { status: 200 });
-  } catch (err) {
-    const [res, status] = errorHandler(err);
-    return NextResponse.json(res, status);
-  }
-}
-
-export const PUT = putResume;
-export const DELETE = deleteResume;
+export const POST = postResume;

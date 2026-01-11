@@ -13,6 +13,9 @@ async function getProfile(req: NextRequest) {
     const studentData = await prisma.applicant.findUnique({
       where: {
         email: token?.email
+      },
+      include: {
+        resume: true
       }
     });
 
@@ -23,7 +26,6 @@ async function getProfile(req: NextRequest) {
     const [res, status] = errorHandler(err);
     return NextResponse.json(res, status)
   }
-
 }
 
 async function postProfile(req: NextRequest) {
@@ -31,6 +33,7 @@ async function postProfile(req: NextRequest) {
     const token = await authMiddleware(req, "applicant")
 
     const body = await req.json()
+    const { resume, ...profile } = body
 
     if (body.password) {
       body.password = await hashPassword(body.password);
@@ -40,7 +43,7 @@ async function postProfile(req: NextRequest) {
       where: {
         email: token.email
       },
-      data: body
+      data: profile
     });
 
     return NextResponse.json({ status: true, data: updated });

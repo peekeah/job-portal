@@ -50,8 +50,6 @@ const Jobs = () => {
 
   const { data: enhanceResumeData, trigger: handleEnhanceResume, isMutating } = useSWRMutation("/api/jobs/apply-enhanced/", fetchEnhanceResume)
 
-  console.log("ff:", enhanceResumeData?.data)
-
   const handleApplyJob = async (jobId: string) => {
     try {
       const response = await axios.post(`/api/jobs/apply/${jobId}`, {});
@@ -67,11 +65,11 @@ const Jobs = () => {
     }
   }
 
-
   const applyWithEdits = async () => {
     if (!enahncePreviewJobId) return;
     setApplying(true);
     try {
+      // Add API call
       alert('Applied with edited resume');
       setEnahancePreviewJobId("");
     } catch (err) {
