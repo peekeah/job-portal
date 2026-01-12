@@ -1,56 +1,93 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server";
 
 import { errorHandler, CustomError } from "@/lib/errorHandler";
-import { authMiddleware } from "@/lib/token"
+import { authMiddleware } from "@/lib/token";
 import { prisma } from "@/lib/db";
+import z from "zod";
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+const payloadSchema = z.object({
+  resumeId: z.string().optional(),
+});
 
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id: jobId } = await params
+    const { id: jobId } = await params;
 
     if (!jobId) throw new CustomError("Job id missing", 400);
 
     const token = await authMiddleware(req, "applicant");
 
+    const rawPayload = await req.json();
+    const payload = payloadSchema.parse(rawPayload);
+
     const studentData = await prisma.applicant.findUnique({
       where: {
-        email: token.email
-      }
-    })
+        email: token.email,
+      },
+    });
 
     if (!studentData) {
-      throw new CustomError("student not found", 403)
+      throw new CustomError("student not found", 403);
     }
 
     if (!studentData?.id) throw new CustomError("Student data missing", 400);
 
-
     const job = await prisma.appliedJob.findFirst({
       where: {
-        jobId
-      }
-    })
+        jobId,
+      },
+    });
 
     if (job?.status === "applied") {
       throw new CustomError("You already applied for this job", 403);
+    }
+
+    let resumeId: string;
+
+    if (!payload.resumeId) {
+      const dbRes = await prisma.resume.findFirst({
+        where: {
+          type: "pdf",
+        },
+      });
+
+      if (!dbRes) {
+        throw new CustomError("upload resume first", 400);
+      }
+
+      resumeId = dbRes.id;
+    } else {
+      const dbRes = await prisma.resume.findFirst({
+        where: { id: payload.resumeId },
+      });
+
+      if (!dbRes) {
+        throw new CustomError("resume not found", 403);
+      }
+
+      resumeId = dbRes.id;
     }
 
     await prisma.appliedJob.updateMany({
       where: {
         applicant_id: studentData.id,
         jobId: jobId,
+        applied_resume_id: resumeId,
       },
       data: {
         status: "applied",
       },
-    })
+    });
 
-    return NextResponse.json({ status: true, data: "successfully applied for the job" });
+    return NextResponse.json({
+      status: true,
+      data: "successfully applied for the job",
+    });
   } catch (err) {
     const [res, status] = errorHandler(err);
-    return NextResponse.json(res, status)
+    return NextResponse.json(res, status);
   }
 }
-
-

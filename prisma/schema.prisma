@@ -94,6 +94,8 @@ model Resume {
   json         Json?
   applicant    Applicant  @relation(fields: [applicant_id], references: [id])
   applicant_id String
+
+  appliedJobs  AppliedJob[]
 }
 
 // =========================
@@ -107,8 +109,12 @@ model AppliedJob {
   job   Job    @relation(fields: [jobId], references: [id])
   jobId String
 
+  resume              Resume @relation(fields: [applied_resume_id], references: [id])
+  applied_resume_id   String
+
   status          JobStatus @default(applied)
   resume_url_used String?
+
 }
 
 // =========================

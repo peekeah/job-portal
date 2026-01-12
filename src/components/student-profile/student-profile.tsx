@@ -8,15 +8,11 @@ import { Card, CardContent } from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Upload } from "lucide-react";
 import { fetcher } from "@/lib/fetcher";
-import PDFViewer from "../pdf-viewer";
 
-type Resume = {
-  id: string;
-  title: string;
-  type: "pdf" | "url";
-  url: string;
-  applicant_id: string;
-}
+import { Resume } from "@prisma/client"
+import ResumeViewer from "../resume-viewer";
+import { Dialog } from "@radix-ui/react-dialog";
+import { DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
 type Profile = {
   id: string;
@@ -273,18 +269,12 @@ function StudentProfile() {
                                   </p>
                                 </div>
                                 {
-                                  selectResumeToDisplay ?
-                                    <Button
-                                      variant="secondary"
-                                      size="sm"
-                                      onClick={() => setSelectResumeToDisplay(null)}
-                                    > Hide PDF</Button>
-                                    :
+                                  !selectResumeToDisplay ?
                                     <Button
                                       variant="secondary"
                                       size="sm"
                                       onClick={() => setSelectResumeToDisplay(el)}
-                                    >Show PDF</Button>
+                                    >Show PDF</Button> : null
                                 }
                                 <Button
                                   onClick={() => handleResumeDelete(el.id)}
@@ -302,10 +292,21 @@ function StudentProfile() {
                     ) : null}
 
                     {selectResumeToDisplay &&
-                      <PDFViewer
-                        resumeUrl={selectResumeToDisplay.url}
-                        onClose={() => setSelectResumeToDisplay(null)}
-                      />}
+                      <Dialog
+                        open={true}
+                        onOpenChange={
+                          () => setSelectResumeToDisplay(null)
+                        }>
+                        <DialogContent className="min-w-4xl max-h-[90vh]">
+                          <DialogHeader className="hidden">
+                            <DialogTitle>title</DialogTitle>
+                          </DialogHeader>
+                          <ResumeViewer
+                            resume={selectResumeToDisplay}
+                          />
+                        </DialogContent>
+                      </Dialog>
+                    }
                   </div>
                 </div>
               </div>

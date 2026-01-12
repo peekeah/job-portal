@@ -1,12 +1,12 @@
-// ResumeTemplate.tsx
+"use client";
+import "@react-pdf-viewer/default-layout/lib/styles/index.css";
+import "@react-pdf-viewer/core/lib/styles/index.css";
+
+import { Viewer, Worker } from '@react-pdf-viewer/core';
+import { Resume as ResumeResponse } from "@prisma/client";
 import { Resume } from "@/mock/resume";
-import React from "react";
 
-interface Props {
-  data: Resume;
-}
-
-const ResumeViewer: React.FC<Props> = ({ data }) => {
+const JsonViewer: React.FC<{ data: Resume }> = ({ data }) => {
   const {
     profile,
     workExperiences,
@@ -143,4 +143,37 @@ const ResumeViewer: React.FC<Props> = ({ data }) => {
   );
 };
 
-export default ResumeViewer;
+type Props = {
+  resume: ResumeResponse;
+  onClose?: () => void;
+}
+
+const ResumeViewer = ({ resume, onClose }: Props) => {
+  let resumeJson;
+  if (resume.json) {
+    const rawResume = resume.json as string;
+    resumeJson = JSON.parse(rawResume)
+  }
+
+  return (
+    <>
+      {
+        resume.type === "pdf" && resume.url ?
+          <div className="relative border rounded-lg bg-white dark:bg-gray-900" style={{ height: '750px' }}>
+            {!!onClose ?
+              <button
+                onClick={onClose}
+                className="cursor-pointer absolute z-10 top-0 right-8">X
+              </button> : null
+            }
+            <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+              <Viewer fileUrl={resume.url} />
+            </Worker>
+          </div> :
+          <JsonViewer data={resumeJson} />
+      }
+    </>
+  );
+}
+
+export default ResumeViewer 

@@ -24,7 +24,7 @@ export async function POST(
 
     const applicant = await prisma.applicant.findUnique({
       where: { email: token.email },
-      include: { resume: true }
+      include: { resume: true },
     });
     if (!applicant) throw new CustomError("Applicant not found", 404);
 
@@ -35,15 +35,18 @@ export async function POST(
     const existResume = await prisma.resume.findFirst({
       where: {
         type: "pdf",
-        applicant_id: applicant.id
-      }
-    })
+        applicant_id: applicant.id,
+      },
+    });
 
     if (!existResume?.url) {
-      throw new CustomError("Resume is not upload, upload the resume first", 403)
+      throw new CustomError(
+        "Resume is not uploaded, upload the resume first",
+        403
+      );
     }
 
-    const resumeUrl = path.join(process.cwd(), "public", existResume.url)
+    const resumeUrl = path.join(process.cwd(), "public", existResume.url);
 
     const pdfContent = await readPdf(resumeUrl);
 
@@ -52,37 +55,42 @@ export async function POST(
     const sections = groupLinesIntoSections(lines);
     const resume = extractResumeFromSections(sections);
 
-    const profile = { ...resume.profile }
-    resume.profile = { ...initialResume.profile }
-    resume.profile.summary = profile.summary
+    const profile = { ...resume.profile };
+    resume.profile = { ...initialResume.profile };
+    resume.profile.summary = profile.summary;
 
-    const llmInput = getResumeBuilderPrompt(JSON.stringify(resume), job.description)
+    const llmInput = getResumeBuilderPrompt(
+      JSON.stringify(resume),
+      job.description
+    );
 
     // #TODO: Make AI call for enhancement
-    const response = await callLLm(llmInput, "gpt-5.2")
+    const response = await callLLm(llmInput, "gpt-5.2");
     let output = response.output[0].content[0].text;
-    output = output.replace("```json", "").replace("```", "")
+    output = output.replace("```json", "").replace("```", "");
 
-    const enhancedResume = JSON.parse(output) as Resume
-    enhancedResume.profile.name = profile.name
-    enhancedResume.profile.email = profile.email
-    enhancedResume.profile.phone = profile.phone
-    enhancedResume.profile.url = profile.url
-    enhancedResume.profile.location = profile.location
+    const enhancedResume = JSON.parse(output) as Resume;
+    enhancedResume.profile.name = profile.name;
+    enhancedResume.profile.email = profile.email;
+    enhancedResume.profile.phone = profile.phone;
+    enhancedResume.profile.url = profile.url;
+    enhancedResume.profile.location = profile.location;
+
+    const resumeTitle = existResume.title.replace(".pdf", "") + Date.now();
 
     // Save in the DB
-    await prisma.resume.create({
+    const dbRes = await prisma.resume.create({
       data: {
-        title: "some-title",
+        title: resumeTitle,
         type: "json",
-        json: JSON.stringify(resume),
+        json: JSON.stringify(enhancedResume),
         applicant_id: applicant.id,
-      }
-    })
+      },
+    });
 
-    return NextResponse.json({ status: true, data: enhancedResume });
+    return NextResponse.json({ status: true, data: dbRes });
   } catch (err) {
-    console.log("ee:", err)
+    console.log("ee:", err);
     const [resBody, status] = errorHandler(err);
     return NextResponse.json(resBody, status);
   }

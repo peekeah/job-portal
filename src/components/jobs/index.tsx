@@ -2,7 +2,6 @@
 
 import axios, { AxiosError } from 'axios';
 import useSWR from 'swr';
-import useSWRMutation from 'swr/mutation'
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import EnhancedPreviewModal from '@/components/enhanced-preview-modal';
 import { useState } from 'react';
+import useSWRMutation from 'swr/mutation';
 
 export type Job = {
   id: string;
@@ -35,53 +35,39 @@ export type Response = {
   data: Job[]
 }
 
-const fetchEnhanceResume = async (url: string, { arg }: { arg: { jobId: string } }) => {
-  const res = await axios.post(url + arg.jobId)
-  return res.data
+type ApplyJobPaylod = {
+  jobId: string;
+  resumeId?: string;
+}
+
+const applyJobApiCall = async (url: string, { arg: { jobId, resumeId } }: { arg: ApplyJobPaylod }) => {
+  try {
+    const payload = resumeId ? { resumeId } : {}
+    const response = await axios.post(url + jobId, payload);
+    alert(response.data.data);
+    return response.data
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      alert(err?.response?.data?.error)
+    } else {
+      alert("something went wrong")
+    }
+    console.log(err);
+  }
 }
 
 const Jobs = () => {
 
+  const { data: appliedRes, trigger: handleApplyJob, isMutating: applying } = useSWRMutation(`/api/jobs/apply/`, applyJobApiCall)
   const { data: resData, error, isLoading } = useSWR<Response>('/api/jobs', fetcher)
   const jobs = resData?.data;
 
-  const [applying, setApplying] = useState(false);
   const [enahncePreviewJobId, setEnahancePreviewJobId] = useState<string>("")
 
-  const { data: enhanceResumeData, trigger: handleEnhanceResume, isMutating } = useSWRMutation("/api/jobs/apply-enhanced/", fetchEnhanceResume)
-
-  const handleApplyJob = async (jobId: string) => {
-    try {
-      const response = await axios.post(`/api/jobs/apply/${jobId}`, {});
-      alert(response.data.data);
-
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        alert(err?.response?.data?.error)
-      } else {
-        alert("something went wrong")
-      }
-      console.log(err);
-    }
-  }
-
-  const applyWithEdits = async () => {
+  const applyWithEdits = async (jobId: string, resumeId: string) => {
     if (!enahncePreviewJobId) return;
-    setApplying(true);
-    try {
-      // Add API call
-      alert('Applied with edited resume');
-      setEnahancePreviewJobId("");
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        alert(err?.response?.data?.error)
-      } else {
-        alert('Failed to apply');
-      }
-      console.error(err);
-    } finally {
-      setApplying(false);
-    }
+    handleApplyJob({ jobId, resumeId })
+    setEnahancePreviewJobId("");
   }
 
   if (error) {
@@ -123,9 +109,9 @@ const Jobs = () => {
                     <Badge key={el} variant={"outline"}>{el}</Badge>
                   ))}</Text>
                   <div className='mt-4 space-x-3'>
-                    <Button onClick={() => handleApplyJob(job.id)}>Apply</Button>
-                    <Button onClick={() => { setEnahancePreviewJobId(job.id); handleEnhanceResume({ jobId: job.id }); }} variant={"outline"}>
-                      Enhance resume
+                    <Button onClick={() => handleApplyJob({ jobId: job.id })}>Apply</Button>
+                    <Button onClick={() => { setEnahancePreviewJobId(job.id) }} variant={"outline"}>
+                      Enhance & apply
                     </Button>
                     <Button variant={"outline"}>View Job</Button>
                   </div>
@@ -139,11 +125,9 @@ const Jobs = () => {
         enahncePreviewJobId && (
           <EnhancedPreviewModal
             jobId={enahncePreviewJobId}
-            resume={enhanceResumeData?.data}
-            isLoading={isMutating}
-            onApply={applyWithEdits}
-            onClose={() => { setEnahancePreviewJobId(""); }}
             applying={applying}
+            onApplyAction={applyWithEdits}
+            onCloseAction={() => { setEnahancePreviewJobId(""); }}
           />
         )
       }
@@ -152,3 +136,4 @@ const Jobs = () => {
 }
 
 export default Jobs 
+
