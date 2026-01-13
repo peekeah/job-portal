@@ -48,7 +48,7 @@ const applyJobApiCall = async (url: string, { arg: { jobId, resumeId } }: { arg:
     return response.data
   } catch (err) {
     if (err instanceof AxiosError) {
-      alert(err?.response?.data?.error)
+      alert(err?.response?.data?.message)
     } else {
       alert("something went wrong")
     }
@@ -66,7 +66,7 @@ const Jobs = () => {
 
   const applyWithEdits = async (jobId: string, resumeId: string) => {
     if (!enahncePreviewJobId) return;
-    handleApplyJob({ jobId, resumeId })
+    await handleApplyJob({ jobId, resumeId })
     setEnahancePreviewJobId("");
   }
 

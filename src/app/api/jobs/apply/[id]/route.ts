@@ -35,13 +35,24 @@ export async function POST(
 
     if (!studentData?.id) throw new CustomError("Student data missing", 400);
 
-    const job = await prisma.appliedJob.findFirst({
+    const existJob = await prisma.job.findFirst({
       where: {
-        jobId,
+        id: jobId,
       },
     });
 
-    if (job?.status === "applied") {
+    if(!existJob){
+      throw new CustomError("Job not found", 403);
+    }
+
+    const appliedJob = await prisma.appliedJob.findFirst({
+      where: {
+        jobId: jobId,
+        applicant_id: studentData.id,
+      },
+    });
+
+    if (appliedJob) {
       throw new CustomError("You already applied for this job", 403);
     }
 
@@ -71,14 +82,12 @@ export async function POST(
       resumeId = dbRes.id;
     }
 
-    await prisma.appliedJob.updateMany({
-      where: {
+    await prisma.appliedJob.create({
+      data: {
+        status: "applied",
         applicant_id: studentData.id,
         jobId: jobId,
         applied_resume_id: resumeId,
-      },
-      data: {
-        status: "applied",
       },
     });
 
