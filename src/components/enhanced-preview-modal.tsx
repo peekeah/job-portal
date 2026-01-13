@@ -7,7 +7,7 @@ import { Button } from "./ui/button";
 import ResumeViewer from "./resume-viewer";
 import { Spinner } from "./ui/spinner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useEffect } from "react";
 
 type Props = {
@@ -23,13 +23,19 @@ const getEnhancedResume = async (url: string, { arg }: { arg: string }) => {
 }
 
 export default function EnhancedjobIdPreviewModal({ onApplyAction, onCloseAction, applying, jobId }: Props) {
-  const { data: enhancedResumeRes, trigger: getEnhancedResumeAction, isMutating: isLoading } = useSWRMutation("/api/jobs/apply-enhanced/", getEnhancedResume)
+  const { data: enhancedResumeRes, trigger: getEnhancedResumeAction, isMutating: isLoading, error } = useSWRMutation("/api/jobs/apply-enhanced/", getEnhancedResume)
 
   useEffect(() => {
     if (jobId) {
       getEnhancedResumeAction(jobId)
     }
-  }, [])
+  }, [jobId])
+
+  if (error) {
+    onCloseAction()
+    const errMsg = error?.response?.data?.message || "Something went wrong"
+    alert(errMsg)
+  }
 
   return (
     <Dialog open={true} >

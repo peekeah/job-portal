@@ -32,6 +32,18 @@ export async function POST(
     const job = await prisma.job.findUnique({ where: { id: jobId } });
     if (!job) throw new CustomError("Job not found", 404);
 
+    // validate if jobs is applied
+    const isApplied = await prisma.appliedJob.findFirst({
+      where: {
+        jobId: jobId,
+        applicant_id: applicant.id
+      }
+    })
+
+    if(isApplied){
+      throw new CustomError("You already applied for this job", 403)
+    }
+
     const existResume = await prisma.resume.findFirst({
       where: {
         type: "pdf",

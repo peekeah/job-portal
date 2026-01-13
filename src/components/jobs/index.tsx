@@ -1,7 +1,7 @@
 "use client"
 
 import axios, { AxiosError } from 'axios';
-import useSWR from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -62,20 +62,41 @@ const Jobs = () => {
   const { data: resData, error, isLoading } = useSWR<Response>('/api/jobs', fetcher)
   const jobs = resData?.data;
 
+  const { mutate } = useSWRConfig()
+
   const [enahncePreviewJobId, setEnahancePreviewJobId] = useState<string>("")
 
-  const applyWithEdits = async (jobId: string, resumeId: string) => {
-    if (!enahncePreviewJobId) return;
-    await handleApplyJob({ jobId, resumeId })
-    setEnahancePreviewJobId("");
-  }
 
-  if (error) {
+  if (error || (!isLoading && !resData)) {
     return (
       <div className='h-full w-full grid mx-auto mt-32'>
         <span className='text-xl font-bold'>Error while fetching data</span>
       </div>
     )
+  }
+
+  const applyWithEdits = async (jobId: string, resumeId: string) => {
+    if (!enahncePreviewJobId) return;
+    mutate("/api/jobs",
+      (currentData?: Response) => {
+        if (!currentData) return currentData;
+
+        return {
+          ...currentData,
+          data: currentData.data.filter(
+            (job: Job) => job.id !== jobId
+          ),
+        };
+      },
+      false
+    );
+    try {
+      await handleApplyJob({ jobId, resumeId });
+    } catch (err) {
+      mutate("/api/jobs");
+    }
+
+    setEnahancePreviewJobId("");
   }
 
   return (
