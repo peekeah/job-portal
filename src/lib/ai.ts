@@ -5,10 +5,12 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_SECRET_KEY
 });
 
-export const callLLm = async (input: string, model: ResponsesModel = "gpt-4o"): Promise<any> => {
+export const callLLm = async (input: string, model: ResponsesModel = "gpt-4o", temperature?: number, topP?: number): Promise<any> => {
   return client.responses.create({
     model,
-    input
+    input,
+    temperature,
+    top_p: topP,
   });
 }
 

@@ -40,7 +40,7 @@ export async function POST(
       }
     })
 
-    if(isApplied){
+    if (isApplied) {
       throw new CustomError("You already applied for this job", 403)
     }
 
@@ -76,8 +76,8 @@ export async function POST(
       job.description
     );
 
-    // #TODO: Make AI call for enhancement
-    const response = await callLLm(llmInput, "gpt-5.2");
+    const response = await callLLm(llmInput, "gpt-5.2", 0.3, 0.85);
+
     let output = response.output[0].content[0].text;
     output = output.replace("```json", "").replace("```", "");
 
