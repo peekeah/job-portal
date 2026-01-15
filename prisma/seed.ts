@@ -3,7 +3,6 @@ import {
   PrismaClient,
   UserType,
   CompanySize,
-  ResumeType,
 } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -176,8 +175,8 @@ async function main() {
     {
       company_id: companies[0].id,
       job_role: "Frontend Developer",
-      description: "Build modern frontend applications.",
       ctc: 12.5,
+      description: "We are looking for a Frontend Developer to build modern, scalable, and high-performance web applications. You will collaborate with designers, product managers, and backend engineers to deliver intuitive and visually polished user interfaces. Responsibilities include developing responsive applications using React, TypeScript, and Next.js, translating UI/UX designs into reusable components, integrating frontend code with backend APIs, optimizing performance, ensuring accessibility and cross-browser compatibility, and participating in code reviews. Success in this role means delivering fast, reliable, and maintainable frontend features that enhance user experience.",
       stipend: 0,
       location: "Remote",
       skills_required: ["React", "TypeScript", "Next.js"],
@@ -185,7 +184,7 @@ async function main() {
     {
       company_id: companies[0].id,
       job_role: "Backend Engineer",
-      description: "Design scalable backend systems.",
+      description: "We are seeking a Backend Engineer to design, build, and maintain scalable backend systems that power core business functionality. You will be responsible for developing RESTful APIs using Node.js, designing efficient database schemas with PostgreSQL, implementing caching using Redis, and ensuring data security and system reliability. You will collaborate closely with frontend and DevOps teams to deliver performant and secure backend services. Success in this role means building stable, scalable systems that support business growth.",
       ctc: 15,
       stipend: 0,
       location: "Bangalore",
@@ -194,7 +193,7 @@ async function main() {
     {
       company_id: companies[1].id,
       job_role: "DevOps Engineer",
-      description: "Manage CI/CD and cloud infrastructure.",
+      description: "We are looking for a DevOps Engineer to manage cloud infrastructure, automate deployment pipelines, and ensure high system reliability. Responsibilities include building and maintaining CI/CD pipelines, managing containerized applications using Docker and Kubernetes, provisioning and maintaining AWS infrastructure, monitoring system performance, and implementing security best practices. Success in this role means faster deployments, stable systems, and minimal downtime.",
       ctc: 18,
       stipend: 0,
       location: "Bangalore",
@@ -203,7 +202,7 @@ async function main() {
     {
       company_id: companies[1].id,
       job_role: "Machine Learning Engineer",
-      description: "Build ML models for production.",
+      description: "We are seeking a Machine Learning Engineer to build, deploy, and scale machine learning models for production use cases. You will work on developing and training models using Python and PyTorch, building end-to-end ML pipelines, deploying models into production, monitoring performance, and collaborating with engineering teams to integrate ML services. Success in this role means delivering reliable machine learning solutions that create measurable business impact.",
       ctc: 20,
       stipend: 0,
       location: "Remote",
@@ -214,8 +213,8 @@ async function main() {
     {
       company_id: companies[2].id,
       job_role: "Data Analyst",
-      description: "Analyze healthcare data.",
       ctc: 10,
+      description: "We are looking for a Data Analyst to analyze, interpret, and visualize data to support data-driven decision making. In this role, you will work closely with business and technical teams to collect, clean, and analyze healthcare-related datasets. Responsibilities include writing complex SQL queries, performing data analysis using Python, creating dashboards and reports using Power BI, and identifying trends and insights that can improve operational and business outcomes. Success in this role means delivering accurate, actionable insights that help stakeholders make informed decisions.",
       stipend: 0,
       location: "Pune",
       skills_required: ["SQL", "Python", "Power BI"],
@@ -223,7 +222,7 @@ async function main() {
     {
       company_id: companies[4].id,
       job_role: "Data Scientist",
-      description: "Time-series and predictive analytics.",
+      description: "We are seeking a Data Scientist to build predictive and analytical models that solve real-world business problems. You will work on time-series analysis, forecasting, and machine learning models using structured and unstructured data. Responsibilities include data exploration, feature engineering, model development, evaluation, and deployment in collaboration with engineering teams. You will communicate insights and model results to stakeholders in a clear and actionable manner. Success in this role means delivering accurate predictive models that drive business impact.",
       ctc: 22,
       stipend: 0,
       location: "Remote",
@@ -234,7 +233,7 @@ async function main() {
     {
       company_id: companies[3].id,
       job_role: "Product Manager",
-      description: "Own product roadmap.",
+      description: "We are looking for a Product Manager to own the product roadmap and drive end-to-end product execution. You will work closely with engineering, design, and business stakeholders to define product vision, gather requirements, prioritize features, and ensure timely delivery. Responsibilities include translating business goals into clear product requirements, analyzing user and market data, managing backlogs, and continuously improving the product based on feedback and metrics. Success in this role means shipping impactful features that align with business objectives and improve user satisfaction.",
       ctc: 19,
       stipend: 0,
       location: "Hyderabad",
@@ -243,7 +242,7 @@ async function main() {
     {
       company_id: companies[3].id,
       job_role: "UI/UX Designer",
-      description: "Design intuitive user experiences.",
+      description: "We are seeking a UI/UX Designer to design intuitive, engaging, and user-centered digital experiences. You will collaborate with product managers and engineers to transform ideas into visually appealing and usable designs. Responsibilities include creating user flows, wireframes, prototypes, and high-fidelity designs, maintaining design systems, and ensuring consistency across products. Success in this role means delivering designs that are both visually appealing and easy to use, resulting in a seamless user experience.",
       ctc: 9.5,
       stipend: 0,
       location: "Remote",
@@ -254,7 +253,7 @@ async function main() {
     {
       company_id: companies[4].id,
       job_role: "HR Executive",
-      description: "Manage hiring and HR operations.",
+      description: "We are looking for an HR Executive to manage hiring and day-to-day HR operations. You will be responsible for sourcing and screening candidates, coordinating interviews, managing onboarding processes, and supporting employee engagement initiatives. This role also involves maintaining HR records, assisting with performance management, and ensuring compliance with company policies. Success in this role means building strong teams and maintaining smooth HR operations.",
       ctc: 6.5,
       stipend: 0,
       location: "Delhi",
@@ -263,7 +262,7 @@ async function main() {
     {
       company_id: companies[4].id,
       job_role: "Business Analyst",
-      description: "Translate business needs into solutions.",
+      description: "We are seeking a Business Analyst to translate business requirements into clear and actionable solutions. You will work closely with stakeholders to gather requirements, analyze business processes, and identify opportunities for improvement. Responsibilities include documenting functional requirements, working with data using SQL, and supporting teams in delivering solutions that align with business objectives. Success in this role means delivering well-defined solutions that improve efficiency and decision making.",
       ctc: 11,
       stipend: 0,
       location: "Remote",
@@ -274,7 +273,7 @@ async function main() {
     {
       company_id: companies[2].id,
       job_role: "Digital Marketing Specialist",
-      description: "Drive growth through campaigns.",
+      description: "We are looking for a Digital Marketing Specialist to drive growth through data-driven marketing campaigns. You will be responsible for planning, executing, and optimizing digital campaigns across multiple channels. Responsibilities include SEO optimization, managing paid advertising campaigns, analyzing performance metrics, and improving conversion rates. Success in this role means increasing brand visibility, engagement, and measurable business growth.",
       ctc: 8.5,
       stipend: 0,
       location: "Remote",
@@ -283,7 +282,7 @@ async function main() {
     {
       company_id: companies[1].id,
       job_role: "Sales Executive",
-      description: "Handle B2B sales.",
+      description: "We are seeking a Sales Executive to handle B2B sales and build strong relationships with clients. You will be responsible for identifying leads, pitching products or services, managing the sales pipeline, and closing deals. Responsibilities also include maintaining CRM records, collaborating with internal teams, and meeting revenue targets. Success in this role means consistently achieving sales goals and contributing to business growth.",
       ctc: 7,
       stipend: 0,
       location: "Mumbai",
@@ -294,7 +293,7 @@ async function main() {
     {
       company_id: companies[0].id,
       job_role: "Software Engineering Intern",
-      description: "Assist in development tasks.",
+      description: "We are looking for a Software Engineering Intern to assist the engineering team with development tasks. You will work on real-world projects, write and test code, fix bugs, and learn best practices in software development. This role provides hands-on experience with modern development tools and workflows. Success in this role means actively contributing to features while gaining strong foundational engineering skills.",
       ctc: 0,
       stipend: 25000,
       location: "Remote",
@@ -303,7 +302,7 @@ async function main() {
     {
       company_id: companies[1].id,
       job_role: "AI Research Intern",
-      description: "Work on LLM-based research.",
+      description: "We are seeking an AI Research Intern to work on research and experimentation involving large language models and deep learning techniques. You will assist in conducting experiments, analyzing results, and implementing research ideas into prototypes. This role offers exposure to cutting-edge AI research and practical applications. Success in this role means producing meaningful research outcomes and contributing to innovative AI solutions.",
       ctc: 0,
       stipend: 30000,
       location: "Remote",
