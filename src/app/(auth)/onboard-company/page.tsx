@@ -1,10 +1,11 @@
 "use client"
-import CompanySignupForm from "@/components/company-signup/company-signup"
 import OnboardCompany from "@/components/onboard-company/page"
 
 const Singup = () => {
   return (
-    <OnboardCompany />
+    <div className="flex flex-col mt-24">
+      <OnboardCompany />
+    </div>
   )
 }
 
