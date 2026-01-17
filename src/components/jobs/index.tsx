@@ -63,9 +63,7 @@ const Jobs = () => {
   const jobs = resData?.data;
 
   const { mutate } = useSWRConfig()
-
   const [enahncePreviewJobId, setEnahancePreviewJobId] = useState<string>("")
-
 
   if (error || (!isLoading && !resData)) {
     return (
@@ -156,5 +154,5 @@ const Jobs = () => {
   )
 }
 
-export default Jobs 
+export default Jobs
 

@@ -7,13 +7,13 @@ import { Button } from "./ui/button";
 import ResumeViewer from "./resume-viewer";
 import { Spinner } from "./ui/spinner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { useEffect } from "react";
 
 type Props = {
   jobId: string;
   onCloseAction: () => void;
-  onApplyAction: (jobId: string, resumeId: string) => {};
+  onApplyAction: (jobId: string, resumeId: string) => void;
   applying: boolean;
 };
 
@@ -23,7 +23,7 @@ const getEnhancedResume = async (url: string, { arg }: { arg: string }) => {
 }
 
 export default function EnhancedjobIdPreviewModal({ onApplyAction, onCloseAction, applying, jobId }: Props) {
-  const { data: enhancedResumeRes, trigger: getEnhancedResumeAction, isMutating: isLoading, error } = useSWRMutation("/api/jobs/apply-enhanced/", getEnhancedResume)
+  const { data: enhancedResumeRes, trigger: getEnhancedResumeAction, isMutating: isLoading, error } = useSWRMutation("/api/jobs/enhance-resume/", getEnhancedResume)
 
   useEffect(() => {
     if (jobId) {
