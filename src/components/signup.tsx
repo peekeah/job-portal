@@ -17,8 +17,8 @@ export default function SignUpPage() {
               className="mx-auto block w-fit">
               <LogoIcon />
             </Link>
-            <h1 className="mb-1 mt-4 text-xl font-semibold">Create a Tailark Account</h1>
-            <p className="text-sm">Welcome! Create an account to get started</p>
+            <h1 className="mb-1 mt-4 text-xl font-semibold">Create Account</h1>
+            <p className="text-sm">Welcome! Create account to proceed</p>
           </div>
 
           <div className="mt-6 space-y-6">

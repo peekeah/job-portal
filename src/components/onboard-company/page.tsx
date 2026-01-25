@@ -119,7 +119,7 @@ const OnboardCompany = () => {
   }
 
   return (
-    <Card className="max-w-xl mx-auto mt-16">
+    <Card className="min-w-xl p-3 py-8 pb-6 mx-auto mt-16">
       <CardContent>
         <div className="font-semibold leading-none tracking-tight text-2xl">Onboard Company</div>
         <div className="mx-auto my-8 flex items-center">
