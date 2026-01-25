@@ -69,7 +69,7 @@ function AppliedJobs() {
           <span className="ml-2 text-gray-500">Loading...</span>
         </div>
       ) : appliedJobs?.length > 0 ? (
-        <div className="grid lg:grid-cols-2 gap-5">
+        <div className="grid lg:grid-cols-2 gap-5 mt-5">
           {
             appliedJobs?.map(el => {
               const job = el.job;

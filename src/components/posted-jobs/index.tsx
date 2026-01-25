@@ -25,8 +25,8 @@ const PostedJobs = () => {
   }
 
   return (
-    <div className="responsive-box max-w-6xl">
-      <Text className="text-2xl my-5 font-semibold text-gray-800">
+    <div className="p-5 sm:p-7 md:px-10 lg:px-5 h-full w-full">
+      <Text className="text-2xl font-semibold text-gray-800">
         Posted Jobs
       </Text>
       <div>
@@ -36,7 +36,7 @@ const PostedJobs = () => {
             <span className="ml-2 text-gray-500">Loading...</span>
           </div>
         ) : jobs && jobs?.length > 0 ? (
-          <div className="w-full min-h-44 grid grid-cols-2 gap-5">
+          <div className="w-full mt-5 min-h-44 grid grid-cols-2 gap-5">
             {
               jobs.map((job) => {
                 return (

@@ -55,11 +55,11 @@ const JobDetails = () => {
   }
 
   return (
-    <div className="m-10">
-      <Text className="text-2xl my-5 font-semibold text-gray-800">
+    <div className="p-5 sm:p-7 md:px-10 lg:px-5 h-full w-full">
+      <Text className="text-2xl font-semibold text-gray-800">
         Applied Candidates
       </Text>
-      <Tabs defaultValue={"applied"} className="w-full">
+      <Tabs defaultValue={"applied"} className="w-full mt-5">
         <TabsList>
           <TabsTrigger
             className="transition-all cursor-pointer data-[state=active]:bg-primary data-[state=active]:text-white"

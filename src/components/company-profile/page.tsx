@@ -102,22 +102,24 @@ export default function CompanyProfile() {
   }
 
   return (
-    <div className='p-8 max-w-4xl mx-auto'>
-      <h1 className='pb-3 font-semibold text-2xl'>Company Profile</h1>
-      <div className='mx-auto mb-4 flex justify-end'>
-        {
-          editContent ?
-            <div className='space-x-3'>
-              <Button onClick={onSave}>Save</Button>
-              <Button
-                onClick={onCancelChanges}
-                variant={"destructive"}
-              >Cancel</Button>
-            </div> :
-            <Button onClick={toggleEdit}>Edit</Button>
-        }
+    <div className='p-5 sm:p-7 md:px-10 lg:px-5 h-full w-full'>
+      <div className='flex w-full'>
+        <h1 className='font-semibold text-2xl'>Company Profile</h1>
+        <div className='mx-auto flex justify-end flex-1'>
+          {
+            editContent ?
+              <div className='space-x-3'>
+                <Button onClick={onSave}>Save</Button>
+                <Button
+                  onClick={onCancelChanges}
+                  variant={"destructive"}
+                >Cancel</Button>
+              </div> :
+              <Button onClick={toggleEdit}>Edit</Button>
+          }
+        </div>
       </div>
-      <div className='space-y-5'>
+      <div className='max-w-4xl mt-5 space-y-5'>
         <Card>
           <CardContent>
             <div className='flex gap-4 items-center mb-3'>
@@ -250,7 +252,7 @@ export default function CompanyProfile() {
           </CardContent>
         </Card>
       </div>
-    </div >
+    </div>
   )
 }
 

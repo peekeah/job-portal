@@ -66,9 +66,9 @@ export default function PostJob() {
   };
 
   return (
-    <div className="flex mx-10 my-5 bg-muted/10 justify-center">
-      <div className="">
-        <Text className="text-2xl my-5 font-semibold">Post a Job</Text>
+    <div className="p-5 sm:p-7 md:px-10 lg:px-5 h-full w-full">
+      <Text className="text-2xl font-semibold">Post Job</Text>
+      <div className="flex mx-10 my-5 bg-muted/10 justify-center mt-24">
         <Card className="w-full py-10 px-2 min-w-2xl max-w-3xl shadow-sm">
           <CardContent className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -117,12 +117,10 @@ export default function PostJob() {
             </div>
 
             <div className="space-y-3 mt-2">
-              <h4 className="text-sm font-medium text-foreground">
-                Skills Required
-              </h4>
-              <div className="flex gap-3">
+              <div className="flex items-end gap-3">
                 <Input
                   name="skill"
+                  label="Skills Required"
                   value={formData.skill}
                   onChange={handleChange}
                   placeholder="Enter a skill (e.g. React, Node.js)"

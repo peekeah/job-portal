@@ -157,9 +157,9 @@ function StudentProfile() {
   };
 
   return (
-    <div className='p-5 md:p-7'>
-      <div className="flex w-full pb-3">
-        <h1 className='py-1 text-2xl font-semibold'>Student Profile</h1>
+    <div className='p-5 sm:p-7 md:px-10 lg:px-5 h-full w-full'>
+      <div className="flex w-full">
+        <h1 className='text-2xl font-semibold'>Student Profile</h1>
         <div className='mx-auto flex justify-end flex-1'>
           {
             editContent ?
@@ -176,7 +176,7 @@ function StudentProfile() {
       </div>
       {
         !isLoading && userData ?
-          <Card className="p-5 mt-3 md:p-7 lg:p-5 max-w-4xl">
+          <Card className="p-5 mt-5 md:p-7 lg:p-5 max-w-4xl">
             <CardContent className="mb-4">
               <div className="flex mb-5 gap-5 items-center">
                 <Avatar className='size-28'>
