@@ -157,24 +157,26 @@ function StudentProfile() {
   };
 
   return (
-    <div className='p-5 md:p-7 lg:p-5 max-w-4xl mx-auto'>
-      <h1 className='py-1 text-2xl font-semibold'>Student Profile</h1>
-      <div className='mx-auto flex justify-end mb-5'>
-        {
-          editContent ?
-            <div className="space-x-3">
-              <Button onClick={onSave}>Save</Button>
-              <Button
-                onClick={onCancel}
-                variant={"destructive"}
-              >Cancel</Button>
-            </div> :
-            <Button onClick={toggleEdit}>Edit</Button>
-        }
+    <div className='p-5 md:p-7'>
+      <div className="flex w-full pb-3">
+        <h1 className='py-1 text-2xl font-semibold'>Student Profile</h1>
+        <div className='mx-auto flex justify-end flex-1'>
+          {
+            editContent ?
+              <div className="space-x-3">
+                <Button onClick={onSave}>Save</Button>
+                <Button
+                  onClick={onCancel}
+                  variant={"destructive"}
+                >Cancel</Button>
+              </div> :
+              <Button onClick={toggleEdit}>Edit</Button>
+          }
+        </div>
       </div>
       {
         !isLoading && userData ?
-          <Card>
+          <Card className="p-5 mt-3 md:p-7 lg:p-5 max-w-4xl">
             <CardContent className="mb-4">
               <div className="flex mb-5 gap-5 items-center">
                 <Avatar className='size-28'>

@@ -4,7 +4,7 @@ import axios, { AxiosError } from 'axios';
 import useSWR, { useSWRConfig } from 'swr';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { fetcher } from '@/lib/fetcher';
 import { Spinner } from '../ui/spinner';
 import { Heading, Text } from '../ui/typography';
@@ -58,7 +58,7 @@ const applyJobApiCall = async (url: string, { arg: { jobId, resumeId } }: { arg:
 
 const Jobs = () => {
 
-  const { data: appliedRes, trigger: handleApplyJob, isMutating: applying } = useSWRMutation(`/api/jobs/apply/`, applyJobApiCall)
+  const { trigger: handleApplyJob, isMutating: applying } = useSWRMutation(`/api/jobs/apply/`, applyJobApiCall)
   const { data: resData, error, isLoading } = useSWR<Response>('/api/jobs', fetcher)
   const jobs = resData?.data;
 
@@ -98,8 +98,10 @@ const Jobs = () => {
   }
 
   return (
-    <div className='p-5 sm:p-7 md:p-10 lg:px-5 md:my-5 h-full w-full'>
-      <Heading variant={"h2"}>Jobs</Heading>
+    <div className='p-5 sm:p-7 md:px-10 lg:px-5 h-full w-full'>
+      <CardTitle className="text-2xl mb-3 font-semibold text-gray-800">
+        Jobs
+      </CardTitle>
       {
         isLoading ? (
           <div className="flex mt-32 items-center justify-center py-10">
@@ -107,7 +109,7 @@ const Jobs = () => {
             <span className="ml-2 text-gray-500">Loading...</span>
           </div>
         ) :
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-5'>
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-5 pb-3'>
             {jobs?.map((job) => (
               <Card key={job.id}>
                 <CardContent>
