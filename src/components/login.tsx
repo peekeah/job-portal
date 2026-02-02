@@ -71,6 +71,7 @@ export default function Login() {
               required
               name="email"
               label="Email"
+              placeholder="Email"
               onChange={handleInputChange}
             />
 
@@ -79,6 +80,7 @@ export default function Login() {
                 required
                 name="password"
                 label="Password"
+                placeholder="Password"
                 type="password"
                 onChange={handleInputChange}
               />

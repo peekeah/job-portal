@@ -1,13 +1,108 @@
 import { LogoIcon } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import axios, { AxiosError } from 'axios';
 import Link from 'next/link'
+import { useRouter } from 'next/navigation';
+import z from 'zod';
+import { useForm, Controller } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import useSWRMutation from 'swr/mutation';
+import { Spinner } from './ui/spinner';
+
+const initialFormValues = {
+  name: '',
+  email: '',
+  password: '',
+  verifyPassword: '',
+}
+
+const signupSchema = z
+  .object({
+    name: z
+      .string()
+      .nonempty({ message: "Name is required" })
+      .min(2, { message: "Name must be at least 2 characters long" })
+      .max(50, { message: "Name cannot exceed 50 characters" }),
+
+    email: z
+      .string()
+      .nonempty({ message: "Email is required" })
+      .email({ message: "Please enter a valid email address" })
+      .max(50, { message: "Email cannot exceed 50 characters" }),
+
+    password: z
+      .string()
+      .nonempty({ message: "Password is required" })
+      .min(8, { message: "Password must be at least 8 characters long" })
+      .max(20, { message: "Password cannot exceed 20 characters" })
+      .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
+      .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
+      .regex(/[0-9]/, { message: "Password must contain at least one number" }),
+
+    verifyPassword: z
+      .string()
+      .nonempty({ message: "Confirm password is required" }),
+  })
+  .refine((data) => data.password === data.verifyPassword, {
+    message: "Passwords do not match",
+    path: ["verifyPassword"],
+  });
+
+type SignupPayload = z.infer<typeof signupSchema> & {
+  userType: string;
+}
+
+const signupApiCall = async (url: string, { arg: payload }: { arg: SignupPayload }) => {
+  try {
+    const response = await axios.post(url, payload);
+    alert(response.data.data);
+    return response.data
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      alert(err?.response?.data?.message)
+    } else {
+      alert("something went wrong")
+    }
+    console.log(err);
+  }
+}
+
 
 export default function SignUpPage() {
+
+  const router = useRouter();
+
+  const form = useForm<z.infer<typeof signupSchema>>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: initialFormValues
+  })
+
+  const { trigger: handleSignup, isMutating: isLoading } = useSWRMutation(`/api/auth/signup`, signupApiCall)
+
+  const onSubmit = async (data: z.infer<typeof signupSchema>) => {
+    const payload: SignupPayload = {
+      ...data, userType: "applicant"
+    }
+
+    try {
+      await handleSignup(payload)
+      alert("successfully signup!")
+      router.push("/login")
+
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        alert(err?.response?.data.message || err?.response?.data.error)
+      }
+      console.log(err);
+    }
+  }
+
   return (
     <section className="flex h-full dark:bg-transparent">
       <form
-        action=""
+        id="signup-form"
+        onSubmit={form.handleSubmit(onSubmit)}
         className="bg-muted m-auto h-fit w-full max-w-lg overflow-hidden rounded-[calc(var(--radius)+.125rem)] border shadow-md shadow-zinc-950/5 dark:[--color-muted:var(--color-zinc-900)]">
         <div className="bg-card -m-px rounded-[calc(var(--radius)+.125rem)] border p-8 pb-6">
           <div className="text-center">
@@ -22,47 +117,70 @@ export default function SignUpPage() {
           </div>
 
           <div className="mt-6 space-y-6">
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label='First Name'
-                required
-                name="firstname"
-                id="firstname"
-              />
-              <Input
-                type="text"
-                required
-                name="lastname"
-                label='Last Name'
-                id="lastname"
-              />
-            </div>
-            <Input
-              type="email"
-              required
+            <Controller
+              name="name"
+              control={form.control}
+              render={({ field, fieldState, formState }) => (
+                <Input
+                  {...field}
+                  label='Name'
+                  placeholder='Name'
+                  aria-invalid={fieldState.invalid}
+                  error={
+                    !formState.isValid ? formState.errors.name?.message : ""
+                  }
+                />
+              )}
+            />
+            <Controller
               name="email"
-              id="email"
-              label='Email'
+              control={form.control}
+              render={({ field, fieldState, formState }) => (
+                <Input
+                  {...field}
+                  type="email"
+                  label='Email'
+                  aria-invalid={fieldState.invalid}
+                  placeholder='Email'
+                  error={
+                    !formState.isValid ? formState.errors.email?.message : ""
+                  }
+                />
+              )}
             />
-            <Input
-              type="password"
-              required
-              name="pwd"
-              id="pwd"
-              label='Password'
-              className="input sz-md variant-mixed"
+            <Controller
+              name="password"
+              control={form.control}
+              render={({ field, fieldState, formState }) => (
+                <Input
+                  {...field}
+                  type="password"
+                  placeholder='Password'
+                  aria-invalid={fieldState.invalid}
+                  label='Password'
+                  error={
+                    !formState.isValid ? formState.errors.password?.message : ""
+                  }
+                />
+              )}
             />
-
-            <Input
-              type="password"
-              required
-              name="verify-pwd"
-              label='Verify Password'
-              id="pwd"
-              className="input sz-md variant-mixed"
+            <Controller
+              name="verifyPassword"
+              control={form.control}
+              render={({ field, fieldState, formState }) => (
+                <Input
+                  {...field}
+                  type="password"
+                  placeholder='Confirm Password'
+                  aria-invalid={fieldState.invalid}
+                  label='Confirm Password'
+                  error={
+                    !formState.isValid ? formState.errors.verifyPassword?.message : ""
+                  }
+                />
+              )}
             />
-
-            <Button className="w-full">Sign In</Button>
+            <Button className="w-full" type="submit">{!isLoading ? "Sign In" : <Spinner />}</Button>
           </div>
 
           <div className="my-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
@@ -111,6 +229,6 @@ export default function SignUpPage() {
           </p>
         </div>
       </form>
-    </section>
+    </section >
   )
 }

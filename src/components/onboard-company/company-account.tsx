@@ -1,41 +1,57 @@
-import { ChangeEvent, Dispatch, SetStateAction } from "react";
-import { CompanySignupPayload } from "./page";
+import { CompanySignupPayload } from "./types";
 import { Input } from "../ui/input";
+import { Control, Controller } from "react-hook-form";
 
-type Props = {
-  formData: CompanySignupPayload;
-  setFormData: Dispatch<SetStateAction<CompanySignupPayload>>;
-  handleChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-}
-
-const CompanyAccount = ({ formData, handleChange }: Props) => {
+const CompanyAccount = ({ formControl }: { formControl: Control<CompanySignupPayload> }) => {
   return (
     <div className="space-y-5">
-      <Input
-        label="Email"
-        type="email"
-        placeholder="Enter company email"
+      <Controller
         name="email"
-        value={formData.email}
-        onChange={handleChange}
+        control={formControl}
+        render={({ field, fieldState: { error, invalid } }) => (
+          <Input
+            {...field}
+            label="Email"
+            type="email"
+            placeholder="Enter company email"
+            aria-invalid={invalid}
+            error={
+              error ? error.message : ""
+            }
+          />
+        )}
       />
-
-      <Input
-        label="Password"
-        type="password"
-        placeholder="Enter password"
+      <Controller
         name="password"
-        value={formData.password}
-        onChange={handleChange}
+        control={formControl}
+        render={({ field, fieldState: { error, invalid } }) => (
+          <Input
+            {...field}
+            label="Password"
+            type="password"
+            placeholder="Enter password"
+            aria-invalid={invalid}
+            error={
+              error ? error.message : ""
+            }
+          />
+        )}
       />
-
-      <Input
-        label="Phone No"
-        type="number"
-        placeholder="Enter contact number"
+      <Controller
         name="contact_no"
-        value={formData.contact_no}
-        onChange={handleChange}
+        control={formControl}
+        render={({ field, fieldState: { error, invalid } }) => (
+          <Input
+            {...field}
+            label="Phone No"
+            type="number"
+            placeholder="Enter contact number"
+            aria-invalid={invalid}
+            error={
+              error ? error.message : ""
+            }
+          />
+        )}
       />
     </div>
   )

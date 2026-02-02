@@ -1,62 +1,87 @@
-import { ChangeEvent, Dispatch, SetStateAction } from "react";
-import { CompanySignupPayload } from "./page"
 import { Input } from "../ui/input";
 import { CustomSelect } from "../ui/select";
+import { Control, Controller } from "react-hook-form";
+import { CompanySignupPayload } from "./types";
 
-type Props = {
-  formData: CompanySignupPayload;
-  setFormData: Dispatch<SetStateAction<CompanySignupPayload>>;
-  handleChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-}
-
-const CompanyProfile = ({ formData, handleChange }: Props) => {
+const CompanyProfile = ({ formControl }: { formControl: Control<CompanySignupPayload> }) => {
   return (
     <div className="space-y-5">
-      <Input
-        label="Company Name"
-        placeholder="Enter company name"
+      <Controller
         name="name"
-        value={formData.name}
-        onChange={handleChange}
+        control={formControl}
+        render={({ field, fieldState: { error, invalid } }) => (
+          <Input
+            {...field}
+            label="Company Name"
+            aria-invalid={invalid}
+            placeholder="Enter company name"
+            error={
+              error ? error.message : ""
+            }
+          />
+        )}
       />
-
-      <Input
-        label="Company Type"
-        placeholder="Enter company type"
+      <Controller
         name="company_type"
-        value={formData.company_type}
-        onChange={handleChange}
+        control={formControl}
+        render={({ field, fieldState: { error, invalid } }) => (
+          <Input
+            {...field}
+            label="Company Type"
+            placeholder="Enter company type"
+            aria-invalid={invalid}
+            error={
+              error ? error.message : ""
+            }
+          />
+        )}
       />
-
       <div className="flex gap-3">
-        <Input
-          label="Year Founded"
-          type="number"
-          placeholder="Enter founding year"
+        <Controller
           name="founding_year"
-          value={formData.founding_year}
-          onChange={handleChange}
+          control={formControl}
+          render={({ field, fieldState: { error, invalid } }) => (
+            <Input
+              {...field}
+              onChange={(e) => !e.target.value ? null : field.onChange(Number(e.target.value))}
+              label="Year Founded"
+              type="number"
+              placeholder="Enter founding year"
+              aria-invalid={invalid}
+              error={
+                error ? error.message : ""
+              }
+            />
+          )}
         />
 
-        <CustomSelect
-          label='Company Size'
-          value={formData.size}
-          className='w-48'
-          onValueChange={
-            (val) => setFormData(prev => ({
-              ...prev, ["size"]: val
-            }))
-          }
-          options={[
-            { value: 'SIZE_1_10', label: '1-10' },
-            { value: 'SIZE_10_50', label: '10-50' },
-            { value: 'SIZE_50_100', label: '50-100' },
-            { value: 'SIZE_100_PLUS', label: '100+' },
-          ]}
+        <Controller
+          name="size"
+          control={formControl}
+          render={({ field }) => (
+            <CustomSelect
+              {...field}
+              label='Company Size'
+              className='w-48'
+              onValueChange={
+                (val) => {
+                  console.log("ff:", val, field.value)
+                  return field.onChange({
+                    ["size"]: val
+                  })
+                }
+              }
+              options={[
+                { value: 'SIZE_1_10', label: '1-10' },
+                { value: 'SIZE_10_50', label: '10-50' },
+                { value: 'SIZE_50_100', label: '50-100' },
+                { value: 'SIZE_100_PLUS', label: '100+' },
+              ]}
+            />
+          )}
         />
       </div>
-    </div>
-
+    </div >
   )
 }
 

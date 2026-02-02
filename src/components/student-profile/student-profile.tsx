@@ -1,5 +1,5 @@
 "use client";
-import { ChangeEventHandler, useEffect, useState } from "react";
+import { useState } from "react";
 import useSWR from "swr";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -13,84 +13,62 @@ import { Resume } from "@prisma/client"
 import ResumeViewer from "../resume-viewer";
 import { Dialog } from "@radix-ui/react-dialog";
 import { DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-
-type Profile = {
-  id: string;
-  name: string;
-  email: string;
-  mobile: number;
-  profile_pic: string;
-  college_name: string;
-  college_branch: string;
-  college_joining_year: string;
-  resume: Resume[]
-  applied_jobs: {
-    [key: string]: unknown;
-  }[];
-}
+import { Profile, profileSchema } from "./schema";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import useSWRMutation from "swr/mutation";
 
 const initialProfile: Profile = {
   id: "",
   name: "",
   email: "",
-  mobile: 0,
+  mobile: "",
   profile_pic: "",
   college_name: "",
   college_branch: "",
   college_joining_year: "",
   resume: [],
-  applied_jobs: [],
 };
 
+const postProfileApiCall = async (url: string, { arg: { payload: payload } }: { arg: { payload: Profile } }) => {
+  try {
+    const res = await axios.post(url, payload)
+
+    if (!res?.data?.status) {
+      throw new Error(res?.data?.error || "error while saving")
+    }
+
+    alert("successfully saved data")
+
+  } catch (err) {
+    console.log("err:", err)
+  }
+}
 
 function StudentProfile() {
 
   const [selectResumeToDisplay, setSelectResumeToDisplay] = useState<Resume | null>(null)
 
   const { data, isLoading, mutate } = useSWR<{ data: Profile }>("/api/student/profile", fetcher)
+  const { trigger: postProfileTrigger, isMutating: postProfileLoading } = useSWRMutation("/api/student/profile", postProfileApiCall)
+
   const userData = data?.data;
 
   const [editContent, setEditContent] = useState<boolean>(false)
-  const [formData, setFormData] = useState<Profile>(initialProfile)
   const [isUploadingResume, setIsUploadingResume] = useState<boolean>(false)
 
-  useEffect(() => {
-    if (userData) {
-      setFormData(() => (userData))
-    }
-  }, [userData])
+  const form = useForm<Profile>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: initialProfile,
+    values: userData
+  })
 
   const toggleEdit = () => {
     setEditContent((prev) => !prev)
   }
 
-  const onInputChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  }
-
-  const onSave = async () => {
-
-    try {
-      const res = await axios.post("/api/student/profile", formData)
-
-      if (!res?.data?.status) {
-        throw new Error(res?.data?.error || "error while saving")
-      }
-
-      alert("successfully saved data")
-      toggleEdit()
-
-    } catch (err) {
-      console.log("err:", err)
-    }
-  }
-
   const onCancel = () => {
-    setFormData(() => userData!);
+    form.reset()
     setEditContent(() => false);
   }
 
@@ -114,11 +92,9 @@ function StudentProfile() {
 
     setIsUploadingResume(true);
     try {
-      // Create FormData for file upload
       const formData = new FormData();
       formData.append("resume", file);
 
-      // Upload to backend
       const res = await axios.post("/api/student/resume", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -156,21 +132,28 @@ function StudentProfile() {
     }
   };
 
+  const onSubmit = (payload: Profile) => {
+    postProfileTrigger({ payload })
+  }
+
   return (
-    <div className='p-5 sm:p-7 md:px-10 lg:px-5 h-full w-full'>
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className='p-5 sm:p-7 md:px-10 lg:px-5 h-full w-full'>
       <div className="flex w-full">
         <h1 className='text-2xl font-semibold'>Student Profile</h1>
         <div className='mx-auto flex justify-end flex-1'>
           {
             editContent ?
               <div className="space-x-3">
-                <Button onClick={onSave}>Save</Button>
+                <Button type="submit">Save</Button>
                 <Button
                   onClick={onCancel}
+                  type="button"
                   variant={"destructive"}
                 >Cancel</Button>
               </div> :
-              <Button onClick={toggleEdit}>Edit</Button>
+              <Button type="button" onClick={toggleEdit}>Edit</Button>
           }
         </div>
       </div>
@@ -192,47 +175,101 @@ function StudentProfile() {
                 </div>
               </div>
               <div className='grid md:grid-cols-2 gap-5 mx-auto'>
-                <Input
-                  label="Name"
-                  value={formData?.name}
+                <Controller
                   name="name"
-                  onChange={onInputChange}
-                  disabled={!editContent}
+                  control={form.control}
+                  render={({ field, fieldState: { error, invalid } }) => (
+                    <Input
+                      {...field}
+                      label="Name"
+                      aria-invalid={invalid}
+                      placeholder="Name"
+                      disabled={!editContent}
+                      error={
+                        error ? error.message : ""
+                      }
+                    />
+                  )}
                 />
-                <Input
-                  label="Contact"
+                <Controller
                   name="mobile"
-                  value={formData?.mobile}
-                  onChange={onInputChange}
-                  disabled={!editContent}
+                  control={form.control}
+                  render={({ field, fieldState: { error, invalid } }) => (
+                    <Input
+                      {...field}
+                      label="Contact"
+                      aria-invalid={invalid}
+                      placeholder="Contact"
+                      disabled={!editContent}
+                      error={
+                        error ? error.message : ""
+                      }
+                    />
+                  )}
                 />
-                <Input
-                  label="Email"
+                <Controller
                   name="email"
-                  value={formData?.email}
-                  onChange={onInputChange}
-                  disabled={!editContent}
+                  control={form.control}
+                  render={({ field, fieldState: { error, invalid } }) => (
+                    <Input
+                      {...field}
+                      label="Email"
+                      aria-invalid={invalid}
+                      placeholder="Email"
+                      disabled={!editContent}
+                      error={
+                        error ? error.message : ""
+                      }
+                    />
+                  )}
                 />
-                <Input
-                  label="College Name"
+                <Controller
                   name="college_name"
-                  value={formData?.college_name}
-                  onChange={onInputChange}
-                  disabled={!editContent}
+                  control={form.control}
+                  render={({ field, fieldState: { error, invalid } }) => (
+                    <Input
+                      {...field}
+                      label="College Name"
+                      aria-invalid={invalid}
+                      placeholder="College Name"
+                      disabled={!editContent}
+                      error={
+                        error ? error.message : ""
+                      }
+                    />
+                  )}
                 />
-                <Input
-                  label="College Branch"
+                <Controller
                   name="college_branch"
-                  value={formData?.college_branch}
-                  onChange={onInputChange}
-                  disabled={!editContent}
+                  control={form.control}
+                  render={({ field, fieldState: { error, invalid } }) => (
+                    <Input
+                      {...field}
+                      label="College Branch"
+                      aria-invalid={invalid}
+                      placeholder="College Branch"
+                      disabled={!editContent}
+                      error={
+                        error ? error.message : ""
+                      }
+                    />
+                  )}
                 />
-                <Input
-                  label="College Joining Year"
+                <Controller
                   name="college_joining_year"
-                  value={formData?.college_joining_year}
-                  onChange={onInputChange}
-                  disabled={!editContent}
+                  control={form.control}
+                  render={({ field, fieldState: { error, invalid } }) => (
+                    <Input
+                      {...field}
+                      label="College Joining Year"
+                      aria-invalid={invalid}
+                      placeholder="College Joining Year"
+                      disabled={!editContent}
+                      error={
+                        error ? error.message : ""
+                      }
+                    />
+                  )}
                 />
 
                 <div className="md:col-span-2 border-t pt-5 mt-5">
@@ -259,10 +296,10 @@ function StudentProfile() {
                       </div>
                     </label>
 
-                    {formData?.resume.length ? (
+                    {userData?.resume.length ? (
                       <>
                         {
-                          formData.resume.map(el => (
+                          userData.resume.map(el => (
                             <div key={el.id} className="space-y-3">
                               <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
                                 <div className="flex-1">
@@ -316,7 +353,7 @@ function StudentProfile() {
           </Card>
           : null
       }
-    </div>
+    </form>
   )
 }
 

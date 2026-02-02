@@ -1,36 +1,56 @@
-import { ChangeEvent, Dispatch, SetStateAction } from "react";
-import { CompanySignupPayload } from "./page";
+import { CompanySignupPayload } from "./types";
 import { Input } from "../ui/input";
+import { Control, Controller } from "react-hook-form";
 
-type Props = {
-  formData: CompanySignupPayload;
-  setFormData: Dispatch<SetStateAction<CompanySignupPayload>>;
-  handleChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-}
-
-const CompanyMetadata = ({ formData, handleChange }: Props) => {
+const CompanyMetadata = ({ formControl }: { formControl: Control<CompanySignupPayload> }) => {
   return (
     <div className="space-y-5">
-      <Input
-        label="Website"
-        placeholder="Enter company website"
+      <Controller
         name="website"
-        value={formData.website}
-        onChange={handleChange}
+        control={formControl}
+        render={({ field, fieldState: { error, invalid } }) => (
+          <Input
+            {...field}
+            value={field.value ?? ""}
+            label="Website"
+            placeholder="Enter company website"
+            aria-invalid={invalid}
+            error={
+              error ? error.message : ""
+            }
+          />
+        )}
       />
-      <Input
-        label="Address"
-        placeholder="Enter state"
+      <Controller
         name="address"
-        value={formData.address}
-        onChange={handleChange}
+        control={formControl}
+        render={({ field, fieldState: { error, invalid } }) => (
+          <Input
+            {...field}
+            label="Address"
+            placeholder="Enter state"
+            aria-invalid={invalid}
+            error={
+              error ? error.message : ""
+            }
+          />
+        )}
       />
-      <Input
-        label="Bio"
-        placeholder="Enter company bio"
+      <Controller
         name="bio"
-        value={formData.bio}
-        onChange={handleChange}
+        control={formControl}
+        render={({ field, fieldState: { error, invalid } }) => (
+          <Input
+            {...field}
+            value={field.value ?? ""}
+            aria-invalid={invalid}
+            label="Bio"
+            placeholder="Enter company bio"
+            error={
+              error ? error.message : ""
+            }
+          />
+        )}
       />
     </div>
   )

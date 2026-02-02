@@ -1,7 +1,7 @@
 "use client"
 import useSWR from 'swr';
 import axios from 'axios';
-import { ChangeEventHandler, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { redirect } from 'next/navigation';
 
 import { fetcher } from '@/lib/fetcher';
@@ -13,30 +13,32 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Heading } from '../ui/typography';
 import { Textarea } from '../ui/textarea';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { combinedCompanySchema } from '../onboard-company/types';
+import { CompanySize } from '@prisma/client';
+import z from 'zod';
 
-type Company = {
-  id: string;
-  name: string;
-  founding_year: string;
-  company_type: string;
-  email: string;
-  contact_no: string;
-  website: string;
-  address: string;
-  size: string;
-  bio: string;
-}
+const profileSchema = z
+  .object({
+    id: z.uuid(),
+  })
+  .extend(
+    combinedCompanySchema.omit({ password: true }).shape
+  )
 
-const initialCompany: Company = {
+type CompanyProfile = z.infer<typeof profileSchema>
+
+const initialCompanyValues: CompanyProfile = {
   id: "",
   name: "",
-  founding_year: "",
+  founding_year: 0,
   company_type: "",
   email: "",
   contact_no: "",
   website: "",
   address: "",
-  size: "",
+  size: CompanySize.SIZE_1_10,
   bio: "",
 };
 
@@ -47,8 +49,28 @@ export const companySizeMap = new Map([
   ["SIZE_100_PLUS", "100+"]
 ]);
 
+const postProfileApiCall = async (url: string, { arg: { payload: payload } }: { arg: { payload: CompanyProfile } }) => {
+  try {
+    const res = await axios.post(url, payload)
+
+    if (!res?.data?.status) {
+      throw new Error(res?.data?.error || "error while saving")
+    }
+
+    alert("successfully saved data")
+
+  } catch (err) {
+    console.log("err:", err)
+    alert("error while saving data")
+  }
+}
+
 export default function CompanyProfile() {
-  const { data, isLoading } = useSWR<{ data: Company }>('/api/company/profile', fetcher)
+  const { data, isLoading } = useSWR<{ data: CompanyProfile }>('/api/company/profile', fetcher)
+
+  const { data: postProfileData, isMutating: postProfileLoading } = useSWR<{ data: CompanyProfile }>('/api/company/profile', fetcher)
+
+
   const company = data?.data;
 
   if (!isLoading && !company) {
@@ -56,33 +78,20 @@ export default function CompanyProfile() {
   }
 
   const [editContent, setEditContent] = useState<boolean>(false)
-  const [formData, setFormData] = useState<Company>(initialCompany)
 
-  useEffect(() => {
-    if (company) {
-      setFormData(() => company)
-    }
-  }, [company])
+  const form = useForm({
+    resolver: zodResolver(profileSchema),
+    defaultValues: initialCompanyValues,
+    values: company
+  })
 
   const toggleEdit = () => {
     setEditContent((prev) => !prev)
   }
 
-
-  const onInputChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement> = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }))
-  }
-
-  const onSave = async () => {
+  const onSubmit = async (payload: CompanyProfile) => {
     try {
-      const res = await axios.post("/api/company/profile", {
-        ...formData,
-        founding_year: +formData.founding_year
-      })
+      const res = await axios.post("/api/company/profile", payload)
 
       if (!res?.data?.status) {
         throw new Error(res?.data?.error || "error while saving")
@@ -97,25 +106,29 @@ export default function CompanyProfile() {
   }
 
   const onCancelChanges = () => {
-    setFormData(prev => company ? company : prev);
+    form.reset()
     setEditContent(() => false);
   }
 
   return (
-    <div className='p-5 sm:p-7 md:px-10 lg:px-5 h-full w-full'>
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className='p-5 sm:p-7 md:px-10 lg:px-5 h-full w-full'
+    >
       <div className='flex w-full'>
         <h1 className='font-semibold text-2xl'>Company Profile</h1>
         <div className='mx-auto flex justify-end flex-1'>
           {
             editContent ?
               <div className='space-x-3'>
-                <Button onClick={onSave}>Save</Button>
+                <Button type="submit">Save</Button>
                 <Button
+                  type='button'
                   onClick={onCancelChanges}
                   variant={"destructive"}
                 >Cancel</Button>
               </div> :
-              <Button onClick={toggleEdit}>Edit</Button>
+              <Button type='button' onClick={toggleEdit}>Edit</Button>
           }
         </div>
       </div>
@@ -149,14 +162,25 @@ export default function CompanyProfile() {
               </div>
             </div>
             <div>
-              <Textarea
-                rows={4}
-                label='Description'
+              <Controller
                 name="bio"
-                className="text-neutral-500"
-                value={formData?.bio}
-                onChange={onInputChange}
-                disabled={!editContent}
+                control={form.control}
+                render={({ field, fieldState: { error, invalid } }) => (
+                  <Textarea
+                    {...field}
+                    rows={4}
+                    label='Description'
+                    placeholder='Description'
+                    aria-invalid={invalid}
+                    name="bio"
+                    className="text-neutral-500"
+                    value={field.value ? String(field.value) : ""}
+                    disabled={!editContent}
+                    error={
+                      error ? error.message : ""
+                    }
+                  />
+                )}
               />
             </div>
           </CardContent>
@@ -165,33 +189,70 @@ export default function CompanyProfile() {
           <CardContent>
             <Heading variant='h4' className='mb-3'>Contact Information</Heading>
             <div className='grid grid-cols-2 gap-5'>
-              <Input
-                label="Email"
+              <Controller
                 name="email"
-                value={formData?.email}
-                onChange={onInputChange}
-                disabled={!editContent}
+                control={form.control}
+                render={({ field, fieldState: { error, invalid } }) => (
+                  <Input
+                    {...field}
+                    label="Email"
+                    aria-invalid={invalid}
+                    placeholder="Email"
+                    disabled={!editContent}
+                    error={
+                      error ? error.message : ""
+                    }
+                  />
+                )}
               />
-              <Input
-                label="Contact No"
+              <Controller
                 name="contact_no"
-                value={formData?.contact_no}
-                onChange={onInputChange}
-                disabled={!editContent}
+                control={form.control}
+                render={({ field, fieldState: { error, invalid } }) => (
+                  <Input
+                    {...field}
+                    label="Contact No"
+                    aria-invalid={invalid}
+                    placeholder="Email"
+                    disabled={!editContent}
+                    error={
+                      error ? error.message : ""
+                    }
+                  />
+                )}
               />
-              <Input
-                label="Location"
+              <Controller
                 name="address"
-                value={formData?.address}
-                onChange={onInputChange}
-                disabled={!editContent}
+                control={form.control}
+                render={({ field, fieldState: { error, invalid } }) => (
+                  <Input
+                    {...field}
+                    label="Location"
+                    aria-invalid={invalid}
+                    placeholder="Location"
+                    disabled={!editContent}
+                    error={
+                      error ? error.message : ""
+                    }
+                  />
+                )}
               />
-              <Input
-                label="Website"
+              <Controller
                 name="website"
-                value={formData?.website}
-                onChange={onInputChange}
-                disabled={!editContent}
+                control={form.control}
+                render={({ field, fieldState: { error, invalid } }) => (
+                  <Input
+                    {...field}
+                    label="Website"
+                    aria-invalid={invalid}
+                    placeholder="Location"
+                    value={field.value ? String(field.value) : ""}
+                    disabled={!editContent}
+                    error={
+                      error ? error.message : ""
+                    }
+                  />
+                )}
               />
             </div>
           </CardContent>
@@ -217,42 +278,68 @@ export default function CompanyProfile() {
           <CardContent>
             <Heading variant='h4' className='mb-3'>Company Details</Heading>
             <div className='grid grid-cols-2 gap-5'>
-              <Input
-                label="Industry/Domain"
+              <Controller
                 name="company_type"
-                value={formData?.company_type}
-                onChange={onInputChange}
-                disabled={!editContent}
+                control={form.control}
+                render={({ field, fieldState: { error, invalid } }) => (
+                  <Input
+                    {...field}
+                    label="Industry/Domain"
+                    aria-invalid={invalid}
+                    placeholder="Industry/Domain"
+                    value={field.value ? String(field.value) : ""}
+                    disabled={!editContent}
+                    error={
+                      error ? error.message : ""
+                    }
+                  />
+                )}
               />
-              <CustomSelect
-                label="Company Size"
-                value={formData.size}
-                disabled={!editContent}
-                onValueChange={(val) => {
-                  setFormData((prev) => ({ ...prev, size: val }))
-                }}
-                options={[
-                  { value: "SIZE_1_10", label: "1-10" },
-                  { value: "SIZE_10_50", label: "10-50" },
-                  { value: "SIZE_50_100", label: "50-100" },
-                  { value: "SIZE_100_PLUS", label: "100+" },
-                ]}
-              >
-              </CustomSelect>
+              <Controller
+                name="size"
+                control={form.control}
+                render={({ field, fieldState: { invalid } }) => (
+                  <CustomSelect
+                    {...field}
+                    label="Company Size"
+                    aria-invalid={invalid}
+                    disabled={!editContent}
+                    onValueChange={(val) => {
+                      field.onChange((prev) => ({ ...prev, size: val }))
+                    }}
+                    options={[
+                      { value: "SIZE_1_10", label: "1-10" },
+                      { value: "SIZE_10_50", label: "10-50" },
+                      { value: "SIZE_50_100", label: "50-100" },
+                      { value: "SIZE_100_PLUS", label: "100+" },
+                    ]}
+                  />
+                )}
+              />
 
-              <Input
-                label="Year Founded"
-                type="number"
+              <Controller
                 name="founding_year"
-                value={formData?.founding_year}
-                onChange={onInputChange}
-                disabled={!editContent}
+                control={form.control}
+                render={({ field, fieldState: { error, invalid } }) => (
+                  <Input
+                    {...field}
+                    label="Year Founded"
+                    type="number"
+                    aria-invalid={invalid}
+                    placeholder="Year founded"
+                    disabled={!editContent}
+                    onChange={(e) => field.onChange(+e.target.value)}
+                    error={
+                      error ? error.message : ""
+                    }
+                  />
+                )}
               />
             </div>
           </CardContent>
         </Card>
       </div>
-    </div>
+    </form>
   )
 }
 

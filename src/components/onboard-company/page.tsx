@@ -1,6 +1,6 @@
 "use client"
 import axios, { AxiosError } from "axios";
-import React, { ChangeEvent, useState } from "react";
+import React, { useState } from "react";
 import CompanyProfile from "./company-profile";
 import CompanyMetadata from "./company-metadata";
 import CompanyAccount from "./company-account";
@@ -11,36 +11,37 @@ import clsx from "clsx";
 import { Card, CardContent } from "../ui/card";
 import useSWRMutation from "swr/mutation";
 import { Spinner } from "../ui/spinner";
+import * as z from "zod";
+import { CompanySize } from "@prisma/client";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  combinedCompanySchema,
+  companyAccountInputKeys,
+  companyMetadataInputKeys,
+  companyProfileInputKeys,
+  CompanyCombinedInputKeys,
+  CompanySignupPayload
+} from "./types";
 
-const initialFormData = {
+const initialFormData: CompanySignupPayload = {
   name: '',
-  founding_year: '',
+  founding_year: 2004,
   company_type: '',
   email: '',
   password: '',
   contact_no: '',
   website: '',
   address: '',
-  size: 'SIZE_1_10',
-  bio: ''
+  size: CompanySize.SIZE_1_10,
+  bio: null
 }
 
-export type CompanySignupPayload = {
-  name: string;
-  founding_year: string;
-  company_type: string;
-  email: string;
-  password: string;
-  contact_no: string;
-  website: string;
-  address: string;
-  size: string;
-  bio: string;
-}
+type StepTitle = "profile" | "account" | "metadata";
 
 type Step = {
   id: number;
-  title: string;
+  title: StepTitle
 }
 
 const steps: Step[] = [
@@ -56,6 +57,13 @@ const steps: Step[] = [
   },
 ]
 
+const getFieldsForStepMap: Map<StepTitle, CompanyCombinedInputKeys[]> =
+  new Map<StepTitle, CompanyCombinedInputKeys[]>([
+    ["profile", companyProfileInputKeys],
+    ["account", companyAccountInputKeys],
+    ["metadata", companyMetadataInputKeys]
+  ])
+
 const signupApiCall = async (url: string, { arg }: { arg: { payload: CompanySignupPayload } }) => {
   return await axios.post(url, {
     ...arg.payload,
@@ -69,28 +77,39 @@ const OnboardCompany = () => {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState<Step>(steps[0])
 
-  const [formData, setFormData] = useState<CompanySignupPayload>(initialFormData)
+  const { data: signupApiRes, isMutating: isLoading, trigger: signupApiTrigger } = useSWRMutation("/api/auth/signup", signupApiCall)
 
-  const { data: signupApiRes, isMutating: isLoading } = useSWRMutation("/api/auth/signup", signupApiCall)
+  const handleNext = async () => {
+    const fields = getFieldsForStepMap.get(currentStep.title);
+    const isValid = await form.trigger(fields);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    if (isValid) {
+      setCurrentStep(prev => prev.id === 3 ? prev : steps[prev.id])
+    }
   }
 
-  const handleSubmit = async () => {
+  const handlePrev = () => {
+    const fields = getFieldsForStepMap.get(currentStep.title as StepTitle)
+
+    fields?.forEach(field => {
+      form.clearErrors(field)
+    })
+
+    setCurrentStep(prev => prev?.id === 1 ? prev : steps[prev.id - 2])
+  }
+
+  const form = useForm<CompanySignupPayload>({
+    resolver: zodResolver(combinedCompanySchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
+    defaultValues: initialFormData
+  })
+
+  const onSubmit = async (data: z.infer<typeof combinedCompanySchema>) => {
     try {
-      await axios.post("/api/auth/signup", {
-        ...formData,
-        user_type: "company",
-        founding_year: +formData.founding_year,
-      });
-
-      alert("successful signup!")
-      handleReset()
-      router.push("/login")
-
-    } catch (err: unknown) {
+      await signupApiTrigger({ payload: data });
+      alert("Signup successful")
+    } catch (err) {
       if (err instanceof AxiosError) {
         alert(err?.response?.data?.error)
         console.log(err);
@@ -101,21 +120,8 @@ const OnboardCompany = () => {
     }
   }
 
-  const handleReset = async () => {
-    setFormData(() => initialFormData)
-  }
-
-  const handleNext = () => {
-    setCurrentStep(prev => prev.id === 3 ? prev : steps[prev.id])
-  }
-
-  const handlePrev = () => {
-    setCurrentStep(prev => prev?.id === 1 ? prev : steps[prev.id - 2])
-  }
-
   if (!isLoading && signupApiRes) {
     router.push("/login")
-    alert("Signup successful")
   }
 
   return (
@@ -153,35 +159,39 @@ const OnboardCompany = () => {
           ))}
         </div>
 
-        <div className="space-y-4 mx-auto">
-          {
-            currentStep?.id === 1 && (
-              <CompanyProfile
-                formData={formData}
-                setFormData={setFormData}
-                handleChange={handleChange}
-              />)}
-          {currentStep?.id === 2 && (
-            <CompanyAccount
-              formData={formData}
-              setFormData={setFormData}
-              handleChange={handleChange}
-            />)}
-          {currentStep?.id === 3 && (
-            <CompanyMetadata
-              formData={formData}
-              setFormData={setFormData}
-              handleChange={handleChange}
-            />)
-          }
+        <form
+          className="space-y-4 mx-auto"
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
+          {currentStep.id === 1 && <CompanyProfile formControl={form.control} />}
+          {currentStep.id === 2 && <CompanyAccount formControl={form.control} />}
+          {currentStep.id === 3 && <CompanyMetadata formControl={form.control} />}
           <div className="mt-6 space-x-4">
-            {currentStep.id !== 1 && <Button className="w-24" variant="outline" onClick={handlePrev}>Prev</Button>}
-            {currentStep.id !== 3 && <Button className="w-24" onClick={handleNext}>Next</Button>}
-            {currentStep.id === 3 && <Button className="w-24" onClick={handleSubmit}>{!isLoading ? "Submit" : <Spinner />}</Button>}
+            {currentStep.id !== 1 && (
+              <Button
+                className="w-24"
+                type="button"
+                variant="outline"
+                onClick={handlePrev}
+              >Prev</Button>
+            )}
+            {currentStep.id !== 3 && (
+              <Button
+                className="w-24"
+                type="button"
+                onClick={handleNext}
+              >Next</Button>
+            )}
+            {currentStep.id === 3 && (
+              <Button
+                className="w-24"
+                type="submit"
+              >{!isLoading ? "Submit" : <Spinner />}</Button>
+            )}
           </div>
-        </div>
+        </form>
       </CardContent>
-    </Card >
+    </Card>
   )
 }
 

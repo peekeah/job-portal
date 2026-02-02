@@ -15,7 +15,7 @@ const payloadSchema = z.object({
 
 const applicantSchema = z.object({
   name: z.string(),
-  mobile: z.string(),
+  mobile: z.string().optional(),
   email: z.string(),
   profile_pic: z.string().optional(),
   bio: z.string().optional(),
