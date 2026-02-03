@@ -1,5 +1,4 @@
 "use client"
-import { useState } from "react";
 import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 
@@ -10,48 +9,76 @@ import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
 import { Text } from "@/components/ui/typography";
 import { Badge } from "@/components/ui/badge";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { jobSchema as initialJobSchama } from "@/lib/schema";
+import z from "zod";
+import clsx from "clsx";
 
-type Skill = {
-  id: number;
-  value: string;
-};
+type Job = z.infer<typeof schema>
+
+const updatedSchema = initialJobSchama.omit({ skills_required: true })
+
+const schema = updatedSchema.extend({
+  ctc: z.string().min(1, "CTC is required"),
+  stipend: z.string(),
+  skill: z.string(),
+  skills_required: z.array(
+    z.object({
+      id: z.number(),
+      value: z.string()
+    })).min(1, "Atleast 1 skill is required")
+})
+
+const initialJobValues: Job = {
+  job_role: "",
+  description: "",
+  ctc: "",
+  stipend: "",
+  location: "",
+  skill: "",
+  skills_required: []
+}
 
 export default function PostJob() {
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [formData, setFormData] = useState({
-    job_role: "",
-    description: "",
-    ctc: "",
-    stipend: "",
-    location: "",
-    skill: ""
-  });
+
+  const form = useForm<Job>({
+    resolver: zodResolver(schema),
+    defaultValues: initialJobValues,
+  })
+
+
+  const skill = form.watch("skill")
+  form.watch("skills_required")
 
   const router = useRouter();
 
   const addSkill = () => {
-    setSkills((prev) => [...prev, {
-      id: Math.floor(Math.random() * 100 + 100),
-      value: formData.skill
-    }]);
-
-    setFormData((prev) => ({ ...prev, skill: "" }))
+    const skills = form.getValues("skills_required")
+    const skill = form.getValues("skill")
+    form.setValue("skills_required", skills.concat({
+      id: Date.now(),
+      value: skill
+    }))
+    form.resetField("skill")
+    form.clearErrors("skills_required")
   }
 
   const removeSkill = (skillId: number) => {
-    setSkills((prev) => prev.filter((skill) => skill.id !== skillId));
+    const filteredSkills = form.getValues("skills_required")
+      .filter(el => el.id !== skillId)
+    form.setValue("skills_required", filteredSkills)
+    if (form.formState.isSubmitted) {
+      form.trigger("skills_required")
+    }
   }
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (formData: Job) => {
     try {
-      const payload = { ...formData, skills_required: skills.map(el => el.value) };
+      const payload = {
+        ...formData,
+        skills_required: formData.skills_required.map(el => el.value)
+      };
       const res = await axios.post("/api/jobs", payload);
       alert(res.data.data);
       router.push("/dashboard");
@@ -68,98 +95,158 @@ export default function PostJob() {
   return (
     <div className="p-5 sm:p-7 md:px-10 lg:px-5 h-full w-full">
       <Text className="text-2xl font-semibold">Post Job</Text>
-      <div className="flex mx-10 my-5 bg-muted/10 justify-center mt-24">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="flex mx-10 my-5 bg-muted/10 justify-center mt-24"
+      >
         <Card className="w-full py-10 px-2 min-w-2xl max-w-3xl shadow-sm">
           <CardContent className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Job Role"
+              <Controller
                 name="job_role"
-                value={formData.job_role}
-                onChange={handleChange}
-                placeholder="e.g. Frontend Developer"
+                control={form.control}
+                render={({ field, fieldState: { error, invalid } }) => (
+                  <Input
+                    {...field}
+                    label="Job Role"
+                    aria-invalid={invalid}
+                    placeholder="e.g. Frontend Developer"
+                    error={
+                      error ? error.message : ""
+                    }
+                  />
+                )}
               />
-              <Input
-                label="Location"
+              <Controller
                 name="location"
-                value={formData.location}
-                onChange={handleChange}
-                placeholder="e.g. Remote / Bangalore"
+                control={form.control}
+                render={({ field, fieldState: { error, invalid } }) => (
+                  <Input
+                    {...field}
+                    label="Location"
+                    placeholder="e.g. Remote / Bangalore"
+                    aria-invalid={invalid}
+                    error={
+                      error ? error.message : ""
+                    }
+                  />
+                )}
               />
             </div>
-
-            <Textarea
-              label="Description"
+            <Controller
               name="description"
-              rows={10}
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Describe the job role and requirements..."
+              control={form.control}
+              render={({ field, fieldState: { error, invalid } }) => (
+                <Textarea
+                  {...field}
+                  label="Description"
+                  rows={10}
+                  placeholder="Describe the job role and requirements..."
+                  aria-invalid={invalid}
+                  error={
+                    error ? error.message : ""
+                  }
+                />
+              )}
             />
 
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="CTC"
+              <Controller
                 name="ctc"
-                type="number"
-                value={formData.ctc}
-                onChange={handleChange}
-                placeholder="Enter CTC"
+                control={form.control}
+                render={({ field, fieldState: { error, invalid } }) => (
+                  <Input
+                    {...field}
+                    label="CTC"
+                    type="number"
+                    placeholder="Enter CTC"
+                    aria-invalid={invalid}
+                    error={
+                      error ? error.message : ""
+                    }
+                  />
+                )}
               />
-              <Input
-                label="Stipend"
+              <Controller
                 name="stipend"
-                type="number"
-                value={formData.stipend}
-                onChange={handleChange}
-                placeholder="Enter stipend"
+                control={form.control}
+                render={({ field, fieldState: { error, invalid } }) => (
+                  <Input
+                    {...field}
+                    label="Stipend"
+                    type="number"
+                    placeholder="Enter stipend"
+                    aria-invalid={invalid}
+                    error={
+                      error ? error.message : ""
+                    }
+                  />
+                )}
               />
             </div>
 
             <div className="space-y-3 mt-2">
-              <div className="flex items-end gap-3">
-                <Input
-                  name="skill"
-                  label="Skills Required"
-                  value={formData.skill}
-                  onChange={handleChange}
-                  placeholder="Enter a skill (e.g. React, Node.js)"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="transition-all cursor-pointer"
-                  onClick={addSkill}
-                  disabled={!Boolean(formData.skill)}
-                >
-                  <Plus className="size-4" />
-                </Button>
-              </div>
-              <div className="flex gap-3 my-5">
-                {skills.map((skill) => (
-                  <Badge
-                    key={skill.id}
-                    className="flex items-center rounded-full px-3 py-2 text-base bg-primary/10 text-primary"
+              <div>
+                <div className="flex items-end gap-3">
+                  <Controller
+                    name="skill"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        label="Skills Required"
+                        placeholder="Enter skill"
+                        aria-invalid={Boolean(form.formState.errors["skills_required"])}
+                      />
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="transition-all cursor-pointer"
+                    onClick={addSkill}
+                    disabled={!Boolean(skill)}
                   >
-                    <p>{skill.value}</p>
-                    <button
-                      className="cursor-pointer"
-                      onClick={() => removeSkill(skill.id)}
-                    ><X className="size-4" />
-                    </button>
-                  </Badge>
-                ))}
+                    <Plus className="size-4" />
+                  </Button>
+                </div>
+                {
+                  form.formState.errors["skills_required"] &&
+                  <span className="text-sm text-destructive">{form.formState.errors["skills_required"]?.message || ""}</span>
+                }
+              </div>
+              <div className={clsx(
+                "flex gap-3 my-5",
+                !form.getValues("skills_required").length && "hidden"
+              )}
+              >
+                {form.getValues("skills_required")
+                  .map((skill) => (
+                    <Badge
+                      key={skill.id}
+                      className="flex items-center rounded-full px-3 py-2 text-base bg-primary/10 text-primary"
+                    >
+                      <p>{skill.value}</p>
+                      <button
+                        className="cursor-pointer"
+                        type="button"
+                        onClick={() => removeSkill(skill.id)}
+                      ><X className="size-4" />
+                      </button>
+                    </Badge>
+                  ))}
               </div>
             </div>
 
             <div className="pt-4">
-              <Button className="w-full" onClick={handleSubmit}>
+              <Button className="w-full" type="submit" >
                 Submit
               </Button>
             </div>
           </CardContent>
         </Card>
-      </div>
+      </form>
     </div >
   );
 }
