@@ -122,11 +122,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <SignOutButton />
         </div>
       </div>
-      <div className="block absolute top-5 right-3 lg:hidden">
+      <div className="block absolute top-5 right-3 lg:hidden z-10">
         <MenuIcon className="z-20" onClick={() => setOpenMenu(true)} />
       </div>
       {openMenu ? (
-        <div className="block lg:hidden absolute z-10 h-screen w-screen backdrop-blur-md transition-all duration-300">
+        <div className="block lg:hidden absolute z-20 h-screen w-screen backdrop-blur-md transition-all duration-300">
           <div className="relative p-5">
             <CloseIcon
               className="z-20 absolute top-5 right-3"

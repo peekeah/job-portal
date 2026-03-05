@@ -52,6 +52,7 @@
     "pdfjs-dist": "3.4.120",
     "pg": "^8.16.3",
     "prisma": "~6.18.0",
+    "radix-ui": "^1.4.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.71.1",

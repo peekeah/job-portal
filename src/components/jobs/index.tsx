@@ -13,6 +13,7 @@ import { Badge } from '../ui/badge';
 import EnhancedPreviewModal from '@/components/enhanced-preview-modal';
 import { useState } from 'react';
 import useSWRMutation from 'swr/mutation';
+import { useRouter } from 'next/navigation';
 
 export type Job = {
   id: string;
@@ -62,6 +63,7 @@ const Jobs = () => {
   const { data: resData, error, isLoading } = useSWR<Response>('/api/jobs', fetcher)
   const jobs = resData?.data;
 
+  const router = useRouter()
   const { mutate } = useSWRConfig()
   const [enahncePreviewJobId, setEnahancePreviewJobId] = useState<string>("")
 
@@ -134,7 +136,10 @@ const Jobs = () => {
                     <Button onClick={() => { setEnahancePreviewJobId(job.id) }} variant={"outline"}>
                       Enhance & apply
                     </Button>
-                    <Button variant={"outline"}>View Job</Button>
+                    <Button
+                      variant={"outline"}
+                      onClick={() => router.push("dashboard/job/" + job.id)}
+                    >View Job</Button>
                   </div>
                 </CardContent>
               </Card>

@@ -9,6 +9,7 @@ import { Heading, Text } from "@/components/ui/typography";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation"
 
 export type Job = {
   id: string;
@@ -47,6 +48,7 @@ const badgeClasses = new Map([
 
 function AppliedJobs() {
 
+  const router = useRouter()
   const { data, error, isLoading } = useSWR<ApiResponse>("/api/student/applied-jobs", fetcher)
 
   const appliedJobs = data?.data ?? []
@@ -105,7 +107,7 @@ function AppliedJobs() {
                       <Badge key={el} variant={"outline"}>{el}</Badge>
                     ))}</Text>
                     <div className='mt-4 space-x-3'>
-                      <Button variant={"outline"}>View Job</Button>
+                      <Button variant={"outline"} onClick={() => router.push("job/" + job.id)}>View Job</Button>
                     </div>
                   </CardContent>
                 </Card>
