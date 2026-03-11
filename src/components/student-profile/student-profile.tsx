@@ -9,7 +9,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Upload } from "lucide-react";
 import { fetcher } from "@/lib/fetcher";
 
-import { Resume } from "@prisma/client"
 import ResumeViewer from "../resume-viewer";
 import { Dialog } from "@radix-ui/react-dialog";
 import { DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
@@ -17,6 +16,7 @@ import { Profile, profileSchema } from "./schema";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useSWRMutation from "swr/mutation";
+import { Resume } from "@/mock/resume";
 
 const initialProfile: Profile = {
   id: "",
@@ -312,8 +312,8 @@ function StudentProfile() {
                                     <Button
                                       variant="secondary"
                                       size="sm"
-                                      onClick={() => setSelectResumeToDisplay(el)}
-                                    >Show PDF</Button> : null
+                                      onClick={() => setSelectResumeToDisplay(el?.json ? JSON.parse(el.json) : el)}
+                                    >Show</Button> : null
                                 }
                                 <Button
                                   onClick={() => handleResumeDelete(el.id)}

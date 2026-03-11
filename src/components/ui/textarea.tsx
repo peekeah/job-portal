@@ -10,9 +10,11 @@ interface TextareaProps extends React.ComponentProps<"textarea"> {
 
 function Textarea({ className, label, name, error, ...props }: TextareaProps) {
   return (
-    <div>
-      <div className="space-y-1.5">
-        <Label htmlFor={name}>{label}</Label>
+    <div className="w-full">
+      <div className="space-y-1.5 w-full">
+        {
+          label ? <Label htmlFor={name}>{label}</Label> : null
+        }
         <textarea
           data-slot="textarea"
           name={name}
@@ -23,7 +25,10 @@ function Textarea({ className, label, name, error, ...props }: TextareaProps) {
           {...props}
         />
       </div>
-      <span className="text-sm text-destructive">{error}</span>
+      {
+        error ?
+          <span className="text-sm text-destructive">{error}</span> : null
+      }
     </div>
   )
 }

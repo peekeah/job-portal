@@ -4,16 +4,17 @@ import { cn } from "@/lib/utils"
 import { Label } from "./label"
 
 interface CustomInput extends React.ComponentProps<"input"> {
-  label?: string
-  error?: string
+  label?: string;
+  error?: string;
+  labelClass?: string;
 }
 
-function Input({ className, name, type, label, error, ...props }: CustomInput) {
+function Input({ className, labelClass, name, type, label, error, ...props }: CustomInput) {
   return (
     <div>
       <div className="space-y-1.5 w-full">
         {
-          label ? <Label htmlFor={name}>{label}</Label> : null
+          label ? <Label htmlFor={name} className={labelClass}>{label}</Label> : null
         }
         <input
           type={type}
@@ -29,7 +30,9 @@ function Input({ className, name, type, label, error, ...props }: CustomInput) {
           {...props}
         />
       </div>
-      <span className="text-sm text-destructive">{error}</span>
+      {
+        error ? <span className="text-sm text-destructive">{error}</span> : null
+      }
     </div>
   )
 }

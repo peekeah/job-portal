@@ -17,7 +17,7 @@ const JsonViewer: React.FC<{ data: Resume }> = ({ data }) => {
   } = data;
 
   return (
-    <div className="max-w-4xl mx-auto p-8 font-sans text-gray-800">
+    <div className="max-w-4xl mx-auto p-3 font-sans text-gray-800">
       {/* Profile */}
       <header className="mb-8">
         <h1 className="text-3xl font-bold">{profile.name}</h1>
@@ -144,21 +144,22 @@ const JsonViewer: React.FC<{ data: Resume }> = ({ data }) => {
 };
 
 type Props = {
-  resume: ResumeResponse;
+  resume: ResumeResponse | Resume;
   onClose?: () => void;
 }
 
+function isResumeResponse(resume: ResumeResponse | Resume): resume is ResumeResponse {
+  return 'type' in resume && 'url' in resume;
+}
+
 const ResumeViewer = ({ resume, onClose }: Props) => {
-  let resumeJson;
-  if (resume.json) {
-    const rawResume = resume.json as string;
-    resumeJson = JSON.parse(rawResume)
-  }
+
+  const isPdfResume = isResumeResponse(resume) && resume.type === "pdf" && resume.url;
 
   return (
     <>
       {
-        resume.type === "pdf" && resume.url ?
+        isPdfResume ?
           <div className="relative border rounded-lg bg-white dark:bg-gray-900" style={{ height: '750px' }}>
             {!!onClose ?
               <button
@@ -167,11 +168,12 @@ const ResumeViewer = ({ resume, onClose }: Props) => {
               </button> : null
             }
             <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
-              <Viewer fileUrl={resume.url} />
+              <Viewer fileUrl={resume.url as string} />
             </Worker>
           </div> :
-          <JsonViewer data={resumeJson} />
-      }
+          isResumeResponse(resume) ? null : (
+            <JsonViewer data={resume} />
+          )}
     </>
   );
 }
