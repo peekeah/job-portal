@@ -62,6 +62,7 @@ export async function POST(
       const dbRes = await prisma.resume.findFirst({
         where: {
           type: "pdf",
+          applicant_id: studentData.id
         },
       });
 
@@ -72,7 +73,10 @@ export async function POST(
       resumeId = dbRes.id;
     } else {
       const dbRes = await prisma.resume.findFirst({
-        where: { id: payload.resumeId },
+        where: { 
+          id: payload.resumeId,
+          applicant_id: studentData.id
+         },
       });
 
       if (!dbRes) {
