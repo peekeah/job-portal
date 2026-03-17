@@ -1,4 +1,4 @@
-import type { ResumeSectionToLines } from "lib/parse-resume-from-pdf/types";
+import { ResumeSectionToLines } from "../../types";
 
 /**
  * Return section lines that contain any of the keywords.

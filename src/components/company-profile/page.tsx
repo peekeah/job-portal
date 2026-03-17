@@ -18,6 +18,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { combinedCompanySchema } from '../onboard-company/types';
 import { CompanySize } from '@prisma/client';
 import z from 'zod';
+import useSWRMutation from 'swr/mutation';
 
 const profileSchema = z
   .object({
@@ -68,8 +69,7 @@ const postProfileApiCall = async (url: string, { arg: { payload: payload } }: { 
 export default function CompanyProfile() {
   const { data, isLoading } = useSWR<{ data: CompanyProfile }>('/api/company/profile', fetcher)
 
-  const { data: postProfileData, isMutating: postProfileLoading } = useSWR<{ data: CompanyProfile }>('/api/company/profile', fetcher)
-
+  const { trigger: postProfileTrigger, isMutating: postProfileLoading } = useSWRMutation('/api/company/profile', postProfileApiCall)
 
   const company = data?.data;
 
@@ -90,19 +90,7 @@ export default function CompanyProfile() {
   }
 
   const onSubmit = async (payload: CompanyProfile) => {
-    try {
-      const res = await axios.post("/api/company/profile", payload)
-
-      if (!res?.data?.status) {
-        throw new Error(res?.data?.error || "error while saving")
-      }
-
-      alert("successfully saved data")
-      toggleEdit()
-
-    } catch (err) {
-      console.log("err:", err)
-    }
+    postProfileTrigger({ payload })
   }
 
   const onCancelChanges = () => {
@@ -304,9 +292,7 @@ export default function CompanyProfile() {
                     label="Company Size"
                     aria-invalid={invalid}
                     disabled={!editContent}
-                    onValueChange={(val) => {
-                      field.onChange((prev) => ({ ...prev, size: val }))
-                    }}
+                    onValueChange={field.onChange}
                     options={[
                       { value: "SIZE_1_10", label: "1-10" },
                       { value: "SIZE_10_50", label: "10-50" },

@@ -28,16 +28,18 @@ async function getProfile(req: NextRequest) {
   }
 }
 
+// #FIXME: Fix postprofile bug
 async function postProfile(req: NextRequest) {
   try {
 
     const token = await authMiddleware(req, "company")
 
     const body = await req.json()
+    console.log("rjs:", body)
     const postSchema = companySchema.partial();
     const payload = postSchema.parse(body);
 
-    const updated = await prisma.company.updateMany(
+    const updated = await prisma.company.updateManyAndReturn(
       {
         data: {
           ...payload,

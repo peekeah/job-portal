@@ -39,6 +39,11 @@ export type Response = {
   data: ResJob[]
 }
 
+type ApplyJobPaylod  = {
+  jobId: string;
+  resumeId: string;
+}
+
 const applyJobApiCall = async (url: string, { arg: { jobId, resumeId } }: { arg: ApplyJobPaylod }) => {
   try {
     const payload = resumeId ? { resumeId } : {}
@@ -55,7 +60,6 @@ const applyJobApiCall = async (url: string, { arg: { jobId, resumeId } }: { arg:
   }
 }
 
-
 export function JobDetails() {
 
   const formatCompanySize = (size: string) => {
@@ -71,7 +75,6 @@ export function JobDetails() {
       .slice(0, 2);
   };
 
-
   const { mutate } = useSWRConfig()
   const { trigger: handleApplyJob, isMutating: applying } = useSWRMutation(`/api/jobs/apply/`, applyJobApiCall)
   const [enahncePreviewJobId, setEnahancePreviewJobId] = useState<string>("")
@@ -80,10 +83,6 @@ export function JobDetails() {
 
   const { data: jobRes, isLoading } = useSWR<{ data: Job }>('/api/jobs/' + jobId, fetcher)
   const jobData = jobRes?.data
-
-  const handleSubmitJob = () => {
-
-  }
 
   const applyWithEdits = async (jobId: string, resumeId: string) => {
     if (!enahncePreviewJobId) return;
@@ -176,9 +175,10 @@ export function JobDetails() {
                     )}
                   </div>
                   <div className='space-x-3'>
+                    {/* // FIXME: Update api call to latest */}
                     <Button
                       className="lg:p-5 lg:text-md bg-white text-blue-600 hover:bg-blue-50 font-semibold transition-colors"
-                      onClick={() => handleApplyJob({ jobId: jobData?.id })}
+                      onClick={() => handleApplyJob({ jobId: jobData?.id, resumeId: "1" })}
                     >
                       Apply
                     </Button>
@@ -209,7 +209,7 @@ export function JobDetails() {
                   </div>
                   <div>
                     <p className="text-xs sm:text-sm text-gray-600 mb-1">Company Size</p>
-                    <p className="font-semibold text-base sm:text-lg">{formatCompanySize(jobData.company.size)}</p>
+                    <p className="font-semibold text-base sm:text-lg">{formatCompanySize(jobData.company.size!)}</p>
                   </div>
                   <div className="sm:col-span-2 md:col-span-1">
                     <p className="text-xs sm:text-sm text-gray-600 mb-1">Location</p>

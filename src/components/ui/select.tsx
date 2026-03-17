@@ -180,16 +180,23 @@ type CustomSelectProps = React.ComponentProps<typeof Select> & {
   label?: string;
   placeholder?: string;
   className?: string;
+  onChange?: (e: { target: { value: string } }) => void; // add this
 }
 
-function CustomSelect({ options, label, className, placeholder, ...props }: CustomSelectProps) {
+function CustomSelect({ options, label, className, placeholder, onValueChange, onChange, ...props }: CustomSelectProps) {
   return (
     <div className={cx("space-y-1.5", className)}>
       {
         label && (
           <Label className="text-sm font-medium leading-none">{label}</Label>)
       }
-      <Select {...props}>
+      <Select 
+        {...props}
+        onValueChange={(val) => {
+          onValueChange?.(val);
+          onChange?.({ target: { value: val } } as any);
+        }}
+      >
         <SelectTrigger className="w-full">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>

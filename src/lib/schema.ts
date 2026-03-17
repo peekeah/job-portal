@@ -2,9 +2,9 @@ import { CompanySize } from "@prisma/client";
 import z from "zod";
 
 export const companySchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.uuid().optional(),
   name: z.string().min(1, "Company name is required"),
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   founding_year: z
     .number()
     .int("Founding year must be an integer")
@@ -17,7 +17,6 @@ export const companySchema = z.object({
     .max(15, "Contact number too long")
     .refine((val) => /^\+?\d+$/.test(val), "Contact number must contain only digits"),
   website: z
-    .string()
     .url("Invalid URL")
     .optional()
     .nullable()

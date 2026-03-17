@@ -63,14 +63,7 @@ const CompanyProfile = ({ formControl }: { formControl: Control<CompanySignupPay
               {...field}
               label='Company Size'
               className='w-48'
-              onValueChange={
-                (val) => {
-                  console.log("ff:", val, field.value)
-                  return field.onChange({
-                    ["size"]: val
-                  })
-                }
-              }
+              onValueChange={field.onChange}
               options={[
                 { value: 'SIZE_1_10', label: '1-10' },
                 { value: 'SIZE_10_50', label: '10-50' },

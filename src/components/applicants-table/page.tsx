@@ -1,8 +1,8 @@
-import { Applicants, ApplicantType } from "@/app/(dashboard)/dashboard/job/[jobId]/page";
 import axios from "axios";
 
 import { Button } from "../ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Applicants, ApplicantType } from "../job/company-job";
 
 type ApplicantTableProps = {
   jobId: string;

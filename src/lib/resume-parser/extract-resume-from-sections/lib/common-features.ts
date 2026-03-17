@@ -1,4 +1,4 @@
-import type { TextItem, FeatureSet } from "lib/parse-resume-from-pdf/types";
+import { FeatureSet, TextItem } from "../../types";
 
 const isTextItemBold = (fontName: string) =>
   fontName.toLowerCase().includes("bold");
