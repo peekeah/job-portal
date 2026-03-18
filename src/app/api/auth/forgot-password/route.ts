@@ -5,9 +5,10 @@ import { Resend } from "resend";
 import { CustomError, errorHandler } from "@/lib/errorHandler";
 import { prisma } from "@/lib/db";
 import { signToken } from "@/lib/jwt";
+import { getEnv } from "@/lib/config";
 
 function getEmailText(name: string, hash: string) {
-  const CLIENT_HOST = process.env.CLIENT_HOST || "http://localhost:3000";
+  const CLIENT_HOST = getEnv("CLIENT_HOST", "http://localhost:3000");
   const resetLink = CLIENT_HOST + "/reset-password?token=" + hash;
 
   return `Hi ${name},\nPlease find reset link below to reset the password\n${resetLink}`;
@@ -57,7 +58,7 @@ async function forgotPassword(req: NextRequest) {
       userName = userData?.name || userName;
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    const resend = new Resend(getEnv("RESEND_API_KEY"));
     const { error } = await resend.emails.send({
       from: "onboarding@resend.dev",
       to: "testmail9174@gmail.com",

@@ -2,9 +2,10 @@ import { NextRequest } from "next/server";
 import { getToken as fetchToken } from "next-auth/jwt";
 import { NextApiRequest } from "next";
 import { CustomError } from "@/lib/errorHandler";
+import { getEnv } from "./config";
 
 export function getToken(req: NextRequest | NextApiRequest) {
-  return fetchToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  return fetchToken({ req, secret: getEnv("NEXTAUTH_SECRET") });
 }
 
 export type Role = "company" | "applicant" | "admin";
