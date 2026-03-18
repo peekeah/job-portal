@@ -8,10 +8,12 @@ import { fetcher } from '@/lib/fetcher';
 import { companySizeMap } from '@/components/company-profile/page';
 import { useParams } from 'next/navigation';
 import axios, { AxiosError } from 'axios';
-import EnhancedjobIdPreviewModal from '../enhanced-preview-modal';
 import { useState } from 'react';
 import useSWRMutation from 'swr/mutation';
 import { Card } from '../ui/card';
+import EnhancedJobPreviewModal from '../enhanced-preview-modal';
+import { Resume } from '@/mock/resume';
+import { Spinner } from '../ui/spinner';
 
 type Job = z.infer<typeof jobSchema> & {
   id: string;
@@ -39,15 +41,13 @@ export type Response = {
   data: ResJob[]
 }
 
-type ApplyJobPaylod  = {
+type ApplyJobPaylod = {
   jobId: string;
-  resumeId: string;
 }
 
-const applyJobApiCall = async (url: string, { arg: { jobId, resumeId } }: { arg: ApplyJobPaylod }) => {
+const applyJobApiCall = async (url: string, { arg: { jobId } }: { arg: ApplyJobPaylod }) => {
   try {
-    const payload = resumeId ? { resumeId } : {}
-    const response = await axios.post(url + jobId, payload);
+    const response = await axios.post(url + jobId);
     alert(response.data.data);
     return response.data
   } catch (err) {
@@ -59,6 +59,33 @@ const applyJobApiCall = async (url: string, { arg: { jobId, resumeId } }: { arg:
     console.log(err);
   }
 }
+
+type ApplyJobWithEditsPayload = {
+  jobId: string;
+  resumeId: string;
+  resumeData: string;
+};
+
+const applyJobWithEditsApiCall = async (
+  url: string,
+  { arg: { jobId, resumeId, resumeData } }: { arg: ApplyJobWithEditsPayload }
+) => {
+  try {
+    const response = await axios.post(url + jobId, {
+      resumeId,
+      resumeData,
+    });
+    alert(response.data.data);
+    return response.data;
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      alert(err?.response?.data?.message);
+    } else {
+      alert("something went wrong");
+    }
+    console.log(err);
+  }
+};
 
 export function JobDetails() {
 
@@ -77,6 +104,11 @@ export function JobDetails() {
 
   const { mutate } = useSWRConfig()
   const { trigger: handleApplyJob, isMutating: applying } = useSWRMutation(`/api/jobs/apply/`, applyJobApiCall)
+
+  const { trigger: handleApplyJobWithEdits } = useSWRMutation(
+    `/api/jobs/apply-with-edits/`,
+    applyJobWithEditsApiCall
+  );
   const [enahncePreviewJobId, setEnahancePreviewJobId] = useState<string>("")
 
   const { jobId } = useParams<{ jobId: string }>();
@@ -84,28 +116,27 @@ export function JobDetails() {
   const { data: jobRes, isLoading } = useSWR<{ data: Job }>('/api/jobs/' + jobId, fetcher)
   const jobData = jobRes?.data
 
-  const applyWithEdits = async (jobId: string, resumeId: string) => {
+  const applyWithEdits = async (jobId: string, resumeId: string, resumeData: Resume) => {
     if (!enahncePreviewJobId) return;
-    mutate("/api/jobs",
-      (currentData?: Response) => {
-        if (!currentData) return currentData;
-
-        return {
-          ...currentData,
-          data: currentData.data.filter(
-            (job: ResJob) => job.id !== jobId
-          ),
-        };
-      },
-      false
-    );
     try {
-      await handleApplyJob({ jobId, resumeId });
+      await handleApplyJobWithEdits({
+        jobId,
+        resumeId,
+        resumeData: JSON.stringify(resumeData),
+      });
+      setEnahancePreviewJobId("");
     } catch (err) {
-      mutate("/api/jobs");
+      alert("error while applying")
     }
+  }
 
-    setEnahancePreviewJobId("");
+  if (isLoading) {
+    return (
+      <div className="mt-72 flex items-center justify-center py-10">
+        <Spinner className="h-6 w-6 animate-spin text-gray-500" />
+        <span className="ml-2 text-gray-500">Loading...</span>
+      </div>
+    )
   }
 
   return (
@@ -114,11 +145,10 @@ export function JobDetails() {
         <div className="min-h-screen flex py-4 sm:py-8 lg:py-12 px-3 sm:px-4 lg:px-6">
           <div className="max-w-4xl w-full">
             <Card>
-              {/* Header */}
               <div className="space-y-4 sm:space-y-6 pb-6 sm:pb-8 px-4 sm:px-6 pt-6">
                 <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                   <div className="flex gap-3 sm:gap-5 w-full sm:w-auto">
-                    <div className="relative flex-shrink-0">
+                    <div className="relative shrink-0">
                       <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-lg sm:text-xl lg:text-2xl font-bold ring-2 sm:ring-4 ring-white shadow-lg">
                         {getCompanyInitials(jobData.company.name)}
                       </div>
@@ -126,30 +156,30 @@ export function JobDetails() {
                     </div>
                     <div className="space-y-2 sm:space-y-3 flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600">
-                        <Building2 className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <Building2 className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
                         <span className="font-semibold text-gray-900 truncate">{jobData.company.name}</span>
                         <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 sm:py-1 rounded-full font-medium whitespace-nowrap">Actively hiring</span>
                       </div>
-                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent leading-tight">
+                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent leading-tight">
                         {jobData.job_role}
                       </h1>
                       <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
                         <div className="flex items-center gap-1 sm:gap-1.5 text-gray-600">
-                          <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                          <MapPin className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
                           <span className="truncate">{jobData.location}</span>
                         </div>
                         <div className="flex items-center gap-1 sm:gap-1.5 text-gray-600">
-                          <Building2 className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                          <Building2 className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
                           <span className="truncate">{jobData.company.company_type}</span>
                         </div>
                         <div className="flex items-center gap-1 sm:gap-1.5 text-gray-600">
-                          <Briefcase className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                          <Briefcase className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
                           <span className="truncate">{formatCompanySize(jobData.company.size!)}</span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-2 flex-shrink-0 self-end sm:self-start">
+                  <div className="flex gap-2 shrink-0 self-end sm:self-start">
                     <button className="h-9 w-9 sm:h-10 sm:w-10 rounded-full border border-gray-300 hover:bg-gray-100 flex items-center justify-center">
                       <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
@@ -163,7 +193,7 @@ export function JobDetails() {
               {/* Content */}
               <div className="space-y-6 sm:space-y-8 pb-6 sm:pb-8 px-4 sm:px-6">
                 {/* CTC Card */}
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-500 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="bg-linear-to-r from-blue-600 to-indigo-500 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="w-full sm:w-auto">
                     <div className="flex items-center gap-2 text-blue-100 mb-2">
                       <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -175,10 +205,9 @@ export function JobDetails() {
                     )}
                   </div>
                   <div className='space-x-3'>
-                    {/* // FIXME: Update api call to latest */}
                     <Button
                       className="lg:p-5 lg:text-md bg-white text-blue-600 hover:bg-blue-50 font-semibold transition-colors"
-                      onClick={() => handleApplyJob({ jobId: jobData?.id, resumeId: "1" })}
+                      onClick={() => handleApplyJob({ jobId: jobData?.id })}
                     >
                       Apply
                     </Button>
@@ -213,7 +242,7 @@ export function JobDetails() {
                   </div>
                   <div className="sm:col-span-2 md:col-span-1">
                     <p className="text-xs sm:text-sm text-gray-600 mb-1">Location</p>
-                    <p className="font-semibold text-base sm:text-lg break-words">{jobData.company.address}</p>
+                    <p className="font-semibold text-base sm:text-lg wrap-break-words">{jobData.company.address}</p>
                   </div>
                 </div>
 
@@ -266,7 +295,7 @@ export function JobDetails() {
 
       {
         enahncePreviewJobId && (
-          <EnhancedjobIdPreviewModal
+          <EnhancedJobPreviewModal
             jobId={enahncePreviewJobId}
             applying={applying}
             onApplyAction={applyWithEdits}

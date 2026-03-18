@@ -64,10 +64,11 @@ export const errorHandler = (err: unknown): [ResponseOut, Status] => {
   }
 
   if (err instanceof CustomError) {
-    console.log("cust err", err.message, err.status)
     response.message = err.message;
     response.status = err.status;
   }
+
+  console.log("error:", err)
 
   return [
     {

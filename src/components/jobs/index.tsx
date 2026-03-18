@@ -10,10 +10,11 @@ import { Spinner } from '../ui/spinner';
 import { Heading, Text } from '../ui/typography';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
-import EnhancedPreviewModal from '@/components/enhanced-preview-modal';
 import { useState } from 'react';
 import useSWRMutation from 'swr/mutation';
 import { useRouter } from 'next/navigation';
+import { Resume } from '@/mock/resume';
+import EnhancedJobPreviewModal from '../enhanced-preview-modal';
 
 export type Job = {
   id: string;
@@ -38,13 +39,11 @@ export type Response = {
 
 type ApplyJobPaylod = {
   jobId: string;
-  resumeId?: string;
 }
 
-const applyJobApiCall = async (url: string, { arg: { jobId, resumeId } }: { arg: ApplyJobPaylod }) => {
+const applyJobApiCall = async (url: string, { arg: { jobId } }: { arg: ApplyJobPaylod }) => {
   try {
-    const payload = resumeId ? { resumeId } : {}
-    const response = await axios.post(url + jobId, payload);
+    const response = await axios.post(url + jobId);
     alert(response.data.data);
     return response.data
   } catch (err) {
@@ -57,9 +56,41 @@ const applyJobApiCall = async (url: string, { arg: { jobId, resumeId } }: { arg:
   }
 }
 
+type ApplyJobWithEditsPayload = {
+  jobId: string;
+  resumeId: string;
+  resumeData: string;
+};
+
+const applyJobWithEditsApiCall = async (
+  url: string,
+  { arg: { jobId, resumeId, resumeData } }: { arg: ApplyJobWithEditsPayload }
+) => {
+  try {
+    const response = await axios.post(url + jobId, {
+      resumeId,
+      resumeData,
+    });
+    alert(response.data.data);
+    return response.data;
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      alert(err?.response?.data?.message);
+    } else {
+      alert("something went wrong");
+    }
+    console.log(err);
+  }
+};
+
 const Jobs = () => {
 
-  const { trigger: handleApplyJob, isMutating: applying } = useSWRMutation(`/api/jobs/apply/`, applyJobApiCall)
+  const { trigger: handleApplyJob, isMutating: applying } = useSWRMutation(`/api/jobs/apply/`, applyJobApiCall);
+
+  const { trigger: handleApplyJobWithEdits } = useSWRMutation(
+    `/api/jobs/apply-with-edits/`,
+    applyJobWithEditsApiCall
+  );
   const { data: resData, error, isLoading } = useSWR<Response>('/api/jobs', fetcher)
   const jobs = resData?.data;
 
@@ -75,12 +106,11 @@ const Jobs = () => {
     )
   }
 
-  const applyWithEdits = async (jobId: string, resumeId: string) => {
+  const applyWithEdits = async (jobId: string, resumeId: string, resumeData: Resume) => {
     if (!enahncePreviewJobId) return;
     mutate("/api/jobs",
       (currentData?: Response) => {
         if (!currentData) return currentData;
-
         return {
           ...currentData,
           data: currentData.data.filter(
@@ -91,11 +121,14 @@ const Jobs = () => {
       false
     );
     try {
-      await handleApplyJob({ jobId, resumeId });
+      await handleApplyJobWithEdits({
+        jobId,
+        resumeId,
+        resumeData: JSON.stringify(resumeData),
+      });
     } catch (err) {
       mutate("/api/jobs");
     }
-
     setEnahancePreviewJobId("");
   }
 
@@ -149,7 +182,7 @@ const Jobs = () => {
 
       {
         enahncePreviewJobId && (
-          <EnhancedPreviewModal
+          <EnhancedJobPreviewModal
             jobId={enahncePreviewJobId}
             applying={applying}
             onApplyAction={applyWithEdits}

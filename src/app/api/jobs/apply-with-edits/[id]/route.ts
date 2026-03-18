@@ -78,10 +78,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       data: "successfully applied for the job",
     });
 
-
-
-
-
   } catch (err) {
     const [resBody, status] = errorHandler(err);
     return NextResponse.json(resBody, status);

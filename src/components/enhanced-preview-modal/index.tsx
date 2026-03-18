@@ -18,7 +18,7 @@ const SECTIONS = ["Personal", "Experience", "Projects", "Skills", "Education", "
 type Props = {
   jobId: string;
   onCloseAction: () => void;
-  onApplyAction: (jobId: string, editedResumeId: string) => void;
+  onApplyAction: (jobId: string, editedResumeId: string, editedResume: any) => void;
   applying: boolean;
 };
 
@@ -27,7 +27,7 @@ const getEnhancededitedResume = async (url: string, { arg }: { arg: string }) =>
   return res.data
 }
 
-export default function EnhancedjobIdPreviewModal({ onApplyAction, onCloseAction, applying, jobId }: Props) {
+export default function EnhancedJobPreviewModal({ onApplyAction, onCloseAction, applying, jobId }: Props) {
   const { data: enhancededitedResumeRes, trigger: getEnhancededitedResumeAction, isMutating: isLoading, error } = useSWRMutation("/api/jobs/enhance-resume/", getEnhancededitedResume)
   const [isEditing, setIsEditing] = useState(false);
   const [editedResume, setEditedResume] = useState<Resume | null>(null);
@@ -90,7 +90,7 @@ export default function EnhancedjobIdPreviewModal({ onApplyAction, onCloseAction
                 {!isEditing ? (
                   <>
                     <Button variant="secondary" onClick={() => setIsEditing(true)}>Edit</Button>
-                    <Button onClick={() => onApplyAction(jobId, enhancededitedResumeRes.data.id)} disabled={applying}>
+                    <Button onClick={() => onApplyAction(jobId, enhancededitedResumeRes.data.id, editedResume)} disabled={applying}>
                       {applying ? <Spinner /> : "Apply"}
                     </Button>
                   </>
