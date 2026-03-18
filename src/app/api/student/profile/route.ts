@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { UTApi } from "uploadthing/server";
 
 import { hashPassword } from "@/lib/bcrypt";
 import { errorHandler, CustomError } from "@/lib/errorHandler";
@@ -58,6 +59,7 @@ async function postProfile(req: NextRequest) {
       ...(college_branch && { college_branch }),
       ...(college_joining_year && { college_joining_year }),
       ...(hashedPassword && { password: hashedPassword }),
+      ...(profile_pic && { profile_pic }),
     };
 
     const updated = await prisma.applicant.update({

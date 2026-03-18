@@ -3,7 +3,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { Card, CardContent } from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Upload } from "lucide-react";
@@ -18,6 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import useSWRMutation from "swr/mutation";
 import { Resume } from "@/mock/resume";
 import { toast } from "sonner";
+import { useUploadThing } from "@/lib/uploadthing-client";
 
 const initialProfile: Profile = {
   id: "",
@@ -55,6 +56,8 @@ function StudentProfile() {
 
   const userData = data?.data;
 
+  const { startUpload, isUploading } = useUploadThing("avatarUploader");
+
   const [editContent, setEditContent] = useState<boolean>(false)
   const [isUploadingResume, setIsUploadingResume] = useState<boolean>(false)
 
@@ -72,6 +75,23 @@ function StudentProfile() {
     form.reset()
     setEditContent(() => false);
   }
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const res = await startUpload([file]);
+    if (!res?.[0]?.ufsUrl) {
+      toast.error("Failed to upload avatar");
+      return;
+    }
+
+    // Save URL to profile
+    await axios.post("/api/student/profile", { profile_pic: res[0].url });
+    toast.success("Avatar updated");
+    mutate(); // revalidate SWR
+  };
+
 
   const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -122,17 +142,28 @@ function StudentProfile() {
 
     try {
       const res = await axios.delete("/api/student/resume/" + resumeId)
-      if(res?.data?.status){
+      if (res?.data?.status) {
         type = "success"
         msg = "Resume deleted successfully"
         mutate();
       }
     } catch (err) {
-      console.error("Error deleting resume:", err);
-    } finally{
+      if (err instanceof AxiosError) {
+        msg = err?.response?.data?.message || msg
+      }
+      console.log("Error deleting resume:", err);
+    } finally {
       toast[type](msg)
     }
   };
+
+  const formatInitials = (name: string): string => {
+    let result = ""
+    name?.split(" ").forEach((el) => {
+      el?.[0] ? result += el[0] : null
+    })
+    return result
+  }
 
   const onSubmit = (payload: Profile) => {
     postProfileTrigger({ payload })
@@ -166,15 +197,28 @@ function StudentProfile() {
             <CardContent className="mb-4">
               <div className="flex mb-5 gap-5 items-center">
                 <Avatar className='size-28'>
-                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                  <AvatarFallback>Job</AvatarFallback>
+                  <AvatarImage src={userData?.profile_pic ?? ""} alt={userData?.name} />
+                  <AvatarFallback><span className="text-5xl font-bold font-sans">{formatInitials(userData?.name)}</span></AvatarFallback>
                 </Avatar>
 
                 <div className='space-y-2'>
                   <div className='text-2xl font-bold'>{userData.name}</div>
-                  <div>
-                    <Button variant={"outline"}>Change Image</Button>
-                  </div>
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarUpload}
+                      disabled={isUploading}
+                    />
+                    <Button
+                      variant="outline"
+                      type="button"
+                      asChild
+                    >
+                      <span>{isUploading ? "Uploading..." : "Change Image"}</span>
+                    </Button>
+                  </label>
                 </div>
               </div>
               <div className='grid md:grid-cols-2 gap-5 mx-auto'>

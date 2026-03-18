@@ -58,9 +58,7 @@ export async function POST(
       );
     }
 
-    const resumeUrl = path.join(process.cwd(), "public", existResume.url);
-
-    const pdfContent = await readPdf(resumeUrl);
+    const pdfContent = await readPdf(existResume?.url);
 
     // Resume parser: Parse the resume & exctract the content
     const lines = groupTextItemsIntoLines(pdfContent);
