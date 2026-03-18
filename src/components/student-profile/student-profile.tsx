@@ -17,6 +17,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useSWRMutation from "swr/mutation";
 import { Resume } from "@/mock/resume";
+import { toast } from "sonner";
 
 const initialProfile: Profile = {
   id: "",
@@ -38,7 +39,7 @@ const postProfileApiCall = async (url: string, { arg: { payload: payload } }: { 
       throw new Error(res?.data?.error || "error while saving")
     }
 
-    alert("successfully saved data")
+    toast.success("Successfully saved data")
 
   } catch (err) {
     console.log("err:", err)
@@ -79,14 +80,14 @@ function StudentProfile() {
     // Validate file type
     const validTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
     if (!validTypes.includes(file.type)) {
-      alert("Only PDF and Word documents are allowed");
+      toast.error("Only PDF and Word documents are allowed");
       return;
     }
 
     // Validate file size (5MB max)
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert("File size must be less than 5MB");
+      toast.error("File size must be less than 5MB");
       return;
     }
 
@@ -105,30 +106,31 @@ function StudentProfile() {
         throw new Error(res?.data?.error || "Failed to upload resume");
       }
 
-      alert("Resume uploaded successfully");
+      toast.success("Resume uploaded successfully");
       mutate();
     } catch (err) {
       console.error("Error uploading resume:", err);
-      alert("Failed to upload resume");
+      toast.error("Failed to upload resume");
     } finally {
       setIsUploadingResume(false);
     }
   };
 
   const handleResumeDelete = async (resumeId: string) => {
+    let type: "error" | "success" = "error";
+    let msg = "Failed to delete resume"
 
     try {
       const res = await axios.delete("/api/student/resume/" + resumeId)
-
-      if (!res?.data?.status) {
-        throw new Error(res?.data?.error || "Failed to delete resume");
+      if(res?.data?.status){
+        type = "success"
+        msg = "Resume deleted successfully"
+        mutate();
       }
-
-      alert("Resume deleted successfully");
-      mutate();
     } catch (err) {
       console.error("Error deleting resume:", err);
-      alert("Failed to delete resume");
+    } finally{
+      toast[type](msg)
     }
   };
 
@@ -295,12 +297,14 @@ function StudentProfile() {
                                 {
                                   !selectResumeToDisplay ?
                                     <Button
+                                      type="button"
                                       variant="secondary"
                                       size="sm"
                                       onClick={() => setSelectResumeToDisplay(el?.json ? JSON.parse(el.json) : el)}
                                     >Show</Button> : null
                                 }
                                 <Button
+                                  type="button"
                                   onClick={() => handleResumeDelete(el.id)}
                                   variant="destructive"
                                   size="sm"

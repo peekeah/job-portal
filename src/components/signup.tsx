@@ -9,6 +9,7 @@ import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import useSWRMutation from 'swr/mutation';
 import { Spinner } from './ui/spinner';
+import { toast } from 'sonner';
 
 const initialFormValues = {
   name: '',
@@ -56,13 +57,13 @@ type SignupPayload = z.infer<typeof signupSchema> & {
 const signupApiCall = async (url: string, { arg: payload }: { arg: SignupPayload }) => {
   try {
     const response = await axios.post(url, payload);
-    alert(response.data.data);
+    toast.success(response.data.data);
     return response.data
   } catch (err) {
     if (err instanceof AxiosError) {
-      alert(err?.response?.data?.message)
+      toast.error(err?.response?.data?.message)
     } else {
-      alert("something went wrong")
+      toast.error("something went wrong")
     }
     console.log(err);
   }
@@ -87,12 +88,12 @@ export default function SignUpPage() {
 
     try {
       await handleSignup(payload)
-      alert("successfully signup!")
+      toast.success("successfully signup!")
       router.push("/login")
 
     } catch (err) {
       if (err instanceof AxiosError) {
-        alert(err?.response?.data.message || err?.response?.data.error)
+        toast.error(err?.response?.data.message || err?.response?.data.error)
       }
       console.log(err);
     }

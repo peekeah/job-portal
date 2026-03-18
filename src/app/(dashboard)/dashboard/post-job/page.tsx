@@ -14,6 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { jobSchema as initialJobSchama } from "@/lib/schema";
 import z from "zod";
 import clsx from "clsx";
+import { toast } from "sonner";
 
 type Job = z.infer<typeof schema>
 
@@ -80,7 +81,7 @@ export default function PostJob() {
         skills_required: formData.skills_required.map(el => el.value)
       };
       const res = await axios.post("/api/jobs", payload);
-      alert(res.data.data);
+      toast.success(res.data.data);
       router.push("/dashboard");
     } catch (err: unknown) {
       let msg = "Something went wrong";
@@ -88,7 +89,7 @@ export default function PostJob() {
         msg = err.response?.data?.error;
       }
       console.error(err);
-      alert(msg);
+      toast.error(msg);
     }
   };
 

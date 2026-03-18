@@ -4,6 +4,7 @@ import "./globals.css";
 
 import Provider from "@/components/provider";
 import { Suspense } from "react";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
         <Provider>
           <Suspense>{children}</Suspense>
         </Provider>
+        <Toaster richColors />
       </body>
     </html>
   );

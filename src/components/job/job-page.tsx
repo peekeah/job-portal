@@ -14,6 +14,7 @@ import { Card } from '../ui/card';
 import EnhancedJobPreviewModal from '../enhanced-preview-modal';
 import { Resume } from '@/mock/resume';
 import { Spinner } from '../ui/spinner';
+import { toast } from 'sonner';
 
 type Job = z.infer<typeof jobSchema> & {
   id: string;
@@ -48,13 +49,13 @@ type ApplyJobPaylod = {
 const applyJobApiCall = async (url: string, { arg: { jobId } }: { arg: ApplyJobPaylod }) => {
   try {
     const response = await axios.post(url + jobId);
-    alert(response.data.data);
+    toast.success(response.data.data);
     return response.data
   } catch (err) {
     if (err instanceof AxiosError) {
-      alert(err?.response?.data?.message)
+      toast.error(err?.response?.data?.message)
     } else {
-      alert("something went wrong")
+      toast.error("something went wrong")
     }
     console.log(err);
   }
@@ -75,13 +76,13 @@ const applyJobWithEditsApiCall = async (
       resumeId,
       resumeData,
     });
-    alert(response.data.data);
+    toast.success(response.data.data);
     return response.data;
   } catch (err) {
     if (err instanceof AxiosError) {
-      alert(err?.response?.data?.message);
+      toast.error(err?.response?.data?.message);
     } else {
-      alert("something went wrong");
+      toast.error("something went wrong");
     }
     console.log(err);
   }
@@ -126,7 +127,7 @@ export function JobDetails() {
       });
       setEnahancePreviewJobId("");
     } catch (err) {
-      alert("error while applying")
+      toast.error("error while applying")
     }
   }
 

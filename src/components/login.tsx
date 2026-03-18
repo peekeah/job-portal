@@ -8,6 +8,7 @@ import { LogoIcon } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
+import { toast } from "sonner"
 
 export default function Login() {
 
@@ -28,7 +29,7 @@ export default function Login() {
       })
 
       if (res?.error) {
-        return alert(res?.error)
+        return toast.error(res?.error)
       }
 
       router.push("/dashboard")
@@ -37,7 +38,7 @@ export default function Login() {
       if (err instanceof AxiosError) {
         msg = err?.response?.data?.error;
       }
-      alert(msg)
+      toast.success(msg)
       console.log(err);
     }
   }

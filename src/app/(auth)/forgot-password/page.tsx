@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import axios, { AxiosError } from 'axios'
 import Link from 'next/link'
 import { FormEventHandler, useState } from 'react'
+import { toast } from 'sonner'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -16,14 +17,14 @@ export default function ForgotPasswordPage() {
         email
       })
 
-      alert(res?.data?.data)
+      toast.success(res?.data?.data)
 
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
-        alert(err?.message)
+        toast.error(err?.message)
         return
       }
-      alert("something went wrong, try again!")
+      toast.error("something went wrong, try again!")
     }
   }
 

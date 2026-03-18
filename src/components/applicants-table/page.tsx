@@ -3,6 +3,7 @@ import axios from "axios";
 import { Button } from "../ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Applicants, ApplicantType } from "../job/company-job";
+import { toast } from "sonner";
 
 type ApplicantTableProps = {
   jobId: string;
@@ -21,9 +22,10 @@ const ApplicantsTable = ({ applicants, jobId, type, refetch }: ApplicantTablePro
       if (!res?.data?.status) {
         throw new Error(res?.data?.error || "Error while saving")
       }
-      alert("successfully saved")
+      toast.success("successfully saved")
       refetch()
     } catch (err) {
+      toast.error("error while selecting candidate")
       console.log(err)
     }
   }

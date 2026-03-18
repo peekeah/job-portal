@@ -12,6 +12,7 @@ import ResumeViewer from "@/components//resume-viewer";
 import { Resume } from "@/mock/resume";
 import { Tabs, TabsList, TabsTrigger } from "@/components//ui/tabs";
 import { AdditionalSection, EducationSection, ExperienceSection, PersonalSection, ProjectsSection, SkillsSection } from "./components";
+import { toast } from "sonner";
 
 const SECTIONS = ["Personal", "Experience", "Projects", "Skills", "Education", "Additional"];
 
@@ -48,7 +49,7 @@ export default function EnhancedJobPreviewModal({ onApplyAction, onCloseAction, 
   if (error) {
     onCloseAction()
     const errMsg = error?.response?.data?.message || "Something went wrong"
-    alert(errMsg)
+    toast.error(errMsg)
   }
 
   const handleSave = () => {

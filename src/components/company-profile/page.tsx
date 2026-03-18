@@ -19,6 +19,7 @@ import { combinedCompanySchema } from '../onboard-company/types';
 import { CompanySize } from '@prisma/client';
 import z from 'zod';
 import useSWRMutation from 'swr/mutation';
+import { toast } from 'sonner';
 
 const profileSchema = z
   .object({
@@ -60,11 +61,11 @@ const postProfileApiCall = async (url: string, { arg: { payload: payload } }: { 
       throw new Error(res?.data?.error || "error while saving")
     }
 
-    alert("successfully saved data")
+    toast.success("successfully saved data")
 
   } catch (err) {
     console.log("err:", err)
-    alert("error while saving data")
+    toast.error("error while saving data")
   }
 }
 

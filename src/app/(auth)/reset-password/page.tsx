@@ -6,6 +6,7 @@ import axios from 'axios'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, { ChangeEventHandler, FormEventHandler, useLayoutEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 const ResetPassword = () => {
   const params = useSearchParams();
@@ -34,7 +35,7 @@ const ResetPassword = () => {
   const onSubmit: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     if (formData.password !== formData.verifyPassword) {
-      alert("password does not match")
+      toast.error("password does not match")
       return
     }
 
@@ -44,10 +45,10 @@ const ResetPassword = () => {
     }
 
     axios.post("/api/auth/reset-password", payload).then(res => {
-      alert(res.data?.data)
+      toast.success(res.data?.data)
       router.push("/login")
     }).catch(err => {
-      alert(err?.message)
+      toast.error(err?.message)
     })
   }
 

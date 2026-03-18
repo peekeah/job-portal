@@ -23,6 +23,7 @@ import {
   CompanyCombinedInputKeys,
   CompanySignupPayload
 } from "./types";
+import { toast } from "sonner";
 
 const initialFormData: CompanySignupPayload = {
   name: '',
@@ -108,14 +109,14 @@ const OnboardCompany = () => {
   const onSubmit = async (data: z.infer<typeof combinedCompanySchema>) => {
     try {
       await signupApiTrigger({ payload: data });
-      alert("Signup successful")
+      toast.success("Signup successful")
     } catch (err) {
       if (err instanceof AxiosError) {
-        alert(err?.response?.data?.error)
+        toast.error(err?.response?.data?.error)
         console.log(err);
       } else {
         console.log(err)
-        alert("something went wrong")
+        toast.error("something went wrong")
       }
     }
   }
