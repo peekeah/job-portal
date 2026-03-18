@@ -61,7 +61,7 @@ async function forgotPassword(req: NextRequest) {
     const resend = new Resend(getEnv("RESEND_API_KEY"));
     const { error } = await resend.emails.send({
       from: "onboarding@resend.dev",
-      to: "testmail9174@gmail.com",
+      to: existUser.email,
       subject: "Password Reset Link",
       text: getEmailText(userName, token),
     });
