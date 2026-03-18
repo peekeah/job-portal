@@ -34,6 +34,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     if (!studentData?.id) throw new CustomError("Student data missing", 400);
 
+    // Validate applicant resume
+    const existResume = await prisma.resume.findFirst({
+      where: {
+        id: payload.resumeId,
+        applicant_id: studentData.id
+      }
+    })
+
+    if(!existResume){
+      throw new CustomError("resume does not exist", 403)
+    }
+
     const existJob = await prisma.job.findFirst({
       where: {
         id: jobId,
