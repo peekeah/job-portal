@@ -1,7 +1,7 @@
-import { CompanySize } from "@prisma/client"
-import * as z from "zod"
+import { CompanySize } from "@prisma/client";
+import * as z from "zod";
 
-export const companyProfileSchema = z.object(({
+export const companyProfileSchema = z.object({
   name: z
     .string()
     .nonempty({ message: "Company name is required" })
@@ -13,11 +13,9 @@ export const companyProfileSchema = z.object(({
     .max(new Date().getFullYear(), {
       message: "Founding year cannot be in the future",
     }),
-  company_type: z
-    .string()
-    .nonempty({ message: "Company type is required" }),
-  size: z.enum(CompanySize)
-}))
+  company_type: z.string().nonempty({ message: "Company type is required" }),
+  size: z.enum(CompanySize),
+});
 
 export const companyAccountSchema = z.object({
   email: z
@@ -28,8 +26,12 @@ export const companyAccountSchema = z.object({
     .nonempty({ message: "Password is required" })
     .min(8, { message: "Password must be at least 8 characters long" })
     .max(20, { message: "Password cannot exceed 20 characters" })
-    .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
-    .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
+    .regex(/[A-Z]/, {
+      message: "Password must contain at least one uppercase letter",
+    })
+    .regex(/[a-z]/, {
+      message: "Password must contain at least one lowercase letter",
+    })
     .regex(/[0-9]/, { message: "Password must contain at least one number" }),
   contact_no: z
     .string()
@@ -39,17 +41,32 @@ export const companyAccountSchema = z.object({
     .regex(/^\+?\d+$/, {
       message: "Contact number must contain only digits",
     }),
-})
+});
 
 const companyMetadataSchema = z.object({
   website: z
     .url({ message: "Please enter a valid website URL" })
-    .refine(
-      (val) => !val || val.startsWith("https://"),
-      { message: "Website must start with https://" }
-    )
+    .refine((val) => !val || val.startsWith("https://"), {
+      message: "Website must start with https://",
+    })
     .optional()
     .nullable(),
+  linkedIn: z
+    .url({ message: "Please enter a valid website URL" })
+    .refine((val) => !val || val.startsWith("https://"), {
+      message: "Website must start with https://",
+    })
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+  twitter: z
+    .url({ message: "Please enter a valid website URL" })
+    .refine((val) => !val || val.startsWith("https://"), {
+      message: "Website must start with https://",
+    })
+    .optional()
+    .nullable()
+    .or(z.literal("")),
   address: z
     .string()
     .nonempty({ message: "Address is required" })
@@ -60,18 +77,22 @@ const companyMetadataSchema = z.object({
     .max(500, { message: "Bio cannot exceed 500 characters" })
     .optional()
     .nullable(),
-})
-
+});
 
 export const combinedCompanySchema = companyProfileSchema
   .extend(companyAccountSchema.shape)
-  .extend(companyMetadataSchema.shape)
+  .extend(companyMetadataSchema.shape);
 
-export const companyProfileInputKeys = companyProfileSchema.keyof().options as CompanyCombinedInputKeys[];
-export const companyAccountInputKeys = companyAccountSchema.keyof().options as CompanyCombinedInputKeys[];
-export const companyMetadataInputKeys = companyMetadataSchema.keyof().options as CompanyCombinedInputKeys[];
-export const combinedCompanyInputKeys = combinedCompanySchema.keyof().options as CompanyCombinedInputKeys[];
+export const companyProfileInputKeys = companyProfileSchema.keyof()
+  .options as CompanyCombinedInputKeys[];
+export const companyAccountInputKeys = companyAccountSchema.keyof()
+  .options as CompanyCombinedInputKeys[];
+export const companyMetadataInputKeys = companyMetadataSchema.keyof()
+  .options as CompanyCombinedInputKeys[];
+export const combinedCompanyInputKeys = combinedCompanySchema.keyof()
+  .options as CompanyCombinedInputKeys[];
 
 export type CompanySignupPayload = z.infer<typeof combinedCompanySchema>;
-export type CompanyCombinedInputKeys = z.infer<ReturnType<typeof combinedCompanySchema.keyof>>;
-
+export type CompanyCombinedInputKeys = z.infer<
+  ReturnType<typeof combinedCompanySchema.keyof>
+>;

@@ -7,16 +7,15 @@ import { prisma } from "@/lib/db";
 
 async function getProfile(req: NextRequest) {
   try {
-
-    const token = await authMiddleware(req, "applicant")
+    const token = await authMiddleware(req, "applicant");
 
     const studentData = await prisma.applicant.findUnique({
       where: {
-        email: token?.email
+        email: token?.email,
       },
       include: {
-        resume: true
-      }
+        resume: true,
+      },
     });
 
     if (!studentData) throw new CustomError("Student not found", 404);
@@ -24,35 +23,56 @@ async function getProfile(req: NextRequest) {
     return NextResponse.json({ status: true, data: studentData });
   } catch (err) {
     const [res, status] = errorHandler(err);
-    return NextResponse.json(res, status)
+    return NextResponse.json(res, status);
   }
 }
 
 async function postProfile(req: NextRequest) {
   try {
-    const token = await authMiddleware(req, "applicant")
+    const token = await authMiddleware(req, "applicant");
 
-    const body = await req.json()
-    const { resume, ...profile } = body
+    const body = await req.json();
+    const { resume, ...profile } = body;
+    const {
+      name,
+      mobile,
+      bio,
+      profile_pic,
+      college_name,
+      college_branch,
+      college_joining_year,
+    } = body;
+
+    let hashedPassword = "";
 
     if (body.password) {
-      body.password = await hashPassword(body.password);
+      hashedPassword = await hashPassword(body.password);
     }
+
+    const profileData = {
+      ...(name && { name }),
+      ...(mobile && { mobile }),
+      ...(bio && { bio }),
+      ...(profile_pic && { profile_pic }),
+      ...(college_name && { college_name }),
+      ...(college_branch && { college_branch }),
+      ...(college_joining_year && { college_joining_year }),
+      ...(hashedPassword && { password: hashedPassword }),
+    };
 
     const updated = await prisma.applicant.update({
       where: {
-        email: token.email
+        email: token.email,
       },
-      data: profile
+      data: profileData,
     });
 
     return NextResponse.json({ status: true, data: updated });
-
   } catch (err) {
     const [res, status] = errorHandler(err);
-    return NextResponse.json(res, status)
+    return NextResponse.json(res, status);
   }
 }
 
-export const GET = getProfile
-export const POST = postProfile
+export const GET = getProfile;
+export const POST = postProfile;

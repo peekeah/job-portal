@@ -38,6 +38,8 @@ const initialCompanyValues: CompanyProfile = {
   email: "",
   contact_no: "",
   website: "",
+  linkedIn: "",
+  twitter: "",
   address: "",
   size: CompanySize.SIZE_1_10,
   bio: "",
@@ -91,6 +93,7 @@ export default function CompanyProfile() {
 
   const onSubmit = async (payload: CompanyProfile) => {
     postProfileTrigger({ payload })
+    setEditContent(false)
   }
 
   const onCancelChanges = () => {
@@ -178,22 +181,6 @@ export default function CompanyProfile() {
             <Heading variant='h4' className='mb-3'>Contact Information</Heading>
             <div className='grid grid-cols-2 gap-5'>
               <Controller
-                name="email"
-                control={form.control}
-                render={({ field, fieldState: { error, invalid } }) => (
-                  <Input
-                    {...field}
-                    label="Email"
-                    aria-invalid={invalid}
-                    placeholder="Email"
-                    disabled={!editContent}
-                    error={
-                      error ? error.message : ""
-                    }
-                  />
-                )}
-              />
-              <Controller
                 name="contact_no"
                 control={form.control}
                 render={({ field, fieldState: { error, invalid } }) => (
@@ -245,18 +232,43 @@ export default function CompanyProfile() {
             </div>
           </CardContent>
         </Card>
-        {/*TODO: Add these fields in backend*/}
         <Card>
           <CardContent>
             <Heading variant='h4' className='mb-3'>Social Media</Heading>
             <div className='grid grid-cols-2 gap-5'>
-              <Input
-                label="LinkedIn"
-                disabled={!editContent}
+              <Controller
+                name="linkedIn"
+                control={form.control}
+                render={({ field, fieldState: { error, invalid } }) => (
+                  <Input
+                    {...field}
+                    label="LinkedIn"
+                    aria-invalid={invalid}
+                    placeholder="Linked In"
+                    value={field.value ? String(field.value) : ""}
+                    disabled={!editContent}
+                    error={
+                      error ? error.message : ""
+                    }
+                  />
+                )}
               />
-              <Input
-                label="Twitter"
-                disabled={!editContent}
+              <Controller
+                name="twitter"
+                control={form.control}
+                render={({ field, fieldState: { error, invalid } }) => (
+                  <Input
+                    {...field}
+                    label="Twitter"
+                    aria-invalid={invalid}
+                    placeholder="Twitter"
+                    value={field.value ? String(field.value) : ""}
+                    disabled={!editContent}
+                    error={
+                      error ? error.message : ""
+                    }
+                  />
+                )}
               />
             </div>
           </CardContent>
@@ -292,6 +304,7 @@ export default function CompanyProfile() {
                     label="Company Size"
                     aria-invalid={invalid}
                     disabled={!editContent}
+                    value={String(field.value)}
                     onValueChange={field.onChange}
                     options={[
                       { value: "SIZE_1_10", label: "1-10" },

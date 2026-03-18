@@ -58,6 +58,8 @@ model Company {
   company_type  String
   contact_no    String
   website       String?
+  linkedIn      String?
+  twitter       String?
   address       String
   size          CompanySize?
   bio           String?

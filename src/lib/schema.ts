@@ -21,6 +21,18 @@ export const companySchema = z.object({
     .optional()
     .nullable()
     .refine((val) => !val || val.startsWith("https://"), "Website must start with https://"),
+  linkedIn: z
+    .url("Invalid URL")
+    .optional()
+    .nullable()
+    .or(z.literal(""))
+    .refine((val) => !val || val.startsWith("https://"), "Website must start with https://"),
+  twitter: z
+    .url("Invalid URL")
+    .optional()
+    .nullable()
+    .or(z.literal(""))
+    .refine((val) => !val || val.startsWith("https://"), "Website must start with https://"),
   address: z.string().min(1, "Address is required"),
   size: z.enum(CompanySize).optional().nullable(),
   bio: z.string().max(500, "Bio cannot exceed 500 characters").optional().nullable(),

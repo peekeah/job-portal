@@ -134,6 +134,7 @@ function StudentProfile() {
 
   const onSubmit = (payload: Profile) => {
     postProfileTrigger({ payload })
+    setEditContent(false)
   }
 
   return (
@@ -200,22 +201,6 @@ function StudentProfile() {
                       label="Contact"
                       aria-invalid={invalid}
                       placeholder="Contact"
-                      disabled={!editContent}
-                      error={
-                        error ? error.message : ""
-                      }
-                    />
-                  )}
-                />
-                <Controller
-                  name="email"
-                  control={form.control}
-                  render={({ field, fieldState: { error, invalid } }) => (
-                    <Input
-                      {...field}
-                      label="Email"
-                      aria-invalid={invalid}
-                      placeholder="Email"
                       disabled={!editContent}
                       error={
                         error ? error.message : ""
