@@ -34,12 +34,9 @@ async function getCandidatesForJob(token: JWT, jobId: string) {
     result[el.status].push(el);
   })
 
-  return NextResponse.json({
-    status: true,
-    data: result
-  })
-
+  return result
 }
+
 
 async function getJobById(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 
@@ -50,7 +47,11 @@ async function getJobById(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!jobId) throw new CustomError('job id not provided', 400);
 
     if (token.user_type === "company") {
-      getCandidatesForJob(token, jobId)
+      const data = await getCandidatesForJob(token, jobId)
+      return NextResponse.json({
+        status: true,
+        data
+      })
     } else {
       const job = await prisma.job.findFirst({
         where: { id: jobId },
