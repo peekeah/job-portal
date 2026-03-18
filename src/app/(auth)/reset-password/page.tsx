@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import axios from 'axios'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { ChangeEventHandler, FormEventHandler, useLayoutEffect, useState } from 'react'
+import { ChangeEventHandler, FormEventHandler, useLayoutEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 const ResetPassword = () => {
@@ -22,7 +22,7 @@ const ResetPassword = () => {
     if (!token) {
       router.push("/")
     }
-  })
+  }, [token])
 
   const onInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const { name, value } = e.target;
