@@ -22,7 +22,7 @@ const resetPassword = async (req: NextRequest) => {
     if (!email) throw new Error('Invalid request');
 
     const user = await prisma.auth.findFirst({
-      where: { email: token.email },
+      where: { email },
     });
 
     if (user?.reset_hash !== payload.token) {

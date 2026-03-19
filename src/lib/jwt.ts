@@ -3,7 +3,7 @@ import { getEnv } from './config';
 
 export const signToken = (payload: Record<string, string | number>) => {
   const secret = getEnv('JWT_SECRET');
-  const token = jwt.sign({ data: payload }, secret, { expiresIn: '1h' });
+  const token = jwt.sign({ data: payload }, secret, { expiresIn: '1hr' });
   return token;
 };
 

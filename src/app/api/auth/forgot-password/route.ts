@@ -72,7 +72,7 @@ async function forgotPassword(req: NextRequest) {
 
     return NextResponse.json({
       status: true,
-      data: 'successfully sent password to email',
+      data: 'password reset link has been sent to email',
     });
   } catch (err) {
     const [resp, status] = errorHandler(err);
