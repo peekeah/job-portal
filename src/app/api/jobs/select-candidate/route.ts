@@ -3,7 +3,7 @@ import z from "zod";
 
 import { CustomError, errorHandler } from "@/lib/errorHandler";
 import { prisma } from "@/lib/db";
-import { authMiddleware } from "@/lib/token";
+import { authMiddleware } from "@/lib/auth-middleware";
 
 const schema = z.object({
   jobId: z.string(),

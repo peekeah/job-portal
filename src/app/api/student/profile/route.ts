@@ -3,7 +3,7 @@ import { UTApi } from "uploadthing/server";
 
 import { hashPassword } from "@/lib/bcrypt";
 import { errorHandler, CustomError } from "@/lib/errorHandler";
-import { authMiddleware } from "@/lib/token";
+import { authMiddleware } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/db";
 
 async function getProfile(req: NextRequest) {

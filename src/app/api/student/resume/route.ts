@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { errorHandler, CustomError } from "@/lib/errorHandler";
-import { authMiddleware } from "@/lib/token";
+import { authMiddleware } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/db";
 import { UTApi } from "uploadthing/server";
 

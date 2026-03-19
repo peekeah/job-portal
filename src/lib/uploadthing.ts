@@ -1,5 +1,5 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { authMiddleware } from "@/lib/token";
+import { authMiddleware } from "@/lib/auth-middleware";
 
 const f = createUploadthing();
 

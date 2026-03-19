@@ -7,7 +7,7 @@ import { IconMenu2 as MenuIcon, IconX as CloseIcon } from "@tabler/icons-react";
 
 import Container from "@/components/container";
 import SignOutButton from "@/components/signout";
-import { Role } from "@/lib/token";
+import { Role } from "@/lib/auth-middleware";
 import { cn } from "@/lib/utils";
 
 const studentNavLinks = [

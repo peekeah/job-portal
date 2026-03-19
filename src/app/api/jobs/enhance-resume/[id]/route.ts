@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { authMiddleware } from "@/lib/token";
+import { authMiddleware } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/db";
 import { CustomError, errorHandler } from "@/lib/errorHandler";
 import { groupTextItemsIntoLines } from "@/lib/resume-parser/group-text-items-into-lines";
