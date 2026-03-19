@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { FormEventHandler, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
+  const router = useRouter();
 
   const onSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
@@ -18,6 +20,7 @@ export default function ForgotPasswordPage() {
       });
 
       toast.success(res?.data?.data);
+      router.push('/');
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         toast.error(err?.message);

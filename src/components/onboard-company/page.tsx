@@ -1,6 +1,6 @@
 'use client';
 import axios, { AxiosError } from 'axios';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CompanyProfile from './company-profile';
 import CompanyMetadata from './company-metadata';
 import CompanyAccount from './company-account';
@@ -129,9 +129,11 @@ const OnboardCompany = () => {
     }
   };
 
-  if (!isLoading && signupApiRes) {
-    router.push('/login');
-  }
+  useEffect(() => {
+    if (!isLoading && signupApiRes) {
+      router.push('/login');
+    }
+  }, [isLoading, signupApiRes, router]);
 
   return (
     <Card className="mx-auto mt-16 min-w-xl p-3 py-8 pb-6">

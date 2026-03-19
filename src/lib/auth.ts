@@ -39,7 +39,7 @@ export const authOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        console.log("hies")
+        console.log('hies');
         try {
           if (!credentials?.email || !credentials?.password) {
             throw new Error('Missing credentials');
@@ -72,7 +72,7 @@ export const authOptions = {
           if (err instanceof Error) {
             res = err.message;
           }
-          console.log("rr", err)
+          console.log('rr', err);
           throw new Error(res);
         }
       },
