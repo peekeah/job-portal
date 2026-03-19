@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { z, ZodError } from "zod";
 
 export class CustomError extends Error {
@@ -43,7 +43,7 @@ export const errorHandler = (err: unknown): [ResponseOut, Status] => {
     response.status = 422;
   }
 
-  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+  if (err instanceof PrismaClientKnownRequestError) {
     response.status = 400;
     response.error = err.meta;
     switch (err.code) {
