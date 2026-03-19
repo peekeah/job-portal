@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { authMiddleware } from "@/lib/token";
+import { authMiddleware } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/db";
 import { errorHandler, CustomError } from "@/lib/errorHandler";
 import { jobSchema } from "@/lib/schema";

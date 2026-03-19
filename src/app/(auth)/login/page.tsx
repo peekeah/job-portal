@@ -1,4 +1,3 @@
-"use client";
 import LoginComponent from "@/components/login"
 
 const Login = () => {

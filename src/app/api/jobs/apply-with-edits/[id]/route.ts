@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { authMiddleware } from "@/lib/token";
+import { authMiddleware } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/db";
 import { CustomError, errorHandler } from "@/lib/errorHandler";
 import z from "zod";
 
 const payloadSchema = z.object({
-  resumeId: z.string().optional(),
+  resumeId: z.uuid(),
   resumeData: z.string()
 });
 

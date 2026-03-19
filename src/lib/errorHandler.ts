@@ -1,5 +1,5 @@
-import { Prisma } from "@prisma/client";
-import { z, ZodError } from "zod";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { treeifyError, ZodError } from "zod";
 
 export class CustomError extends Error {
   readonly status: number = 500;
@@ -38,12 +38,12 @@ export const errorHandler = (err: unknown): [ResponseOut, Status] => {
   }
 
   if (err instanceof ZodError) {
-    response.error = z.treeifyError(err);
+    response.error = treeifyError(err);
     response.message = "validationErrors";
     response.status = 422;
   }
 
-  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+  if (err instanceof PrismaClientKnownRequestError) {
     response.status = 400;
     response.error = err.meta;
     switch (err.code) {
