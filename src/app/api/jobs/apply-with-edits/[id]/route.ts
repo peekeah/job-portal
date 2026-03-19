@@ -6,7 +6,7 @@ import { CustomError, errorHandler } from "@/lib/errorHandler";
 import z from "zod";
 
 const payloadSchema = z.object({
-  resumeId: z.string().optional(),
+  resumeId: z.uuid(),
   resumeData: z.string()
 });
 

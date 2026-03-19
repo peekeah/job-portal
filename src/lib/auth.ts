@@ -1,10 +1,10 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import { AuthOptions } from "next-auth";
+import { PrismaAdapter } from "@next-auth/prisma-adapter"
 
 import { prisma } from "./db";
 import { comparePassword } from "@/lib/bcrypt";
 import { getEnv } from "./config";
-import { UserType } from "@prisma/client";
 
 declare module "next-auth" {
   interface Session {
@@ -12,7 +12,7 @@ declare module "next-auth" {
       id: string;
       email: string;
       user_type: string;
-    };
+    }
   }
 
   interface User {
@@ -40,23 +40,13 @@ export const authOptions = {
       },
       async authorize(credentials) {
         try {
-          if (!credentials?.email || !credentials?.password) {
-            throw new Error("Missing credentials");
-          }
-
-          const existUser = await prisma.auth.findUnique({
-            where: { email: credentials.email },
-          });
+          const existUser = await prisma.auth.findUnique({ where: { email: credentials?.email } });
 
           if (!existUser) {
-            throw new Error("user does not exist");
+            throw new Error("user does not exist")
           }
 
-          const isPasswordValid = await comparePassword(
-            credentials.password,
-            existUser.password,
-          );
-
+          const isPasswordValid = await comparePassword(credentials!.password, existUser!.password);
           if (!isPasswordValid) {
             throw new Error("Invalid password");
           }
@@ -64,17 +54,17 @@ export const authOptions = {
           return {
             id: existUser.id,
             email: existUser.email,
-            user_type: existUser.user_type || UserType.applicant,
+            user_type: existUser.user_type || "user",
           };
         } catch (err) {
-          console.log("err:", err);
+          console.log("err:", err)
           let res = "Error while login";
           if (err instanceof Error) {
             res = err.message;
           }
-          throw new Error(res);
+          throw new Error(res)
         }
-      },
+      }
     }),
   ],
 
@@ -82,7 +72,7 @@ export const authOptions = {
     strategy: "jwt" as const,
   },
   pages: {
-    signIn: "/login", // optional: custom login page
+    signIn: "/auth/login", // optional: custom login page
   },
   secret: getEnv("NEXTAUTH_SECRET"),
   callbacks: {
@@ -101,4 +91,5 @@ export const authOptions = {
       return session;
     },
   },
-} satisfies AuthOptions;
+  adapter: PrismaAdapter(prisma),
+} satisfies AuthOptions
