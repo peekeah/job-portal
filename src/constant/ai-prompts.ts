@@ -1,4 +1,7 @@
-export const getResumeBuilderPrompt = (resumeInput: string, jobDescription: string) => `
+export const getResumeBuilderPrompt = (
+  resumeInput: string,
+  jobDescription: string,
+) => `
 You are a senior resume processing agent used in production.
 
 You MUST follow the phases below IN ORDER.
@@ -99,5 +102,4 @@ ${jobDescription}
 ====================================
 RETURN ONLY THE FINAL RESUME JSON
 ====================================
-`
-
+`;

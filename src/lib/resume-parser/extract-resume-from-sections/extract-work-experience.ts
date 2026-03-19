@@ -3,20 +3,20 @@ import type {
   FeatureSet,
   ResumeSectionToLines,
   ResumeWorkExperience,
-} from "../types";
-import { getSectionLinesByKeywords } from "@/lib/resume-parser/extract-resume-from-sections/lib/get-section-lines";
+} from '../types';
+import { getSectionLinesByKeywords } from '@/lib/resume-parser/extract-resume-from-sections/lib/get-section-lines';
 import {
   DATE_FEATURE_SETS,
   hasNumber,
   getHasText,
   isBold,
-} from "@/lib/resume-parser/extract-resume-from-sections/lib/common-features";
-import { divideSectionIntoSubsections } from "@/lib/resume-parser/extract-resume-from-sections/lib/subsections";
-import { getTextWithHighestFeatureScore } from "@/lib/resume-parser/extract-resume-from-sections/lib/feature-scoring-system";
+} from '@/lib/resume-parser/extract-resume-from-sections/lib/common-features';
+import { divideSectionIntoSubsections } from '@/lib/resume-parser/extract-resume-from-sections/lib/subsections';
+import { getTextWithHighestFeatureScore } from '@/lib/resume-parser/extract-resume-from-sections/lib/feature-scoring-system';
 import {
   getBulletPointsFromLines,
   getDescriptionsLineIdx,
-} from "@/lib/resume-parser/extract-resume-from-sections/lib/bullet-points";
+} from '@/lib/resume-parser/extract-resume-from-sections/lib/bullet-points';
 
 // prettier-ignore
 const WORK_EXPERIENCE_KEYWORDS_LOWERCASE = ['work', 'experience', 'employment', 'history', 'job'];
@@ -25,7 +25,7 @@ const JOB_TITLES = ['Accountant', 'Administrator', 'Advisor', 'Agent', 'Analyst'
 
 const hasJobTitle = (item: TextItem) =>
   JOB_TITLES.some((jobTitle) =>
-    item.text.split(/\s/).some((word) => word === jobTitle)
+    item.text.split(/\s/).some((word) => word === jobTitle),
   );
 const hasMoreThan5Words = (item: TextItem) => item.text.split(/\s/).length > 5;
 const JOB_TITLE_FEATURE_SET: FeatureSet[] = [
@@ -39,7 +39,7 @@ export const extractWorkExperience = (sections: ResumeSectionToLines) => {
   const workExperiencesScores = [];
   const lines = getSectionLinesByKeywords(
     sections,
-    WORK_EXPERIENCE_KEYWORDS_LOWERCASE
+    WORK_EXPERIENCE_KEYWORDS_LOWERCASE,
   );
   const subsections = divideSectionIntoSubsections(lines);
 
@@ -51,11 +51,11 @@ export const extractWorkExperience = (sections: ResumeSectionToLines) => {
       .flat();
     const [date, dateScores] = getTextWithHighestFeatureScore(
       subsectionInfoTextItems,
-      DATE_FEATURE_SETS
+      DATE_FEATURE_SETS,
     );
     const [jobTitle, jobTitleScores] = getTextWithHighestFeatureScore(
       subsectionInfoTextItems,
-      JOB_TITLE_FEATURE_SET
+      JOB_TITLE_FEATURE_SET,
     );
     const COMPANY_FEATURE_SET: FeatureSet[] = [
       [isBold, 2],
@@ -65,7 +65,7 @@ export const extractWorkExperience = (sections: ResumeSectionToLines) => {
     const [company, companyScores] = getTextWithHighestFeatureScore(
       subsectionInfoTextItems,
       COMPANY_FEATURE_SET,
-      false
+      false,
     );
 
     const subsectionDescriptionsLines =

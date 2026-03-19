@@ -1,10 +1,10 @@
-import { hashPassword } from "@/lib/bcrypt";
-import { prisma } from "@/lib/db";
-import { CustomError, errorHandler } from "@/lib/errorHandler";
-import { verifyToken } from "@/lib/jwt";
-import { JwtPayload } from "jsonwebtoken";
-import { NextRequest, NextResponse } from "next/server";
-import z from "zod";
+import { hashPassword } from '@/lib/bcrypt';
+import { prisma } from '@/lib/db';
+import { CustomError, errorHandler } from '@/lib/errorHandler';
+import { verifyToken } from '@/lib/jwt';
+import { JwtPayload } from 'jsonwebtoken';
+import { NextRequest, NextResponse } from 'next/server';
+import z from 'zod';
 
 const schema = z.object({
   token: z.string(),
@@ -19,7 +19,7 @@ const resetPassword = async (req: NextRequest) => {
     const token = verifyToken(payload.token) as JwtPayload;
     const email = token?.data?.email;
 
-    if (!email) throw new Error("Invalid request");
+    if (!email) throw new Error('Invalid request');
 
     const user = await prisma.auth.findFirst({
       where: { email: token.email },
@@ -27,8 +27,8 @@ const resetPassword = async (req: NextRequest) => {
 
     if (user?.reset_hash !== payload.token) {
       throw new CustomError(
-        "Reset link expired, regenerate the reset link",
-        403
+        'Reset link expired, regenerate the reset link',
+        403,
       );
     }
 
@@ -36,12 +36,12 @@ const resetPassword = async (req: NextRequest) => {
 
     await prisma.auth.update({
       data: { password: hashedPwd, reset_hash: null },
-      where: { email: email },
+      where: { email },
     });
 
     return NextResponse.json({
       status: true,
-      data: "Successfully updated password",
+      data: 'Successfully updated password',
     });
   } catch (err) {
     const [resp, status] = errorHandler(err);

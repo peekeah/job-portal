@@ -1,16 +1,16 @@
-import type { ResumeKey } from "./types";
+import type { ResumeKey } from './types';
 import type {
   Line,
   Lines,
   ResumeSectionToLines,
-} from "@/lib/resume-parser/types";
+} from '@/lib/resume-parser/types';
 import {
   hasLetterAndIsAllUpperCase,
   hasOnlyLettersSpacesAmpersands,
   isBold,
-} from "@/lib/resume-parser/extract-resume-from-sections/lib/common-features";
+} from '@/lib/resume-parser/extract-resume-from-sections/lib/common-features';
 
-export const PROFILE_SECTION: ResumeKey = "profile";
+export const PROFILE_SECTION: ResumeKey = 'profile';
 
 /**
  * Step 3. Group lines into sections
@@ -21,7 +21,7 @@ export const PROFILE_SECTION: ResumeKey = "profile";
  * into the closest section title above these lines.
  */
 export const groupLinesIntoSections = (lines: Lines) => {
-  let sections: ResumeSectionToLines = {};
+  const sections: ResumeSectionToLines = {};
   let sectionName: string = PROFILE_SECTION;
   let sectionLines = [];
   for (let i = 0; i < lines.length; i++) {
@@ -42,20 +42,20 @@ export const groupLinesIntoSections = (lines: Lines) => {
 };
 
 const SECTION_TITLE_PRIMARY_KEYWORDS = [
-  "experience",
-  "education",
-  "project",
-  "skill",
+  'experience',
+  'education',
+  'project',
+  'skill',
 ];
 const SECTION_TITLE_SECONDARY_KEYWORDS = [
-  "job",
-  "course",
-  "extracurricular",
-  "objective",
-  "summary", // LinkedIn generated resume has a summary section
-  "award",
-  "honor",
-  "project",
+  'job',
+  'course',
+  'extracurricular',
+  'objective',
+  'summary', // LinkedIn generated resume has a summary section
+  'award',
+  'honor',
+  'project',
 ];
 const SECTION_TITLE_KEYWORDS = [
   ...SECTION_TITLE_PRIMARY_KEYWORDS,
@@ -82,7 +82,7 @@ const isSectionTitle = (line: Line, lineNumber: number) => {
   // (This heuristics is not well tested and may not work well)
   const text = textItem.text.trim();
   const textHasAtMost2Words =
-    text.split(" ").filter((s) => s !== "&").length <= 2;
+    text.split(' ').filter((s) => s !== '&').length <= 2;
   const startsWithCapitalLetter = /[A-Z]/.test(text.slice(0, 1));
 
   if (
@@ -90,7 +90,7 @@ const isSectionTitle = (line: Line, lineNumber: number) => {
     hasOnlyLettersSpacesAmpersands(textItem) &&
     startsWithCapitalLetter &&
     SECTION_TITLE_KEYWORDS.some((keyword) =>
-      text.toLowerCase().includes(keyword)
+      text.toLowerCase().includes(keyword),
     )
   ) {
     return true;

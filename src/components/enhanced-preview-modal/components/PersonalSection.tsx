@@ -1,6 +1,6 @@
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Resume } from "@/mock/resume";
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Resume } from '@/mock/resume';
 
 type Props = {
   data: Resume;
@@ -8,7 +8,7 @@ type Props = {
 };
 
 export const PersonalSection = ({ data, setData }: Props) => {
-  const handleChange = (field: keyof Resume["profile"], value: string) => {
+  const handleChange = (field: keyof Resume['profile'], value: string) => {
     setData({
       ...data,
       profile: {
@@ -19,62 +19,62 @@ export const PersonalSection = ({ data, setData }: Props) => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-1">Personal Info</h2>
-      <p className="text-sm text-gray-500 mb-6">
+    <div className="mx-auto max-w-3xl">
+      <h2 className="mb-1 text-2xl font-semibold">Personal Info</h2>
+      <p className="mb-6 text-sm text-gray-500">
         Your basic contact and identity details
       </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
-          <label className="block text-xs font-medium mb-1">Full Name</label>
+          <label className="mb-1 block text-xs font-medium">Full Name</label>
           <Input
             value={data.profile.name}
-            onChange={(e) => handleChange("name", e.target.value)}
+            onChange={(e) => handleChange('name', e.target.value)}
             placeholder="Your name"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1">Location</label>
+          <label className="mb-1 block text-xs font-medium">Location</label>
           <Input
             value={data.profile.location}
-            onChange={(e) => handleChange("location", e.target.value)}
+            onChange={(e) => handleChange('location', e.target.value)}
             placeholder="City, Country"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1">Email</label>
+          <label className="mb-1 block text-xs font-medium">Email</label>
           <Input
             value={data.profile.email}
-            onChange={(e) => handleChange("email", e.target.value)}
+            onChange={(e) => handleChange('email', e.target.value)}
             placeholder="Email"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1">Phone</label>
+          <label className="mb-1 block text-xs font-medium">Phone</label>
           <Input
             value={data.profile.phone}
-            onChange={(e) => handleChange("phone", e.target.value)}
+            onChange={(e) => handleChange('phone', e.target.value)}
             placeholder="+91 00000 00000"
           />
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs font-medium mb-1">
+          <label className="mb-1 block text-xs font-medium">
             Portfolio / LinkedIn URL
           </label>
           <Input
             value={data.profile.url}
-            onChange={(e) => handleChange("url", e.target.value)}
+            onChange={(e) => handleChange('url', e.target.value)}
             placeholder="https://yoursite.com"
           />
         </div>
       </div>
       <div className="mb-4">
-        <label className="block text-xs font-medium mb-1">
+        <label className="mb-1 block text-xs font-medium">
           Professional Summary
         </label>
         <Textarea
           value={data.profile.summary}
-          onChange={(e) => handleChange("summary", e.target.value)}
+          onChange={(e) => handleChange('summary', e.target.value)}
           placeholder="Brief summary about yourself"
           className="min-h-[100px]"
         />

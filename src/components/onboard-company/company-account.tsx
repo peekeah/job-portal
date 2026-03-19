@@ -1,8 +1,12 @@
-import { CompanySignupPayload } from "./types";
-import { Input } from "../ui/input";
-import { Control, Controller } from "react-hook-form";
+import { CompanySignupPayload } from './types';
+import { Input } from '../ui/input';
+import { Control, Controller } from 'react-hook-form';
 
-const CompanyAccount = ({ formControl }: { formControl: Control<CompanySignupPayload> }) => {
+const CompanyAccount = ({
+  formControl,
+}: {
+  formControl: Control<CompanySignupPayload>;
+}) => {
   return (
     <div className="space-y-5">
       <Controller
@@ -15,9 +19,7 @@ const CompanyAccount = ({ formControl }: { formControl: Control<CompanySignupPay
             type="email"
             placeholder="Enter company email"
             aria-invalid={invalid}
-            error={
-              error ? error.message : ""
-            }
+            error={error ? error.message : ''}
           />
         )}
       />
@@ -31,9 +33,7 @@ const CompanyAccount = ({ formControl }: { formControl: Control<CompanySignupPay
             type="password"
             placeholder="Enter password"
             aria-invalid={invalid}
-            error={
-              error ? error.message : ""
-            }
+            error={error ? error.message : ''}
           />
         )}
       />
@@ -47,14 +47,12 @@ const CompanyAccount = ({ formControl }: { formControl: Control<CompanySignupPay
             type="number"
             placeholder="Enter contact number"
             aria-invalid={invalid}
-            error={
-              error ? error.message : ""
-            }
+            error={error ? error.message : ''}
           />
         )}
       />
     </div>
-  )
-}
+  );
+};
 
 export default CompanyAccount;

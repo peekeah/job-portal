@@ -1,9 +1,13 @@
-import { Input } from "../ui/input";
-import { CustomSelect } from "../ui/select";
-import { Control, Controller } from "react-hook-form";
-import { CompanySignupPayload } from "./types";
+import { Input } from '../ui/input';
+import { CustomSelect } from '../ui/select';
+import { Control, Controller } from 'react-hook-form';
+import { CompanySignupPayload } from './types';
 
-const CompanyProfile = ({ formControl }: { formControl: Control<CompanySignupPayload> }) => {
+const CompanyProfile = ({
+  formControl,
+}: {
+  formControl: Control<CompanySignupPayload>;
+}) => {
   return (
     <div className="space-y-5">
       <Controller
@@ -15,9 +19,7 @@ const CompanyProfile = ({ formControl }: { formControl: Control<CompanySignupPay
             label="Company Name"
             aria-invalid={invalid}
             placeholder="Enter company name"
-            error={
-              error ? error.message : ""
-            }
+            error={error ? error.message : ''}
           />
         )}
       />
@@ -30,9 +32,7 @@ const CompanyProfile = ({ formControl }: { formControl: Control<CompanySignupPay
             label="Company Type"
             placeholder="Enter company type"
             aria-invalid={invalid}
-            error={
-              error ? error.message : ""
-            }
+            error={error ? error.message : ''}
           />
         )}
       />
@@ -43,14 +43,14 @@ const CompanyProfile = ({ formControl }: { formControl: Control<CompanySignupPay
           render={({ field, fieldState: { error, invalid } }) => (
             <Input
               {...field}
-              onChange={(e) => !e.target.value ? null : field.onChange(Number(e.target.value))}
+              onChange={(e) =>
+                !e.target.value ? null : field.onChange(Number(e.target.value))
+              }
               label="Year Founded"
               type="number"
               placeholder="Enter founding year"
               aria-invalid={invalid}
-              error={
-                error ? error.message : ""
-              }
+              error={error ? error.message : ''}
             />
           )}
         />
@@ -61,8 +61,8 @@ const CompanyProfile = ({ formControl }: { formControl: Control<CompanySignupPay
           render={({ field }) => (
             <CustomSelect
               {...field}
-              label='Company Size'
-              className='w-48'
+              label="Company Size"
+              className="w-48"
               onValueChange={field.onChange}
               options={[
                 { value: 'SIZE_1_10', label: '1-10' },
@@ -74,8 +74,8 @@ const CompanyProfile = ({ formControl }: { formControl: Control<CompanySignupPay
           )}
         />
       </div>
-    </div >
-  )
-}
+    </div>
+  );
+};
 
-export default CompanyProfile
+export default CompanyProfile;

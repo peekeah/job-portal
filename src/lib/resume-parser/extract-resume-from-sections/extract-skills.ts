@@ -1,19 +1,19 @@
-import type { FeaturedSkill, ResumeSkills } from "../types";
-import type { ResumeSectionToLines } from "../types";
-import { deepClone } from "./deep-clone";
-import { getSectionLinesByKeywords } from "./lib/get-section-lines";
+import type { FeaturedSkill, ResumeSkills } from '../types';
+import type { ResumeSectionToLines } from '../types';
+import { deepClone } from './deep-clone';
+import { getSectionLinesByKeywords } from './lib/get-section-lines';
 import {
   getBulletPointsFromLines,
   getDescriptionsLineIdx,
-} from "./lib/bullet-points";
+} from './lib/bullet-points';
 
-export const initialFeaturedSkill: FeaturedSkill = { skill: "", rating: 4 };
+export const initialFeaturedSkill: FeaturedSkill = { skill: '', rating: 4 };
 export const initialFeaturedSkills: FeaturedSkill[] = Array(6).fill({
   ...initialFeaturedSkill,
 });
 
 export const extractSkills = (sections: ResumeSectionToLines) => {
-  const lines = getSectionLinesByKeywords(sections, ["skill"]);
+  const lines = getSectionLinesByKeywords(sections, ['skill']);
   const descriptionsLineIdx = getDescriptionsLineIdx(lines) ?? 0;
   const descriptionsLines = lines.slice(descriptionsLineIdx);
   const descriptions = getBulletPointsFromLines(descriptionsLines);

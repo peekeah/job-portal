@@ -1,14 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { UTApi } from "uploadthing/server";
+import { NextRequest, NextResponse } from 'next/server';
 
-import { hashPassword } from "@/lib/bcrypt";
-import { errorHandler, CustomError } from "@/lib/errorHandler";
-import { authMiddleware } from "@/lib/auth-middleware";
-import { prisma } from "@/lib/db";
+import { hashPassword } from '@/lib/bcrypt';
+import { errorHandler, CustomError } from '@/lib/errorHandler';
+import { authMiddleware } from '@/lib/auth-middleware';
+import { prisma } from '@/lib/db';
 
 async function getProfile(req: NextRequest) {
   try {
-    const token = await authMiddleware(req, "applicant");
+    const token = await authMiddleware(req, 'applicant');
 
     const studentData = await prisma.applicant.findUnique({
       where: {
@@ -19,7 +18,7 @@ async function getProfile(req: NextRequest) {
       },
     });
 
-    if (!studentData) throw new CustomError("Student not found", 404);
+    if (!studentData) throw new CustomError('Student not found', 404);
 
     return NextResponse.json({ status: true, data: studentData });
   } catch (err) {
@@ -30,10 +29,9 @@ async function getProfile(req: NextRequest) {
 
 async function postProfile(req: NextRequest) {
   try {
-    const token = await authMiddleware(req, "applicant");
-
+    const token = await authMiddleware(req, 'applicant');
     const body = await req.json();
-    const { resume, ...profile } = body;
+
     const {
       name,
       mobile,
@@ -44,7 +42,7 @@ async function postProfile(req: NextRequest) {
       college_joining_year,
     } = body;
 
-    let hashedPassword = "";
+    let hashedPassword = '';
 
     if (body.password) {
       hashedPassword = await hashPassword(body.password);

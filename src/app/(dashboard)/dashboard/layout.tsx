@@ -1,58 +1,58 @@
-"use client";
-import { useState } from "react";
-import { useSession } from "next-auth/react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { IconMenu2 as MenuIcon, IconX as CloseIcon } from "@tabler/icons-react";
+'use client';
+import { useState } from 'react';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { IconMenu2 as MenuIcon, IconX as CloseIcon } from '@tabler/icons-react';
 
-import Container from "@/components/container";
-import SignOutButton from "@/components/signout";
-import { Role } from "@/lib/auth-middleware";
-import { cn } from "@/lib/utils";
+import Container from '@/components/container';
+import SignOutButton from '@/components/signout';
+import { Role } from '@/lib/auth-middleware';
+import { cn } from '@/lib/utils';
 
 const studentNavLinks = [
   {
-    title: "Dashboard",
-    href: "/dashboard",
+    title: 'Dashboard',
+    href: '/dashboard',
   },
   {
-    title: "Appplied Jobs",
-    href: "/applied-jobs",
+    title: 'Appplied Jobs',
+    href: '/applied-jobs',
   },
   {
-    title: "Profile",
-    href: "/profile",
+    title: 'Profile',
+    href: '/profile',
   },
   {
-    title: "Logout",
-    href: "/logout",
+    title: 'Logout',
+    href: '/logout',
   },
 ];
 
 const companyNavLinks = [
   {
-    title: "Dashboard",
-    href: "/dashboard",
+    title: 'Dashboard',
+    href: '/dashboard',
   },
   {
-    title: "Posted Jobs",
-    href: "/posted-jobs",
+    title: 'Posted Jobs',
+    href: '/posted-jobs',
   },
   {
-    title: "Profile",
-    href: "/profile",
+    title: 'Profile',
+    href: '/profile',
   },
   {
-    title: "Logout",
-    href: "/logout",
+    title: 'Logout',
+    href: '/logout',
   },
 ];
 
-const links = ["/dashboard", "/post-job", "/profile", "/logout"];
+const links = ['/dashboard', '/post-job', '/profile', '/logout'];
 
 const getSelectedLink = (path: string): string => {
-  const link = path.split("/dashboard")[1] ?? "";
-  return links.includes(link) ? link : "";
+  const link = path.split('/dashboard')[1] ?? '';
+  return links.includes(link) ? link : '';
 };
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
@@ -63,31 +63,31 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const selectedLink = getSelectedLink(path);
   const [openMenu, setOpenMenu] = useState(false);
 
-  const navlinks = role === "applicant" ? studentNavLinks : companyNavLinks;
+  const navlinks = role === 'applicant' ? studentNavLinks : companyNavLinks;
 
   return (
-    <Container className="relative max-w-7xl w-full h-screen flex">
-      <div className="hidden lg:block h-screen px-5">
+    <Container className="relative flex h-screen w-full max-w-7xl">
+      <div className="hidden h-screen px-5 lg:block">
         <div className="py-6">Logo</div>
-        <div className="flex flex-col gap-3 ">
+        <div className="flex flex-col gap-3">
           <Link
-            href={"/dashboard"}
+            href={'/dashboard'}
             className={cn(
-              "text-lg px-3 py-1.5 cursor-pointer transition-all",
-              "hover:bg-primary hover:text-white hover:rounded-md",
-              selectedLink === "" ? "bg-primary text-white rounded-md" : null,
+              'cursor-pointer px-3 py-1.5 text-lg transition-all',
+              'hover:bg-primary hover:rounded-md hover:text-white',
+              selectedLink === '' ? 'bg-primary rounded-md text-white' : null,
             )}
           >
             Dashboard
           </Link>
-          {role === "applicant" ? (
+          {role === 'applicant' ? (
             <Link
-              href={"/dashboard/applied-jobs"}
+              href={'/dashboard/applied-jobs'}
               className={cn(
-                "text-lg px-3 py-1.5 cursor-pointer transition-all",
-                "hover:bg-primary hover:text-white hover:rounded-md",
-                selectedLink === "/applied-jobs"
-                  ? "bg-primary text-white rounded-md"
+                'cursor-pointer px-3 py-1.5 text-lg transition-all',
+                'hover:bg-primary hover:rounded-md hover:text-white',
+                selectedLink === '/applied-jobs'
+                  ? 'bg-primary rounded-md text-white'
                   : null,
               )}
             >
@@ -95,12 +95,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </Link>
           ) : (
             <Link
-              href={"/dashboard/post-job"}
+              href={'/dashboard/post-job'}
               className={cn(
-                "text-lg px-3 py-1.5 cursor-pointer transition-all",
-                "hover:bg-primary hover:text-white hover:rounded-md",
-                selectedLink === "/post-job"
-                  ? "bg-primary text-white rounded-md"
+                'cursor-pointer px-3 py-1.5 text-lg transition-all',
+                'hover:bg-primary hover:rounded-md hover:text-white',
+                selectedLink === '/post-job'
+                  ? 'bg-primary rounded-md text-white'
                   : null,
               )}
             >
@@ -108,12 +108,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </Link>
           )}
           <Link
-            href={"/dashboard/profile"}
+            href={'/dashboard/profile'}
             className={cn(
-              "text-lg px-3 py-1.5 cursor-pointer transition-all",
-              "hover:bg-primary hover:text-white hover:rounded-md",
-              selectedLink === "/profile"
-                ? "bg-primary text-white rounded-md"
+              'cursor-pointer px-3 py-1.5 text-lg transition-all',
+              'hover:bg-primary hover:rounded-md hover:text-white',
+              selectedLink === '/profile'
+                ? 'bg-primary rounded-md text-white'
                 : null,
             )}
           >
@@ -122,14 +122,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <SignOutButton />
         </div>
       </div>
-      <div className="block absolute top-5 right-3 lg:hidden z-10">
+      <div className="absolute top-5 right-3 z-10 block lg:hidden">
         <MenuIcon className="z-20" onClick={() => setOpenMenu(true)} />
       </div>
       {openMenu ? (
-        <div className="block lg:hidden absolute z-20 h-screen w-screen backdrop-blur-md transition-all duration-300">
+        <div className="absolute z-20 block h-screen w-screen backdrop-blur-md transition-all duration-300 lg:hidden">
           <div className="relative p-5">
             <CloseIcon
-              className="z-20 absolute top-5 right-3"
+              className="absolute top-5 right-3 z-20"
               onClick={() => setOpenMenu(false)}
             />
             <div className="flex flex-col gap-3">
@@ -137,8 +137,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 <Link
                   key={link.title}
                   className={cn(
-                    "text-xl",
-                    selectedLink === link.title ? "text-primary" : null,
+                    'text-xl',
+                    selectedLink === link.title ? 'text-primary' : null,
                   )}
                   href={link.href}
                 >

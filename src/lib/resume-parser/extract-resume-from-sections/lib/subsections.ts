@@ -1,6 +1,6 @@
-import { BULLET_POINTS } from "@/lib/resume-parser/extract-resume-from-sections/lib/bullet-points";
-import { isBold } from "@/lib/resume-parser/extract-resume-from-sections/lib/common-features";
-import type { Lines, Line, Subsections } from "@/lib/resume-parser/types";
+import { BULLET_POINTS } from '@/lib/resume-parser/extract-resume-from-sections/lib/bullet-points';
+import { isBold } from '@/lib/resume-parser/extract-resume-from-sections/lib/common-features';
+import type { Lines, Line, Subsections } from '@/lib/resume-parser/types';
 
 /**
  * Divide lines into subsections based on difference in line gap or bold text.
@@ -42,7 +42,7 @@ export const divideSectionIntoSubsections = (lines: Lines): Subsections => {
 type IsLineNewSubsection = (line: Line, prevLine: Line) => boolean;
 
 const createIsLineNewSubsectionByLineGap = (
-  lines: Lines
+  lines: Lines,
 ): IsLineNewSubsection => {
   // Extract the common typical line gap
   const lineGapToCount: { [lineGap: number]: number } = {};
@@ -70,7 +70,7 @@ const createIsLineNewSubsectionByLineGap = (
 
 const createSubsections = (
   lines: Lines,
-  isLineNewSubsection: IsLineNewSubsection
+  isLineNewSubsection: IsLineNewSubsection,
 ): Subsections => {
   const subsections: Subsections = [];
   let subsection: Lines = [];

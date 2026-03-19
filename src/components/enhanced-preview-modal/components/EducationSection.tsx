@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Resume } from "@/mock/resume";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Resume } from '@/mock/resume';
 
 type Props = {
   data: Resume;
@@ -11,7 +11,7 @@ type Props = {
 export const EducationSection = ({ data, setData }: Props) => {
   const handleEduChange = (idx: number, field: string, value: string) => {
     const updated = data.educations.map((edu, i) =>
-      i === idx ? { ...edu, [field]: value } : edu
+      i === idx ? { ...edu, [field]: value } : edu,
     );
     setData({ ...data, educations: updated });
   };
@@ -20,12 +20,12 @@ export const EducationSection = ({ data, setData }: Props) => {
     const updated = data.educations.map((edu, i) =>
       i === idx
         ? {
-          ...edu,
-          descriptions: edu.descriptions.map((desc, j) =>
-            j === descIdx ? value : desc
-          ),
-        }
-        : edu
+            ...edu,
+            descriptions: edu.descriptions.map((desc, j) =>
+              j === descIdx ? value : desc,
+            ),
+          }
+        : edu,
     );
     setData({ ...data, educations: updated });
   };
@@ -35,23 +35,21 @@ export const EducationSection = ({ data, setData }: Props) => {
       ...data,
       educations: [
         ...data.educations,
-        { degree: "", school: "", date: "", gpa: "", descriptions: [""] }
-      ]
+        { degree: '', school: '', date: '', gpa: '', descriptions: [''] },
+      ],
     });
   };
 
   const handleRemoveEdu = (idx: number) => {
     setData({
       ...data,
-      educations: data.educations.filter((_, id) => id != idx)
+      educations: data.educations.filter((_, id) => id !== idx),
     });
-  }
+  };
 
   const handleAddDesc = (idx: number) => {
     const updated = data.educations.map((edu, i) =>
-      i === idx
-        ? { ...edu, descriptions: [...edu.descriptions, ""] }
-        : edu
+      i === idx ? { ...edu, descriptions: [...edu.descriptions, ''] } : edu,
     );
     setData({ ...data, educations: updated });
   };
@@ -59,35 +57,50 @@ export const EducationSection = ({ data, setData }: Props) => {
   const handleRemoveDesc = (idx: number, descIdx: number) => {
     const updated = data.educations.map((exp, i) =>
       i === idx
-        ? { ...exp, descriptions: exp.descriptions.filter((_, j) => j !== descIdx) }
-        : exp
+        ? {
+            ...exp,
+            descriptions: exp.descriptions.filter((_, j) => j !== descIdx),
+          }
+        : exp,
     );
     setData({ ...data, educations: updated });
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-1">Education</h2>
-      <p className="text-sm text-gray-500 mb-6">Add your education in reverse chronological order</p>
+    <div className="mx-auto max-w-3xl">
+      <h2 className="mb-1 text-2xl font-semibold">Education</h2>
+      <p className="mb-6 text-sm text-gray-500">
+        Add your education in reverse chronological order
+      </p>
       {data.educations.map((edu, idx) => (
-        <div key={idx} className="border rounded-lg p-4 mb-4 space-y-2 shadow-sm relative">
-          <div className="flex justify-between items-center mb-2">
+        <div
+          key={idx}
+          className="relative mb-4 space-y-2 rounded-lg border p-4 shadow-sm"
+        >
+          <div className="mb-2 flex items-center justify-between">
             <span className="font-semibold">Education {idx + 1}</span>
-            <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleRemoveEdu(idx)}>Remove</Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-red-500"
+              onClick={() => handleRemoveEdu(idx)}
+            >
+              Remove
+            </Button>
           </div>
 
           <div className="space-y-3">
-            <div className="grid md:grid-cols-2 gap-3">
+            <div className="grid gap-3 md:grid-cols-2">
               <Input
                 value={edu.date}
-                onChange={e => handleEduChange(idx, "date", e.target.value)}
+                onChange={(e) => handleEduChange(idx, 'date', e.target.value)}
                 placeholder="Date"
                 label="Date"
                 labelClass="text-xs"
               />
               <Input
                 value={edu.gpa}
-                onChange={e => handleEduChange(idx, "gpa", e.target.value)}
+                onChange={(e) => handleEduChange(idx, 'gpa', e.target.value)}
                 placeholder="GPA"
                 label="GPA"
                 labelClass="text-xs"
@@ -95,38 +108,53 @@ export const EducationSection = ({ data, setData }: Props) => {
             </div>
             <Input
               value={edu.degree}
-              onChange={e => handleEduChange(idx, "degree", e.target.value)}
+              onChange={(e) => handleEduChange(idx, 'degree', e.target.value)}
               placeholder="Degree"
               label="Degree"
               labelClass="text-xs"
             />
             <Input
               value={edu.school}
-              onChange={e => handleEduChange(idx, "school", e.target.value)}
+              onChange={(e) => handleEduChange(idx, 'school', e.target.value)}
               placeholder="School"
               label="School"
               labelClass="text-xs"
             />
 
             <div>
-              <label className="block text-xs font-medium mb-1">Bullet Points</label>
+              <label className="mb-1 block text-xs font-medium">
+                Bullet Points
+              </label>
               {edu.descriptions.map((desc, descIdx) => (
-                <div key={descIdx} className="flex items-center gap-2 mb-2">
+                <div key={descIdx} className="mb-2 flex items-center gap-2">
                   <Textarea
                     key={descIdx}
                     value={desc}
-                    onChange={e => handleDescChange(idx, descIdx, e.target.value)}
+                    onChange={(e) =>
+                      handleDescChange(idx, descIdx, e.target.value)
+                    }
                     placeholder="Description"
                   />
-                  <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleRemoveDesc(idx, descIdx)}>×</Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-500"
+                    onClick={() => handleRemoveDesc(idx, descIdx)}
+                  >
+                    ×
+                  </Button>
                 </div>
               ))}
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => handleAddDesc(idx)}>Add Bullet</Button>
+          <Button variant="ghost" size="sm" onClick={() => handleAddDesc(idx)}>
+            Add Bullet
+          </Button>
         </div>
       ))}
-      <Button variant="outline" size="sm" onClick={handleAddEdu}>Add Education</Button>
+      <Button variant="outline" size="sm" onClick={handleAddEdu}>
+        Add Education
+      </Button>
     </div>
   );
 };

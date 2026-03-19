@@ -1,5 +1,5 @@
 export type Environment = {
-  NODE_ENV: "development" | "production";
+  NODE_ENV: 'development' | 'production';
   DATABASE_URL: string;
   JWT_SECRET: string;
   NEXTAUTH_SECRET: string;
@@ -15,7 +15,7 @@ export const getEnv = <K extends keyof Environment>(
 ): Environment[K] => {
   const value = process.env[key] as Environment[K] | undefined;
 
-  if (value === undefined || value === null || value === "") {
+  if (value === undefined || value === null || value === '') {
     if (fallback) {
       return fallback;
     }
@@ -24,5 +24,3 @@ export const getEnv = <K extends keyof Environment>(
 
   return value;
 };
-
-export default { getEnv };

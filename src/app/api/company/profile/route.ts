@@ -1,20 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
-import { authMiddleware } from "@/lib/auth-middleware";
-import { CustomError, errorHandler } from "@/lib/errorHandler";
-import { prisma } from "@/lib/db";
-import { companySchema } from "@/lib/schema";
+import { authMiddleware } from '@/lib/auth-middleware';
+import { CustomError, errorHandler } from '@/lib/errorHandler';
+import { prisma } from '@/lib/db';
+import { companySchema } from '@/lib/schema';
 
 async function getProfile(req: NextRequest) {
   try {
-    const token = await authMiddleware(req, "company");
+    const token = await authMiddleware(req, 'company');
 
     const companyData = await prisma.company.findFirst({
       where: { email: token?.email },
     });
 
     if (!companyData) {
-      throw new CustomError("company not found", 403);
+      throw new CustomError('company not found', 403);
     }
 
     return NextResponse.json({
@@ -29,7 +29,7 @@ async function getProfile(req: NextRequest) {
 
 async function postProfile(req: NextRequest) {
   try {
-    const token = await authMiddleware(req, "company");
+    const token = await authMiddleware(req, 'company');
 
     const body = await req.json();
     const postSchema = companySchema.partial();

@@ -1,8 +1,8 @@
-import { FeatureSet, TextItems, TextScores } from "../../types";
+import { FeatureSet, TextItems, TextScores } from '../../types';
 
 const computeFeatureScores = (
   textItems: TextItems,
-  featureSets: FeatureSet[]
+  featureSets: FeatureSet[],
 ): TextScores => {
   const textScores = textItems.map((item) => ({
     text: item.text,
@@ -18,7 +18,7 @@ const computeFeatureScores = (
       const result = hasFeature(textItem);
       if (result) {
         let text = textItem.text;
-        if (returnMatchingText && typeof result === "object") {
+        if (returnMatchingText && typeof result === 'object') {
           text = result[0];
         }
 
@@ -47,7 +47,7 @@ export const getTextWithHighestFeatureScore = (
   textItems: TextItems,
   featureSets: FeatureSet[],
   returnEmptyStringIfHighestScoreIsNotPositive = true,
-  returnConcatenatedStringForTextsWithSameHighestScore = false
+  returnConcatenatedStringForTextsWithSameHighestScore = false,
 ) => {
   const textScores = computeFeatureScores(textItems, featureSets);
 
@@ -64,12 +64,12 @@ export const getTextWithHighestFeatureScore = (
   }
 
   if (returnEmptyStringIfHighestScoreIsNotPositive && highestScore <= 0)
-    return ["", textScores] as const;
+    return ['', textScores] as const;
 
   // Note: If textItems is an empty array, textsWithHighestFeatureScore[0] is undefined, so we default it to empty string
   const text = !returnConcatenatedStringForTextsWithSameHighestScore
-    ? textsWithHighestFeatureScore[0] ?? ""
-    : textsWithHighestFeatureScore.map((s) => s.trim()).join(" ");
+    ? (textsWithHighestFeatureScore[0] ?? '')
+    : textsWithHighestFeatureScore.map((s) => s.trim()).join(' ');
 
   return [text, textScores] as const;
 };

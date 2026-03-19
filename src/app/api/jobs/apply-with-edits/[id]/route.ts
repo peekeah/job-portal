@@ -1,23 +1,25 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
-import { authMiddleware } from "@/lib/auth-middleware";
-import { prisma } from "@/lib/db";
-import { CustomError, errorHandler } from "@/lib/errorHandler";
-import z from "zod";
+import { authMiddleware } from '@/lib/auth-middleware';
+import { prisma } from '@/lib/db';
+import { CustomError, errorHandler } from '@/lib/errorHandler';
+import z from 'zod';
 
 const payloadSchema = z.object({
   resumeId: z.uuid(),
-  resumeData: z.string()
+  resumeData: z.string(),
 });
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
-
     const { id: jobId } = await params;
 
-    if (!jobId) throw new CustomError("Job id missing", 400);
+    if (!jobId) throw new CustomError('Job id missing', 400);
 
-    const token = await authMiddleware(req, "applicant");
+    const token = await authMiddleware(req, 'applicant');
 
     const rawPayload = await req.json();
     const payload = payloadSchema.parse(rawPayload);
@@ -29,21 +31,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
 
     if (!studentData) {
-      throw new CustomError("student not found", 403);
+      throw new CustomError('student not found', 403);
     }
 
-    if (!studentData?.id) throw new CustomError("Student data missing", 400);
+    if (!studentData?.id) throw new CustomError('Student data missing', 400);
 
     // Validate applicant resume
     const existResume = await prisma.resume.findFirst({
       where: {
         id: payload.resumeId,
-        applicant_id: studentData.id
-      }
-    })
+        applicant_id: studentData.id,
+      },
+    });
 
-    if(!existResume){
-      throw new CustomError("resume does not exist", 403)
+    if (!existResume) {
+      throw new CustomError('resume does not exist', 403);
     }
 
     const existJob = await prisma.job.findFirst({
@@ -52,44 +54,43 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       },
     });
 
-    if(!existJob){
-      throw new CustomError("Job not found", 403);
+    if (!existJob) {
+      throw new CustomError('Job not found', 403);
     }
 
     const appliedJob = await prisma.appliedJob.findFirst({
       where: {
-        jobId: jobId,
+        jobId,
         applicant_id: studentData.id,
       },
     });
 
     if (appliedJob) {
-      throw new CustomError("You already applied for this job", 403);
+      throw new CustomError('You already applied for this job', 403);
     }
 
     const dbRes = await prisma.resume.update({
       where: {
-        id: payload.resumeId
+        id: payload.resumeId,
       },
       data: {
-        json: payload.resumeData
-      }
-    })
+        json: payload.resumeData,
+      },
+    });
 
     await prisma.appliedJob.create({
       data: {
-        status: "applied",
+        status: 'applied',
         applicant_id: studentData.id,
-        jobId: jobId,
-        applied_resume_id: dbRes.id
+        jobId,
+        applied_resume_id: dbRes.id,
       },
     });
 
     return NextResponse.json({
       status: true,
-      data: "successfully applied for the job",
+      data: 'successfully applied for the job',
     });
-
   } catch (err) {
     const [resBody, status] = errorHandler(err);
     return NextResponse.json(resBody, status);

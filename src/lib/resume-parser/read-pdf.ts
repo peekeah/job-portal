@@ -1,11 +1,15 @@
-import * as pdfjs from "pdfjs-dist";
-import path from "node:path"
+import * as pdfjs from 'pdfjs-dist';
+import path from 'node:path';
 
-const workerUrl = path.join(process.cwd(), "public", "/assets/pdf.worker.min.js");
+const workerUrl = path.join(
+  process.cwd(),
+  'public',
+  '/assets/pdf.worker.min.js',
+);
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
-import type { TextItem as PdfjsTextItem } from "pdfjs-dist/types/src/display/api";
-import type { TextItem, TextItems } from "@/lib/resume-parser/types";
+import type { TextItem as PdfjsTextItem } from 'pdfjs-dist/types/src/display/api';
+import type { TextItem, TextItems } from '@/lib/resume-parser/types';
 
 /**
  * Step 1: Read pdf and output textItems by concatenating results from each page.
@@ -37,7 +41,6 @@ export const readPdf = async (fileUrl: string): Promise<TextItems> => {
     const pageTextItems = textContent.items.map((item) => {
       const {
         str: text,
-        dir, // Remove text direction
         transform,
         fontName: pdfFontName,
         ...otherProps
@@ -57,7 +60,7 @@ export const readPdf = async (fileUrl: string): Promise<TextItems> => {
 
       // pdfjs reads a "-" as "-­‐" in the resume example. This is to revert it.
       // Note "-­‐" is "-&#x00AD;‐" with a soft hyphen in between. It is not the same as "--"
-      const newText = text.replace(/-­‐/g, "-");
+      const newText = text.replace(/-­‐/g, '-');
 
       const newItem = {
         ...otherProps,
@@ -81,7 +84,7 @@ export const readPdf = async (fileUrl: string): Promise<TextItems> => {
 
   // Filter out empty space textItem noise
   const isEmptySpace = (textItem: TextItem) =>
-    !textItem.hasEOL && textItem.text.trim() === "";
+    !textItem.hasEOL && textItem.text.trim() === '';
   textItems = textItems.filter((textItem) => !isEmptySpace(textItem));
 
   return textItems;

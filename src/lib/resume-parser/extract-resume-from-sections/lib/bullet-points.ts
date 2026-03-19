@@ -1,4 +1,4 @@
-import { Lines, TextItem } from "../../types";
+import { Lines, TextItem } from '../../types';
 
 /**
  * List of bullet points
@@ -15,16 +15,16 @@ import { Lines, TextItem } from "../../types";
  * U+25CB   WHITE CIRCLE ○
  */
 export const BULLET_POINTS = [
-  "⋅",
-  "∙",
-  "🞄",
-  "•",
-  "⦁",
-  "⚫︎",
-  "●",
-  "⬤",
-  "⚬",
-  "○",
+  '⋅',
+  '∙',
+  '🞄',
+  '•',
+  '⦁',
+  '⚫︎',
+  '●',
+  '⬤',
+  '⚬',
+  '○',
 ];
 
 /**
@@ -34,18 +34,18 @@ export const getBulletPointsFromLines = (lines: Lines): string[] => {
   // Simply return all lines with text item joined together if there is no bullet point
   const firstBulletPointLineIndex = getFirstBulletPointLineIdx(lines);
   if (firstBulletPointLineIndex === undefined) {
-    return lines.map((line) => line.map((item) => item.text).join(" "));
+    return lines.map((line) => line.map((item) => item.text).join(' '));
   }
 
   // Otherwise, process and remove bullet points
 
   // Combine all lines into a single string
-  let lineStr = "";
-  for (let item of lines.flat()) {
+  let lineStr = '';
+  for (const item of lines.flat()) {
     const text = item.text;
     // Make sure a space is added between 2 words
-    if (!lineStr.endsWith(" ") && !text.startsWith(" ")) {
-      lineStr += " ";
+    if (!lineStr.endsWith(' ') && !text.startsWith(' ')) {
+      lineStr += ' ';
     }
     lineStr += text;
   }
@@ -72,11 +72,11 @@ const getMostCommonBulletPoint = (str: string): string => {
       acc[cur] = 0;
       return acc;
     },
-    {}
+    {},
   );
   let bulletWithMostCount = BULLET_POINTS[0];
-  let bulletMaxCount = 0;
-  for (let char of str) {
+  const bulletMaxCount = 0;
+  for (const char of str) {
     if (bulletToCount.hasOwnProperty(char)) {
       bulletToCount[char]++;
       if (bulletToCount[char] > bulletMaxCount) {
@@ -89,7 +89,7 @@ const getMostCommonBulletPoint = (str: string): string => {
 
 const getFirstBulletPointLineIdx = (lines: Lines): number | undefined => {
   for (let i = 0; i < lines.length; i++) {
-    for (let item of lines[i]) {
+    for (const item of lines[i]) {
       if (BULLET_POINTS.some((bullet) => item.text.includes(bullet))) {
         return i;
       }

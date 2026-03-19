@@ -1,7 +1,7 @@
-import { readPdf } from "./read-pdf";
-import { groupTextItemsIntoLines } from "./group-text-items-into-lines";
-import { groupLinesIntoSections } from "./group-lines-into-sections";
-import { extractResumeFromSections } from "./extract-resume-from-sections";
+import { readPdf } from './read-pdf';
+import { groupTextItemsIntoLines } from './group-text-items-into-lines';
+import { groupLinesIntoSections } from './group-lines-into-sections';
+import { extractResumeFromSections } from './extract-resume-from-sections';
 
 /**
  * Resume parser util that parses a resume from a resume pdf file

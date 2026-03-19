@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
-import { hashPassword } from "@/lib/bcrypt";
-import { errorHandler } from "@/lib/errorHandler";
-import { prisma } from "@/lib/db";
-import { UserType } from "@prisma/client";
-import { companySchema } from "@/lib/schema";
+import { hashPassword } from '@/lib/bcrypt';
+import { errorHandler } from '@/lib/errorHandler';
+import { prisma } from '@/lib/db';
+import { UserType } from '@prisma/client';
+import { companySchema } from '@/lib/schema';
 
 const payloadSchema = z.object({
   email: z.email().min(5).max(25),
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     const password = await hashPassword(rawPwd);
 
-    if (!user_type || user_type === "applicant") {
+    if (!user_type || user_type === 'applicant') {
       const parsedPayload = applicantSchema.parse(leftPayload);
 
       await prisma.$transaction([
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
           },
         }),
       ]);
-    } else if (user_type === "company") {
+    } else if (user_type === 'company') {
       const companyPayload = companySchema.parse(leftPayload);
 
       await prisma.$transaction([
@@ -67,12 +67,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         status: true,
-        data: "signup successfully",
+        data: 'signup successfully',
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
-    console.log("err::", err);
     const [resp, status] = errorHandler(err);
     return NextResponse.json(resp, status);
   }

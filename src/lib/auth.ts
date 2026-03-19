@@ -1,12 +1,12 @@
-import CredentialsProvider from "next-auth/providers/credentials";
-import { AuthOptions } from "next-auth";
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { AuthOptions } from 'next-auth';
 
-import { prisma } from "./db";
-import { comparePassword } from "@/lib/bcrypt";
-import { getEnv } from "./config";
-import { UserType } from "@prisma/client";
+import { prisma } from './db';
+import { comparePassword } from '@/lib/bcrypt';
+import { getEnv } from './config';
+import { UserType } from '@prisma/client';
 
-declare module "next-auth" {
+declare module 'next-auth' {
   interface Session {
     user: {
       id: string;
@@ -22,7 +22,7 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth/jwt" {
+declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
     email?: string;
@@ -33,15 +33,16 @@ declare module "next-auth/jwt" {
 export const authOptions = {
   providers: [
     CredentialsProvider({
-      name: "Credentials",
+      name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
+        email: { label: 'Email', type: 'text' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        console.log("hies")
         try {
           if (!credentials?.email || !credentials?.password) {
-            throw new Error("Missing credentials");
+            throw new Error('Missing credentials');
           }
 
           const existUser = await prisma.auth.findUnique({
@@ -49,7 +50,7 @@ export const authOptions = {
           });
 
           if (!existUser) {
-            throw new Error("user does not exist");
+            throw new Error('user does not exist');
           }
 
           const isPasswordValid = await comparePassword(
@@ -58,7 +59,7 @@ export const authOptions = {
           );
 
           if (!isPasswordValid) {
-            throw new Error("Invalid password");
+            throw new Error('Invalid password');
           }
 
           return {
@@ -67,11 +68,11 @@ export const authOptions = {
             user_type: existUser.user_type || UserType.applicant,
           };
         } catch (err) {
-          console.log("err:", err);
-          let res = "Error while login";
+          let res = 'Error while login';
           if (err instanceof Error) {
             res = err.message;
           }
+          console.log("rr", err)
           throw new Error(res);
         }
       },
@@ -79,12 +80,12 @@ export const authOptions = {
   ],
 
   session: {
-    strategy: "jwt" as const,
+    strategy: 'jwt' as const,
   },
   pages: {
-    signIn: "/login", // optional: custom login page
+    signIn: '/login', // optional: custom login page
   },
-  secret: getEnv("NEXTAUTH_SECRET"),
+  secret: getEnv('NEXTAUTH_SECRET'),
   callbacks: {
     async jwt({ token, user }) {
       if (user) {

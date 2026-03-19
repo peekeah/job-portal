@@ -1,8 +1,12 @@
-import { CompanySignupPayload } from "./types";
-import { Input } from "../ui/input";
-import { Control, Controller } from "react-hook-form";
+import { CompanySignupPayload } from './types';
+import { Input } from '../ui/input';
+import { Control, Controller } from 'react-hook-form';
 
-const CompanyMetadata = ({ formControl }: { formControl: Control<CompanySignupPayload> }) => {
+const CompanyMetadata = ({
+  formControl,
+}: {
+  formControl: Control<CompanySignupPayload>;
+}) => {
   return (
     <div className="space-y-5">
       <Controller
@@ -11,13 +15,11 @@ const CompanyMetadata = ({ formControl }: { formControl: Control<CompanySignupPa
         render={({ field, fieldState: { error, invalid } }) => (
           <Input
             {...field}
-            value={field.value ?? ""}
+            value={field.value ?? ''}
             label="Website"
             placeholder="Enter company website"
             aria-invalid={invalid}
-            error={
-              error ? error.message : ""
-            }
+            error={error ? error.message : ''}
           />
         )}
       />
@@ -30,9 +32,7 @@ const CompanyMetadata = ({ formControl }: { formControl: Control<CompanySignupPa
             label="Address"
             placeholder="Enter state"
             aria-invalid={invalid}
-            error={
-              error ? error.message : ""
-            }
+            error={error ? error.message : ''}
           />
         )}
       />
@@ -42,18 +42,16 @@ const CompanyMetadata = ({ formControl }: { formControl: Control<CompanySignupPa
         render={({ field, fieldState: { error, invalid } }) => (
           <Input
             {...field}
-            value={field.value ?? ""}
+            value={field.value ?? ''}
             aria-invalid={invalid}
             label="Bio"
             placeholder="Enter company bio"
-            error={
-              error ? error.message : ""
-            }
+            error={error ? error.message : ''}
           />
         )}
       />
     </div>
-  )
-}
+  );
+};
 
-export default CompanyMetadata
+export default CompanyMetadata;

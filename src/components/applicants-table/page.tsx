@@ -1,95 +1,117 @@
-import axios from "axios";
+import axios from 'axios';
 
-import { Button } from "../ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Applicants, ApplicantType } from "../job/company-job";
-import { toast } from "sonner";
+import { Button } from '../ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Applicants, ApplicantType } from '../job/company-job';
+import { toast } from 'sonner';
 
 type ApplicantTableProps = {
   jobId: string;
   applicants: Applicants[];
   type: ApplicantType;
-  refetch: () => void
-}
+  refetch: () => void;
+};
 
-const ApplicantsTable = ({ applicants, jobId, type, refetch }: ApplicantTableProps) => {
-
-  const onActionSubmit = async (jobId: string, applicantId: string, applicantStatus: string) => {
+const ApplicantsTable = ({
+  applicants,
+  jobId,
+  type,
+  refetch,
+}: ApplicantTableProps) => {
+  const onActionSubmit = async (
+    jobId: string,
+    applicantId: string,
+    applicantStatus: string,
+  ) => {
     try {
       const payload = { jobId, studentId: applicantId, applicantStatus };
 
-      const res = await axios.post("/api/jobs/select-candidate", payload)
+      const res = await axios.post('/api/jobs/select-candidate', payload);
       if (!res?.data?.status) {
-        throw new Error(res?.data?.error || "Error while saving")
+        throw new Error(res?.data?.error || 'Error while saving');
       }
-      toast.success("successfully saved")
-      refetch()
-    } catch (err) {
-      toast.error("error while selecting candidate")
-      console.log(err)
+      toast.success('successfully saved');
+      refetch();
+    } catch (_err) {
+      toast.error('error while selecting candidate');
     }
-  }
+  };
 
-  return (
-    applicants?.length ?
-      <Table className="w-full">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-10">#</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Mobile</TableHead>
-            <TableHead>Resume</TableHead>
-            {
-              type !== "hired" ? <TableHead>Action</TableHead> : null
-            }
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {
-            applicants.map((el, index) => {
-              return (
-                <TableRow
-                  className="cursor-pointer transition-all"
-                  key={el.id || index}
-                >
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>{el.applicant?.name}</TableCell>
-                  <TableCell>{el.applicant?.email}</TableCell>
-                  <TableCell>{el.applicant?.mobile}</TableCell>
-                  <TableCell>
-                    {el.resume_url_used ? (
-                      <a
-                        href={el.resume_url_used}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                      >
-                        View resume
-                      </a>
-                    ) : (
-                      <span className="text-gray-500">N/A</span>
-                    )}
-                  </TableCell>
-                  {
-                    type !== "hired" ?
-                      <TableCell className="space-x-3">
-                        {
-                          type === "applied" ?
-                            <Button onClick={() => onActionSubmit(jobId, el.applicant.id, "shortlisted")}>Shortlist</Button> :
-                            <Button onClick={() => onActionSubmit(jobId, el.applicant.id, "hired")}>Hire</Button>
-                        }
-                      </TableCell> : null
-                  }
-                </TableRow>
-              )
-            })
-          }
-        </TableBody>
-      </Table> : <div className="h-42 w-full bg-neutral-50 grid place-content-center">
-        <span className="text-xl">No applicant found</span>
-      </div>
-  )
-}
+  return applicants?.length ? (
+    <Table className="w-full">
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-10">#</TableHead>
+          <TableHead>Name</TableHead>
+          <TableHead>Email</TableHead>
+          <TableHead>Mobile</TableHead>
+          <TableHead>Resume</TableHead>
+          {type !== 'hired' ? <TableHead>Action</TableHead> : null}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {applicants.map((el, index) => {
+          return (
+            <TableRow
+              className="cursor-pointer transition-all"
+              key={el.id || index}
+            >
+              <TableCell>{index + 1}</TableCell>
+              <TableCell>{el.applicant?.name}</TableCell>
+              <TableCell>{el.applicant?.email}</TableCell>
+              <TableCell>{el.applicant?.mobile}</TableCell>
+              <TableCell>
+                {el.resume_url_used ? (
+                  <a
+                    href={el.resume_url_used}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline"
+                  >
+                    View resume
+                  </a>
+                ) : (
+                  <span className="text-gray-500">N/A</span>
+                )}
+              </TableCell>
+              {type !== 'hired' ? (
+                <TableCell className="space-x-3">
+                  {type === 'applied' ? (
+                    <Button
+                      onClick={() =>
+                        onActionSubmit(jobId, el.applicant.id, 'shortlisted')
+                      }
+                    >
+                      Shortlist
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() =>
+                        onActionSubmit(jobId, el.applicant.id, 'hired')
+                      }
+                    >
+                      Hire
+                    </Button>
+                  )}
+                </TableCell>
+              ) : null}
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
+  ) : (
+    <div className="grid h-42 w-full place-content-center bg-neutral-50">
+      <span className="text-xl">No applicant found</span>
+    </div>
+  );
+};
 
-export default ApplicantsTable
+export default ApplicantsTable;

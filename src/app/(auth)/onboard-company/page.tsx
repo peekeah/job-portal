@@ -1,12 +1,11 @@
-"use client"
-import OnboardCompany from "@/components/onboard-company/page"
+import OnboardCompany from '@/components/onboard-company/page';
 
 const Singup = () => {
   return (
-    <div className="flex flex-col mt-24">
+    <div className="mt-24 flex flex-col">
       <OnboardCompany />
     </div>
-  )
-}
+  );
+};
 
-export default Singup
+export default Singup;

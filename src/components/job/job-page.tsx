@@ -1,7 +1,14 @@
-"use client"
+'use client';
 import { Button } from '@/components/ui/button';
-import { MapPin, Briefcase, DollarSign, Building2, BookmarkPlus, Share2 } from 'lucide-react';
-import useSWR, { useSWRConfig } from 'swr';
+import {
+  MapPin,
+  Briefcase,
+  DollarSign,
+  Building2,
+  BookmarkPlus,
+  Share2,
+} from 'lucide-react';
+import useSWR from 'swr';
 import z from 'zod';
 import { companySchema, jobSchema } from '@/lib/schema';
 import { fetcher } from '@/lib/fetcher';
@@ -19,7 +26,7 @@ import { toast } from 'sonner';
 type Job = z.infer<typeof jobSchema> & {
   id: string;
   company: z.infer<typeof companySchema>;
-}
+};
 
 export type ResJob = {
   id: string;
@@ -33,33 +40,35 @@ export type ResJob = {
     company_founding_year: number;
     company_type: string;
     address: string;
-  }
+  };
   skills_required: string[];
 };
 
 export type Response = {
   status: boolean;
-  data: ResJob[]
-}
+  data: ResJob[];
+};
 
 type ApplyJobPaylod = {
   jobId: string;
-}
+};
 
-const applyJobApiCall = async (url: string, { arg: { jobId } }: { arg: ApplyJobPaylod }) => {
+const applyJobApiCall = async (
+  url: string,
+  { arg: { jobId } }: { arg: ApplyJobPaylod },
+) => {
   try {
     const response = await axios.post(url + jobId);
     toast.success(response.data.data);
-    return response.data
+    return response.data;
   } catch (err) {
     if (err instanceof AxiosError) {
-      toast.error(err?.response?.data?.message)
+      toast.error(err?.response?.data?.message);
     } else {
-      toast.error("something went wrong")
+      toast.error('something went wrong');
     }
-    console.log(err);
   }
-}
+};
 
 type ApplyJobWithEditsPayload = {
   jobId: string;
@@ -69,7 +78,7 @@ type ApplyJobWithEditsPayload = {
 
 const applyJobWithEditsApiCall = async (
   url: string,
-  { arg: { jobId, resumeId, resumeData } }: { arg: ApplyJobWithEditsPayload }
+  { arg: { jobId, resumeId, resumeData } }: { arg: ApplyJobWithEditsPayload },
 ) => {
   try {
     const response = await axios.post(url + jobId, {
@@ -82,42 +91,49 @@ const applyJobWithEditsApiCall = async (
     if (err instanceof AxiosError) {
       toast.error(err?.response?.data?.message);
     } else {
-      toast.error("something went wrong");
+      toast.error('something went wrong');
     }
-    console.log(err);
   }
 };
 
 export function JobDetails() {
-
   const formatCompanySize = (size: string) => {
-    return companySizeMap.get(size) + " " + "employees"
+    return `${companySizeMap.get(size)} ` + `employees`;
   };
 
   const getCompanyInitials = (name: string) => {
     return name
       .split(' ')
-      .map(word => word[0])
+      .map((word) => word[0])
       .join('')
       .toUpperCase()
       .slice(0, 2);
   };
 
-  const { mutate } = useSWRConfig()
-  const { trigger: handleApplyJob, isMutating: applying } = useSWRMutation(`/api/jobs/apply/`, applyJobApiCall)
+  const { trigger: handleApplyJob, isMutating: applying } = useSWRMutation(
+    `/api/jobs/apply/`,
+    applyJobApiCall,
+  );
 
   const { trigger: handleApplyJobWithEdits } = useSWRMutation(
     `/api/jobs/apply-with-edits/`,
-    applyJobWithEditsApiCall
+    applyJobWithEditsApiCall,
   );
-  const [enahncePreviewJobId, setEnahancePreviewJobId] = useState<string>("")
+  const [enahncePreviewJobId, setEnahancePreviewJobId] = useState<string>('');
 
   const { jobId } = useParams<{ jobId: string }>();
 
-  const { data: jobRes, isLoading } = useSWR<{ data: Job }>('/api/jobs/' + jobId, fetcher)
-  const jobData = jobRes?.data
+  const { data: jobRes, isLoading } = useSWR<{ data: Job }>(
+    `/api/jobs/${jobId}`,
+    fetcher,
+  );
+  const jobData = jobRes?.data;
 
-  const applyWithEdits = async (jobId: string, resumeId: string, resumeData: Resume) => {
+  const applyWithEdits = async (
+    jobId: string,
+    resumeId: string,
+    resumeData: Resume,
+  ) => {
     if (!enahncePreviewJobId) return;
     try {
       await handleApplyJobWithEdits({
@@ -125,11 +141,11 @@ export function JobDetails() {
         resumeId,
         resumeData: JSON.stringify(resumeData),
       });
-      setEnahancePreviewJobId("");
-    } catch (err) {
-      toast.error("error while applying")
+      setEnahancePreviewJobId('');
+    } catch (_err) {
+      toast.error('error while applying');
     }
-  }
+  };
 
   if (isLoading) {
     return (
@@ -137,83 +153,97 @@ export function JobDetails() {
         <Spinner className="h-6 w-6 animate-spin text-gray-500" />
         <span className="ml-2 text-gray-500">Loading...</span>
       </div>
-    )
+    );
   }
 
   return (
-    <>{
-      jobData ?
-        <div className="min-h-screen flex py-4 sm:py-8 lg:py-12 px-3 sm:px-4 lg:px-6">
-          <div className="max-w-4xl w-full">
+    <>
+      {jobData ? (
+        <div className="flex min-h-screen px-3 py-4 sm:px-4 sm:py-8 lg:px-6 lg:py-12">
+          <div className="w-full max-w-4xl">
             <Card>
-              <div className="space-y-4 sm:space-y-6 pb-6 sm:pb-8 px-4 sm:px-6 pt-6">
-                <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
-                  <div className="flex gap-3 sm:gap-5 w-full sm:w-auto">
+              <div className="space-y-4 px-4 pt-6 pb-6 sm:space-y-6 sm:px-6 sm:pb-8">
+                <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
+                  <div className="flex w-full gap-3 sm:w-auto sm:gap-5">
                     <div className="relative shrink-0">
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-lg sm:text-xl lg:text-2xl font-bold ring-2 sm:ring-4 ring-white shadow-lg">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-lg font-bold text-white shadow-lg ring-2 ring-white sm:h-20 sm:w-20 sm:rounded-2xl sm:text-xl sm:ring-4 lg:h-24 lg:w-24 lg:text-2xl">
                         {getCompanyInitials(jobData.company.name)}
                       </div>
-                      <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-green-500 w-5 h-5 sm:w-7 sm:h-7 rounded-full border-2 sm:border-4 border-white"></div>
+                      <div className="absolute -right-1 -bottom-1 h-5 w-5 rounded-full border-2 border-white bg-green-500 sm:-right-2 sm:-bottom-2 sm:h-7 sm:w-7 sm:border-4"></div>
                     </div>
-                    <div className="space-y-2 sm:space-y-3 flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600">
-                        <Building2 className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
-                        <span className="font-semibold text-gray-900 truncate">{jobData.company.name}</span>
-                        <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 sm:py-1 rounded-full font-medium whitespace-nowrap">Actively hiring</span>
+                    <div className="min-w-0 flex-1 space-y-2 sm:space-y-3">
+                      <div className="flex flex-wrap items-center gap-1.5 text-xs text-gray-600 sm:gap-2 sm:text-sm">
+                        <Building2 className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
+                        <span className="truncate font-semibold text-gray-900">
+                          {jobData.company.name}
+                        </span>
+                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-green-700 sm:py-1">
+                          Actively hiring
+                        </span>
                       </div>
-                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent leading-tight">
+                      <h1 className="bg-linear-to-r from-slate-900 to-slate-700 bg-clip-text text-2xl leading-tight font-bold text-transparent sm:text-3xl lg:text-4xl">
                         {jobData.job_role}
                       </h1>
-                      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
-                        <div className="flex items-center gap-1 sm:gap-1.5 text-gray-600">
-                          <MapPin className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
+                      <div className="flex flex-wrap items-center gap-2 text-xs sm:gap-4 sm:text-sm">
+                        <div className="flex items-center gap-1 text-gray-600 sm:gap-1.5">
+                          <MapPin className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
                           <span className="truncate">{jobData.location}</span>
                         </div>
-                        <div className="flex items-center gap-1 sm:gap-1.5 text-gray-600">
-                          <Building2 className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
-                          <span className="truncate">{jobData.company.company_type}</span>
+                        <div className="flex items-center gap-1 text-gray-600 sm:gap-1.5">
+                          <Building2 className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
+                          <span className="truncate">
+                            {jobData.company.company_type}
+                          </span>
                         </div>
-                        <div className="flex items-center gap-1 sm:gap-1.5 text-gray-600">
-                          <Briefcase className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
-                          <span className="truncate">{formatCompanySize(jobData.company.size!)}</span>
+                        <div className="flex items-center gap-1 text-gray-600 sm:gap-1.5">
+                          <Briefcase className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
+                          <span className="truncate">
+                            {formatCompanySize(jobData.company.size!)}
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-2 shrink-0 self-end sm:self-start">
-                    <button className="h-9 w-9 sm:h-10 sm:w-10 rounded-full border border-gray-300 hover:bg-gray-100 flex items-center justify-center">
-                      <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <div className="flex shrink-0 gap-2 self-end sm:self-start">
+                    <button className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 sm:h-10 sm:w-10">
+                      <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </button>
-                    <button className="h-9 w-9 sm:h-10 sm:w-10 rounded-full border border-gray-300 hover:bg-gray-100 flex items-center justify-center">
-                      <BookmarkPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <button className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 sm:h-10 sm:w-10">
+                      <BookmarkPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </button>
                   </div>
                 </div>
               </div>
 
               {/* Content */}
-              <div className="space-y-6 sm:space-y-8 pb-6 sm:pb-8 px-4 sm:px-6">
+              <div className="space-y-6 px-4 pb-6 sm:space-y-8 sm:px-6 sm:pb-8">
                 {/* CTC Card */}
-                <div className="bg-linear-to-r from-blue-600 to-indigo-500 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex flex-col items-start justify-between gap-4 rounded-xl bg-linear-to-r from-blue-600 to-indigo-500 p-4 text-white sm:flex-row sm:items-center sm:rounded-2xl sm:p-6">
                   <div className="w-full sm:w-auto">
-                    <div className="flex items-center gap-2 text-blue-100 mb-2">
-                      <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <span className="text-xs sm:text-sm font-medium">Annual Compensation</span>
+                    <div className="mb-2 flex items-center gap-2 text-blue-100">
+                      <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="text-xs font-medium sm:text-sm">
+                        Annual Compensation
+                      </span>
                     </div>
-                    <p className="text-2xl sm:text-3xl font-bold">₹{jobData.ctc} LPA</p>
+                    <p className="text-2xl font-bold sm:text-3xl">
+                      ₹{jobData.ctc} LPA
+                    </p>
                     {jobData.stipend > 0 && (
-                      <p className="text-xs sm:text-sm text-blue-100 mt-1">+ ₹{jobData.stipend} stipend</p>
+                      <p className="mt-1 text-xs text-blue-100 sm:text-sm">
+                        + ₹{jobData.stipend} stipend
+                      </p>
                     )}
                   </div>
-                  <div className='space-x-3'>
+                  <div className="space-x-3">
                     <Button
-                      className="lg:p-5 lg:text-md bg-white text-blue-600 hover:bg-blue-50 font-semibold transition-colors"
+                      className="lg:text-md bg-white font-semibold text-blue-600 transition-colors hover:bg-blue-50 lg:p-5"
                       onClick={() => handleApplyJob({ jobId: jobData?.id })}
                     >
                       Apply
                     </Button>
                     <Button
-                      className="lg:p-5 lg:text-md bg-white text-blue-600 hover:bg-blue-50 font-semibold transition-colors"
+                      className="lg:text-md bg-white font-semibold text-blue-600 transition-colors hover:bg-blue-50 lg:p-5"
                       onClick={() => setEnahancePreviewJobId(jobData.id)}
                     >
                       Enhance & Apply
@@ -223,8 +253,10 @@ export function JobDetails() {
 
                 {/* About the Role */}
                 <div className="space-y-3 sm:space-y-4">
-                  <h2 className="text-xl sm:text-2xl font-bold">About the Role</h2>
-                  <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
+                  <h2 className="text-xl font-bold sm:text-2xl">
+                    About the Role
+                  </h2>
+                  <p className="text-sm leading-relaxed text-gray-600 sm:text-base">
                     {jobData.description}
                   </p>
                 </div>
@@ -232,18 +264,30 @@ export function JobDetails() {
                 <hr className="border-gray-200" />
 
                 {/* Company Info Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3">
                   <div>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Company Founded</p>
-                    <p className="font-semibold text-base sm:text-lg">{jobData.company.founding_year}</p>
+                    <p className="mb-1 text-xs text-gray-600 sm:text-sm">
+                      Company Founded
+                    </p>
+                    <p className="text-base font-semibold sm:text-lg">
+                      {jobData.company.founding_year}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Company Size</p>
-                    <p className="font-semibold text-base sm:text-lg">{formatCompanySize(jobData.company.size!)}</p>
+                    <p className="mb-1 text-xs text-gray-600 sm:text-sm">
+                      Company Size
+                    </p>
+                    <p className="text-base font-semibold sm:text-lg">
+                      {formatCompanySize(jobData.company.size!)}
+                    </p>
                   </div>
                   <div className="sm:col-span-2 md:col-span-1">
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Location</p>
-                    <p className="font-semibold text-base sm:text-lg wrap-break-words">{jobData.company.address}</p>
+                    <p className="mb-1 text-xs text-gray-600 sm:text-sm">
+                      Location
+                    </p>
+                    <p className="wrap-break-words text-base font-semibold sm:text-lg">
+                      {jobData.company.address}
+                    </p>
                   </div>
                 </div>
 
@@ -251,19 +295,21 @@ export function JobDetails() {
 
                 {/* About Company */}
                 <div className="space-y-3 sm:space-y-4">
-                  <h2 className="text-xl sm:text-2xl font-bold">About {jobData.company.name}</h2>
-                  <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
+                  <h2 className="text-xl font-bold sm:text-2xl">
+                    About {jobData.company.name}
+                  </h2>
+                  <p className="text-sm leading-relaxed text-gray-600 sm:text-base">
                     {jobData.company.bio}
                   </p>
 
                   {jobData.company.website && (
-                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                    <div className="flex items-center gap-2 text-xs text-gray-600 sm:text-sm">
                       <span>🌐</span>
                       <a
                         href={jobData.company.website}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline break-all"
+                        className="break-all text-blue-600 hover:underline"
                       >
                         {jobData.company.website}
                       </a>
@@ -275,13 +321,15 @@ export function JobDetails() {
 
                 {/* Required Skills */}
                 <div className="space-y-4 sm:space-y-5">
-                  <h2 className="text-xl sm:text-2xl font-bold">Required Skills</h2>
+                  <h2 className="text-xl font-bold sm:text-2xl">
+                    Required Skills
+                  </h2>
 
                   <div className="flex flex-wrap gap-2 sm:gap-3">
                     {jobData.skills_required.map((skill, index) => (
                       <span
                         key={index}
-                        className="flex items-center rounded-full px-2.5 py-1.5 sm:px-3 sm:py-2 text-sm sm:text-base bg-blue-50 text-blue-600 font-medium"
+                        className="flex items-center rounded-full bg-blue-50 px-2.5 py-1.5 text-sm font-medium text-blue-600 sm:px-3 sm:py-2 sm:text-base"
                       >
                         {skill}
                       </span>
@@ -291,21 +339,19 @@ export function JobDetails() {
               </div>
             </Card>
           </div>
-        </div> : null
-    }
+        </div>
+      ) : null}
 
-      {
-        enahncePreviewJobId && (
-          <EnhancedJobPreviewModal
-            jobId={enahncePreviewJobId}
-            applying={applying}
-            onApplyAction={applyWithEdits}
-            onCloseAction={() => { setEnahancePreviewJobId(""); }}
-          />
-        )
-      }
+      {enahncePreviewJobId && (
+        <EnhancedJobPreviewModal
+          jobId={enahncePreviewJobId}
+          applying={applying}
+          onApplyAction={applyWithEdits}
+          onCloseAction={() => {
+            setEnahancePreviewJobId('');
+          }}
+        />
+      )}
     </>
-
   );
 }
-

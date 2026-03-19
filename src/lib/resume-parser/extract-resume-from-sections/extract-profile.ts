@@ -1,17 +1,13 @@
-import type {
-  ResumeSectionToLines,
-  TextItem,
-  FeatureSet,
-} from "../types";
+import type { ResumeSectionToLines, TextItem, FeatureSet } from '../types';
 import {
   hasNumber,
   hasComma,
   hasLetter,
   hasLetterAndIsAllUpperCase,
-  isBold
-} from "./lib/common-features";
-import { getTextWithHighestFeatureScore } from "./lib/feature-scoring-system";
-import { getSectionLinesByKeywords } from "./lib/get-section-lines";
+  isBold,
+} from './lib/common-features';
+import { getTextWithHighestFeatureScore } from './lib/feature-scoring-system';
+import { getSectionLinesByKeywords } from './lib/get-section-lines';
 
 // Name
 export const matchOnlyLetterSpaceOrPeriod = (item: TextItem) =>
@@ -20,7 +16,7 @@ export const matchOnlyLetterSpaceOrPeriod = (item: TextItem) =>
 // Email
 // Simple email regex: xxx@xxx.xxx (xxx = anything not space)
 export const matchEmail = (item: TextItem) => item.text.match(/\S+@\S+\.\S+/);
-const hasAt = (item: TextItem) => item.text.includes("@");
+const hasAt = (item: TextItem) => item.text.includes('@');
 
 // Phone
 // Simple phone regex that matches (xxx)-xxx-xxxx where () and - are optional, - can also be space
@@ -42,10 +38,10 @@ const matchUrlHttpFallback = (item: TextItem) =>
 // Match www.xxx.xxx
 const matchUrlWwwFallback = (item: TextItem) =>
   item.text.match(/www\.\S+\.\S+/);
-const hasSlash = (item: TextItem) => item.text.includes("/");
+const hasSlash = (item: TextItem) => item.text.includes('/');
 
 // Summary
-const has4OrMoreWords = (item: TextItem) => item.text.split(" ").length >= 4;
+const has4OrMoreWords = (item: TextItem) => item.text.split(' ').length >= 4;
 
 /**
  *              Unique Attribute
@@ -128,41 +124,41 @@ export const extractProfile = (sections: ResumeSectionToLines) => {
 
   const [name, nameScores] = getTextWithHighestFeatureScore(
     textItems,
-    NAME_FEATURE_SETS
+    NAME_FEATURE_SETS,
   );
   const [email, emailScores] = getTextWithHighestFeatureScore(
     textItems,
-    EMAIL_FEATURE_SETS
+    EMAIL_FEATURE_SETS,
   );
   const [phone, phoneScores] = getTextWithHighestFeatureScore(
     textItems,
-    PHONE_FEATURE_SETS
+    PHONE_FEATURE_SETS,
   );
   const [location, locationScores] = getTextWithHighestFeatureScore(
     textItems,
-    LOCATION_FEATURE_SETS
+    LOCATION_FEATURE_SETS,
   );
   const [url, urlScores] = getTextWithHighestFeatureScore(
     textItems,
-    URL_FEATURE_SETS
+    URL_FEATURE_SETS,
   );
   const [summary, summaryScores] = getTextWithHighestFeatureScore(
     textItems,
     SUMMARY_FEATURE_SETS,
     undefined,
-    true
+    true,
   );
 
-  const summaryLines = getSectionLinesByKeywords(sections, ["summary"]);
+  const summaryLines = getSectionLinesByKeywords(sections, ['summary']);
   const summarySection = summaryLines
     .flat()
     .map((textItem) => textItem.text)
-    .join(" ");
-  const objectiveLines = getSectionLinesByKeywords(sections, ["objective"]);
+    .join(' ');
+  const objectiveLines = getSectionLinesByKeywords(sections, ['objective']);
   const objectiveSection = objectiveLines
     .flat()
     .map((textItem) => textItem.text)
-    .join(" ");
+    .join(' ');
 
   return {
     profile: {

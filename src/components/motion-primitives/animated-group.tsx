@@ -1,6 +1,6 @@
-"use client";
-import { Children, ReactNode } from "react";
-import { motion } from "motion/react";
+'use client';
+import { Children, ReactNode } from 'react';
+import { motion } from 'motion/react';
 
 // motion/react's Variants typing can vary between versions and sometimes
 // causes strict TypeScript errors here. Use a permissive local alias so
@@ -122,11 +122,10 @@ function AnimatedGroup({
   // Create motion-wrapped components. Different motion versions provide
   // different factories; calling motion(as) is the most compatible approach.
 
-
   return (
     <motion.div
-      initial='hidden'
-      animate='visible'
+      initial="hidden"
+      animate="visible"
       variants={containerVariants}
       className={className}
     >
@@ -140,4 +139,3 @@ function AnimatedGroup({
 }
 
 export { AnimatedGroup };
-

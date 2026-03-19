@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
-import { authMiddleware } from "@/lib/auth-middleware";
-import { prisma } from "@/lib/db";
-import { errorHandler, CustomError } from "@/lib/errorHandler";
-import { jobSchema } from "@/lib/schema";
+import { authMiddleware } from '@/lib/auth-middleware';
+import { prisma } from '@/lib/db';
+import { errorHandler, CustomError } from '@/lib/errorHandler';
+import { jobSchema } from '@/lib/schema';
 
 export async function GET(req: NextRequest) {
   try {
     const token = await authMiddleware(req);
 
     let jobs;
-    if (token.user_type === "applicant") {
+    if (token.user_type === 'applicant') {
       const applicant = await prisma.applicant.findFirstOrThrow({
         where: { email: token.email },
       });
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const token = await authMiddleware(req, "company");
+    const token = await authMiddleware(req, 'company');
     const rawPayload = await req.json();
     const payload = jobSchema.parse(rawPayload);
 
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       where: { email: token.email },
     });
 
-    if (!companyData) throw new CustomError("Company not found", 403);
+    if (!companyData) throw new CustomError('Company not found', 403);
 
     await prisma.job.create({
       data: {
@@ -64,8 +64,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(
-      { status: true, data: "successfully posted job" },
-      { status: 201 }
+      { status: true, data: 'successfully posted job' },
+      { status: 201 },
     );
   } catch (err) {
     const [resp, status] = errorHandler(err);

@@ -1,11 +1,11 @@
-import { FeatureSet, TextItem } from "../../types";
+import { FeatureSet, TextItem } from '../../types';
 
 const isTextItemBold = (fontName: string) =>
-  fontName.toLowerCase().includes("bold");
+  fontName.toLowerCase().includes('bold');
 export const isBold = (item: TextItem) => isTextItemBold(item.fontName);
 export const hasLetter = (item: TextItem) => /[a-zA-Z]/.test(item.text);
 export const hasNumber = (item: TextItem) => /[0-9]/.test(item.text);
-export const hasComma = (item: TextItem) => item.text.includes(",");
+export const hasComma = (item: TextItem) => item.text.includes(',');
 export const getHasText = (text: string) => (item: TextItem) =>
   item.text.includes(text);
 export const hasOnlyLettersSpacesAmpersands = (item: TextItem) =>
@@ -20,12 +20,12 @@ const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 const hasMonth = (item: TextItem) =>
   MONTHS.some(
     (month) =>
-      item.text.includes(month) || item.text.includes(month.slice(0, 4))
+      item.text.includes(month) || item.text.includes(month.slice(0, 4)),
   );
-const SEASONS = ["Summer", "Fall", "Spring", "Winter"];
+const SEASONS = ['Summer', 'Fall', 'Spring', 'Winter'];
 const hasSeason = (item: TextItem) =>
   SEASONS.some((season) => item.text.includes(season));
-const hasPresent = (item: TextItem) => item.text.includes("Present");
+const hasPresent = (item: TextItem) => item.text.includes('Present');
 export const DATE_FEATURE_SETS: FeatureSet[] = [
   [hasYear, 1],
   [hasMonth, 1],

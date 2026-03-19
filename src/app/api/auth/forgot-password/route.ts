@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import z from "zod";
-import { Resend } from "resend";
+import { NextRequest, NextResponse } from 'next/server';
+import z from 'zod';
+import { Resend } from 'resend';
 
-import { CustomError, errorHandler } from "@/lib/errorHandler";
-import { prisma } from "@/lib/db";
-import { signToken } from "@/lib/jwt";
-import { getEnv } from "@/lib/config";
+import { CustomError, errorHandler } from '@/lib/errorHandler';
+import { prisma } from '@/lib/db';
+import { signToken } from '@/lib/jwt';
+import { getEnv } from '@/lib/config';
 
 function getEmailText(name: string, hash: string) {
-  const CLIENT_HOST = getEnv("CLIENT_HOST", "http://localhost:3000");
-  const resetLink = CLIENT_HOST + "/reset-password?token=" + hash;
+  const CLIENT_HOST = getEnv('CLIENT_HOST', 'http://localhost:3000');
+  const resetLink = `${CLIENT_HOST}/reset-password?token=${hash}`;
 
   return `Hi ${name},\nPlease find reset link below to reset the password\n${resetLink}`;
 }
@@ -30,7 +30,7 @@ async function forgotPassword(req: NextRequest) {
     });
 
     if (!existUser) {
-      throw new CustomError("user doest not exist", 403);
+      throw new CustomError('user doest not exist', 403);
     }
 
     // Generate random password
@@ -42,9 +42,9 @@ async function forgotPassword(req: NextRequest) {
       where: { email },
     });
 
-    let userName = "User";
+    let userName = 'User';
 
-    if (existUser.user_type === "applicant") {
+    if (existUser.user_type === 'applicant') {
       const userData = await prisma.applicant.findFirst({
         where: { email },
       });
@@ -58,25 +58,23 @@ async function forgotPassword(req: NextRequest) {
       userName = userData?.name || userName;
     }
 
-    const resend = new Resend(getEnv("RESEND_API_KEY"));
+    const resend = new Resend(getEnv('RESEND_API_KEY'));
     const { error } = await resend.emails.send({
-      from: "onboarding@resend.dev",
+      from: 'onboarding@resend.dev',
       to: existUser.email,
-      subject: "Password Reset Link",
+      subject: 'Password Reset Link',
       text: getEmailText(userName, token),
     });
 
     if (error) {
-      throw new CustomError("error password reset", 500);
+      throw new CustomError('error password reset', 500);
     }
 
     return NextResponse.json({
       status: true,
-      data: "successfully sent password to email",
+      data: 'successfully sent password to email',
     });
   } catch (err) {
-    console.log("ee:", err);
-
     const [resp, status] = errorHandler(err);
     return NextResponse.json(resp, status);
   }

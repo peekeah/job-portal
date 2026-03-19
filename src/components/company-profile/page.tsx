@@ -1,4 +1,4 @@
-"use client"
+'use client';
 import useSWR from 'swr';
 import axios from 'axios';
 import { useState } from 'react';
@@ -25,131 +25,149 @@ const profileSchema = z
   .object({
     id: z.uuid(),
   })
-  .extend(
-    combinedCompanySchema.omit({ password: true }).shape
-  )
+  .extend(combinedCompanySchema.omit({ password: true }).shape);
 
-type CompanyProfile = z.infer<typeof profileSchema>
+type CompanyProfile = z.infer<typeof profileSchema>;
 
 const initialCompanyValues: CompanyProfile = {
-  id: "",
-  name: "",
+  id: '',
+  name: '',
   founding_year: 0,
-  company_type: "",
-  email: "",
-  contact_no: "",
-  website: "",
-  linkedIn: "",
-  twitter: "",
-  address: "",
+  company_type: '',
+  email: '',
+  contact_no: '',
+  website: '',
+  linkedIn: '',
+  twitter: '',
+  address: '',
   size: CompanySize.SIZE_1_10,
-  bio: "",
+  bio: '',
 };
 
 export const companySizeMap = new Map([
-  ["SIZE_1_10", "1-10"],
-  ["SIZE_10_50", "10-50"],
-  ["SIZE_50_100", "50-100"],
-  ["SIZE_100_PLUS", "100+"]
+  ['SIZE_1_10', '1-10'],
+  ['SIZE_10_50', '10-50'],
+  ['SIZE_50_100', '50-100'],
+  ['SIZE_100_PLUS', '100+'],
 ]);
 
-const postProfileApiCall = async (url: string, { arg: { payload: payload } }: { arg: { payload: CompanyProfile } }) => {
+const postProfileApiCall = async (
+  url: string,
+  { arg: { payload: payload } }: { arg: { payload: CompanyProfile } },
+) => {
   try {
-    const res = await axios.post(url, payload)
+    const res = await axios.post(url, payload);
 
     if (!res?.data?.status) {
-      throw new Error(res?.data?.error || "error while saving")
+      throw new Error(res?.data?.error || 'error while saving');
     }
 
-    toast.success("successfully saved data")
-
-  } catch (err) {
-    console.log("err:", err)
-    toast.error("error while saving data")
+    toast.success('successfully saved data');
+  } catch (_err) {
+    toast.error('error while saving data');
   }
-}
+};
 
 export default function CompanyProfile() {
-  const { data, isLoading } = useSWR<{ data: CompanyProfile }>('/api/company/profile', fetcher)
+  const { data, isLoading } = useSWR<{ data: CompanyProfile }>(
+    '/api/company/profile',
+    fetcher,
+  );
 
-  const { trigger: postProfileTrigger, isMutating: postProfileLoading } = useSWRMutation('/api/company/profile', postProfileApiCall)
+  const { trigger: postProfileTrigger } = useSWRMutation(
+    '/api/company/profile',
+    postProfileApiCall,
+  );
 
   const company = data?.data;
 
   if (!isLoading && !company) {
-    redirect("/dashboard")
+    redirect('/dashboard');
   }
 
-  const [editContent, setEditContent] = useState<boolean>(false)
+  const [editContent, setEditContent] = useState<boolean>(false);
 
   const form = useForm({
     resolver: zodResolver(profileSchema),
     defaultValues: initialCompanyValues,
-    values: company
-  })
+    values: company,
+  });
 
   const toggleEdit = () => {
-    setEditContent((prev) => !prev)
-  }
+    setEditContent((prev) => !prev);
+  };
 
   const onSubmit = async (payload: CompanyProfile) => {
-    postProfileTrigger({ payload })
-    setEditContent(false)
-  }
+    postProfileTrigger({ payload });
+    setEditContent(false);
+  };
 
   const onCancelChanges = () => {
-    form.reset()
+    form.reset();
     setEditContent(() => false);
-  }
+  };
 
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}
-      className='p-5 sm:p-7 md:px-10 lg:px-5 h-full w-full'
+      className="h-full w-full p-5 sm:p-7 md:px-10 lg:px-5"
     >
-      <div className='flex w-full'>
-        <h1 className='font-semibold text-2xl'>Company Profile</h1>
-        <div className='mx-auto flex justify-end flex-1'>
-          {
-            editContent ?
-              <div className='space-x-3'>
-                <Button type="submit">Save</Button>
-                <Button
-                  type='button'
-                  onClick={onCancelChanges}
-                  variant={"destructive"}
-                >Cancel</Button>
-              </div> :
-              <Button type='button' onClick={toggleEdit}>Edit</Button>
-          }
+      <div className="flex w-full">
+        <h1 className="text-2xl font-semibold">Company Profile</h1>
+        <div className="mx-auto flex flex-1 justify-end">
+          {editContent ? (
+            <div className="space-x-3">
+              <Button type="submit">Save</Button>
+              <Button
+                type="button"
+                onClick={onCancelChanges}
+                variant={'destructive'}
+              >
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <Button type="button" onClick={toggleEdit}>
+              Edit
+            </Button>
+          )}
         </div>
       </div>
-      <div className='max-w-4xl mt-5 space-y-5'>
+      <div className="mt-5 max-w-4xl space-y-5">
         <Card>
           <CardContent>
-            <div className='flex gap-4 items-center mb-3'>
-              <Avatar className='size-28'>
-                <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+            <div className="mb-3 flex items-center gap-4">
+              <Avatar className="size-28">
+                <AvatarImage
+                  src="https://github.com/shadcn.png"
+                  alt="@shadcn"
+                />
                 <AvatarFallback>Job</AvatarFallback>
               </Avatar>
-              <div className='space-y-2'>
-                <div className='text-2xl font-bold'>{company?.name}</div>
-                <div className='space-x-2 font-medium'>
+              <div className="space-y-2">
+                <div className="text-2xl font-bold">{company?.name}</div>
+                <div className="space-x-2 font-medium">
                   <Badge
-                    variant={"outline"}
-                    className='rounded-full px-2 py-1 font-semibold'
-                  >{company?.company_type}</Badge>
+                    variant={'outline'}
+                    className="rounded-full px-2 py-1 font-semibold"
+                  >
+                    {company?.company_type}
+                  </Badge>
                   <Badge
-                    variant={"outline"}
-                    className='rounded-full px-2 py-1 font-semibold'
-                  >{companySizeMap.get(company?.size || "") || "0"} employees</Badge>
+                    variant={'outline'}
+                    className="rounded-full px-2 py-1 font-semibold"
+                  >
+                    {companySizeMap.get(company?.size || '') || '0'} employees
+                  </Badge>
                   <Badge
-                    variant={"outline"}
-                    className='rounded-full px-2 py-1 font-semibold'
-                  >Founded {company?.founding_year}</Badge>
+                    variant={'outline'}
+                    className="rounded-full px-2 py-1 font-semibold"
+                  >
+                    Founded {company?.founding_year}
+                  </Badge>
                 </div>
                 <div>
-                  <Button variant={"outline"}>Change logo</Button>
+                  <Button variant={'outline'}>Change logo</Button>
                 </div>
               </div>
             </div>
@@ -161,16 +179,14 @@ export default function CompanyProfile() {
                   <Textarea
                     {...field}
                     rows={4}
-                    label='Description'
-                    placeholder='Description'
+                    label="Description"
+                    placeholder="Description"
                     aria-invalid={invalid}
                     name="bio"
                     className="text-neutral-500"
-                    value={field.value ? String(field.value) : ""}
+                    value={field.value ? String(field.value) : ''}
                     disabled={!editContent}
-                    error={
-                      error ? error.message : ""
-                    }
+                    error={error ? error.message : ''}
                   />
                 )}
               />
@@ -179,8 +195,10 @@ export default function CompanyProfile() {
         </Card>
         <Card>
           <CardContent>
-            <Heading variant='h4' className='mb-3'>Contact Information</Heading>
-            <div className='grid grid-cols-2 gap-5'>
+            <Heading variant="h4" className="mb-3">
+              Contact Information
+            </Heading>
+            <div className="grid grid-cols-2 gap-5">
               <Controller
                 name="contact_no"
                 control={form.control}
@@ -191,9 +209,7 @@ export default function CompanyProfile() {
                     aria-invalid={invalid}
                     placeholder="Email"
                     disabled={!editContent}
-                    error={
-                      error ? error.message : ""
-                    }
+                    error={error ? error.message : ''}
                   />
                 )}
               />
@@ -207,9 +223,7 @@ export default function CompanyProfile() {
                     aria-invalid={invalid}
                     placeholder="Location"
                     disabled={!editContent}
-                    error={
-                      error ? error.message : ""
-                    }
+                    error={error ? error.message : ''}
                   />
                 )}
               />
@@ -222,11 +236,9 @@ export default function CompanyProfile() {
                     label="Website"
                     aria-invalid={invalid}
                     placeholder="Location"
-                    value={field.value ? String(field.value) : ""}
+                    value={field.value ? String(field.value) : ''}
                     disabled={!editContent}
-                    error={
-                      error ? error.message : ""
-                    }
+                    error={error ? error.message : ''}
                   />
                 )}
               />
@@ -235,8 +247,10 @@ export default function CompanyProfile() {
         </Card>
         <Card>
           <CardContent>
-            <Heading variant='h4' className='mb-3'>Social Media</Heading>
-            <div className='grid grid-cols-2 gap-5'>
+            <Heading variant="h4" className="mb-3">
+              Social Media
+            </Heading>
+            <div className="grid grid-cols-2 gap-5">
               <Controller
                 name="linkedIn"
                 control={form.control}
@@ -246,11 +260,9 @@ export default function CompanyProfile() {
                     label="LinkedIn"
                     aria-invalid={invalid}
                     placeholder="Linked In"
-                    value={field.value ? String(field.value) : ""}
+                    value={field.value ? String(field.value) : ''}
                     disabled={!editContent}
-                    error={
-                      error ? error.message : ""
-                    }
+                    error={error ? error.message : ''}
                   />
                 )}
               />
@@ -263,11 +275,9 @@ export default function CompanyProfile() {
                     label="Twitter"
                     aria-invalid={invalid}
                     placeholder="Twitter"
-                    value={field.value ? String(field.value) : ""}
+                    value={field.value ? String(field.value) : ''}
                     disabled={!editContent}
-                    error={
-                      error ? error.message : ""
-                    }
+                    error={error ? error.message : ''}
                   />
                 )}
               />
@@ -277,8 +287,10 @@ export default function CompanyProfile() {
 
         <Card>
           <CardContent>
-            <Heading variant='h4' className='mb-3'>Company Details</Heading>
-            <div className='grid grid-cols-2 gap-5'>
+            <Heading variant="h4" className="mb-3">
+              Company Details
+            </Heading>
+            <div className="grid grid-cols-2 gap-5">
               <Controller
                 name="company_type"
                 control={form.control}
@@ -288,11 +300,9 @@ export default function CompanyProfile() {
                     label="Industry/Domain"
                     aria-invalid={invalid}
                     placeholder="Industry/Domain"
-                    value={field.value ? String(field.value) : ""}
+                    value={field.value ? String(field.value) : ''}
                     disabled={!editContent}
-                    error={
-                      error ? error.message : ""
-                    }
+                    error={error ? error.message : ''}
                   />
                 )}
               />
@@ -308,10 +318,10 @@ export default function CompanyProfile() {
                     value={String(field.value)}
                     onValueChange={field.onChange}
                     options={[
-                      { value: "SIZE_1_10", label: "1-10" },
-                      { value: "SIZE_10_50", label: "10-50" },
-                      { value: "SIZE_50_100", label: "50-100" },
-                      { value: "SIZE_100_PLUS", label: "100+" },
+                      { value: 'SIZE_1_10', label: '1-10' },
+                      { value: 'SIZE_10_50', label: '10-50' },
+                      { value: 'SIZE_50_100', label: '50-100' },
+                      { value: 'SIZE_100_PLUS', label: '100+' },
                     ]}
                   />
                 )}
@@ -329,9 +339,7 @@ export default function CompanyProfile() {
                     placeholder="Year founded"
                     disabled={!editContent}
                     onChange={(e) => field.onChange(+e.target.value)}
-                    error={
-                      error ? error.message : ""
-                    }
+                    error={error ? error.message : ''}
                   />
                 )}
               />
@@ -340,6 +348,5 @@ export default function CompanyProfile() {
         </Card>
       </div>
     </form>
-  )
+  );
 }
-

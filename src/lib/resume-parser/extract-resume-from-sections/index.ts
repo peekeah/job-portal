@@ -1,10 +1,10 @@
-import type { Resume } from "../types";
-import type { ResumeSectionToLines } from "../types";
-import { extractProfile } from "./extract-profile";
-import { extractEducation } from "./extract-education";
-import { extractWorkExperience } from "./extract-work-experience";
-import { extractProject } from "./extract-project";
-import { extractSkills } from "./extract-skills";
+import type { Resume } from '../types';
+import type { ResumeSectionToLines } from '../types';
+import { extractProfile } from './extract-profile';
+import { extractEducation } from './extract-education';
+import { extractWorkExperience } from './extract-work-experience';
+import { extractProject } from './extract-project';
+import { extractSkills } from './extract-skills';
 
 /**
  * Step 4. Extract resume from sections.
@@ -21,7 +21,7 @@ import { extractSkills } from "./extract-skills";
  * feature score is identified as the extracted resume attribute.
  */
 export const extractResumeFromSections = (
-  sections: ResumeSectionToLines
+  sections: ResumeSectionToLines,
 ): Resume => {
   const { profile } = extractProfile(sections);
   const { educations } = extractEducation(sections);

@@ -1,34 +1,35 @@
-"use client"
-import { fetcher } from "@/lib/fetcher"
-import useSWR from "swr"
-import { Card, CardContent } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
-import { Job } from "../jobs";
-import { useRouter } from "next/navigation";
-import { Heading, Text } from "../ui/typography";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
+'use client';
+import { fetcher } from '@/lib/fetcher';
+import useSWR from 'swr';
+import { Card, CardContent } from '@/components/ui/card';
+import { Spinner } from '@/components/ui/spinner';
+import { Job } from '../jobs';
+import { useRouter } from 'next/navigation';
+import { Heading, Text } from '../ui/typography';
+import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
 
 interface CompanyJob extends Job {
   _count: {
     applied_jobs: number;
-  }
+  };
 }
 
 const PostedJobs = () => {
   const router = useRouter();
-  const { data, error, isLoading } = useSWR<{ data: CompanyJob[] }>('/api/company/posted-jobs', fetcher)
+  const { data, error, isLoading } = useSWR<{ data: CompanyJob[] }>(
+    '/api/company/posted-jobs',
+    fetcher,
+  );
   const jobs = data?.data;
 
   if (error) {
-    return (<div>error</div>)
+    return <div>error</div>;
   }
 
   return (
-    <div className="p-5 sm:p-7 md:px-10 lg:px-5 h-full w-full">
-      <Text className="text-2xl font-semibold text-gray-800">
-        Posted Jobs
-      </Text>
+    <div className="h-full w-full p-5 sm:p-7 md:px-10 lg:px-5">
+      <Text className="text-2xl font-semibold text-gray-800">Posted Jobs</Text>
       <div>
         {isLoading ? (
           <div className="flex items-center justify-center py-10">
@@ -36,36 +37,45 @@ const PostedJobs = () => {
             <span className="ml-2 text-gray-500">Loading...</span>
           </div>
         ) : jobs && jobs?.length > 0 ? (
-          <div className="w-full mt-5 min-h-44 grid grid-cols-2 gap-5">
-            {
-              jobs.map((job) => {
-                return (
-                  <Card key={job.id}>
-                    <CardContent>
-                      <Heading variant='h4'>{job.job_role}</Heading>
-                      <Text className='line-clamp-2 text-neutral-500'>{job.description}</Text>
-                      <Text className='my-2'>$ {job.ctc}k/year</Text>
-                      <Badge className="bg-green-100 text-green-400 my-2 px-3 py-1.5 rounded-full">{job?._count.applied_jobs} applicant{job?._count.applied_jobs > 1 ? "s" : null} </Badge>
-                      <Text className='text-neutral-500 space-x-1'>{job.skills_required.map(el => (
-                        <Badge key={el} variant={"outline"}>{el}</Badge>
-                      ))}</Text>
-                      <div className='mt-4 space-x-3'>
-                        <Button onClick={() => router.push("/dashboard/job/" + job.id)}>View Applicants</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })
-            }
+          <div className="mt-5 grid min-h-44 w-full grid-cols-2 gap-5">
+            {jobs.map((job) => {
+              return (
+                <Card key={job.id}>
+                  <CardContent>
+                    <Heading variant="h4">{job.job_role}</Heading>
+                    <Text className="line-clamp-2 text-neutral-500">
+                      {job.description}
+                    </Text>
+                    <Text className="my-2">$ {job.ctc}k/year</Text>
+                    <Badge className="my-2 rounded-full bg-green-100 px-3 py-1.5 text-green-400">
+                      {job?._count.applied_jobs} applicant
+                      {job?._count.applied_jobs > 1 ? 's' : null}{' '}
+                    </Badge>
+                    <Text className="space-x-1 text-neutral-500">
+                      {job.skills_required.map((el) => (
+                        <Badge key={el} variant={'outline'}>
+                          {el}
+                        </Badge>
+                      ))}
+                    </Text>
+                    <div className="mt-4 space-x-3">
+                      <Button
+                        onClick={() => router.push(`/dashboard/job/${job.id}`)}
+                      >
+                        View Applicants
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         ) : (
-          <div className="text-center py-10 text-gray-500">
-            No data found.
-          </div>
+          <div className="py-10 text-center text-gray-500">No data found.</div>
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PostedJobs
+export default PostedJobs;

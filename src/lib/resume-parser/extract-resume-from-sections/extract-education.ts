@@ -1,22 +1,18 @@
-import type {
-  TextItem,
-  FeatureSet,
-  ResumeSectionToLines,
-} from "../types";
-import type { ResumeEducation } from "../types";
-import { getSectionLinesByKeywords } from "./lib/get-section-lines";
-import { divideSectionIntoSubsections } from "./lib/subsections";
+import type { TextItem, FeatureSet, ResumeSectionToLines } from '../types';
+import type { ResumeEducation } from '../types';
+import { getSectionLinesByKeywords } from './lib/get-section-lines';
+import { divideSectionIntoSubsections } from './lib/subsections';
 import {
   DATE_FEATURE_SETS,
   hasComma,
   hasLetter,
   hasNumber,
-} from "./lib/common-features";
-import { getTextWithHighestFeatureScore } from "./lib/feature-scoring-system";
+} from './lib/common-features';
+import { getTextWithHighestFeatureScore } from './lib/feature-scoring-system';
 import {
   getBulletPointsFromLines,
   getDescriptionsLineIdx,
-} from "./lib/bullet-points";
+} from './lib/bullet-points';
 
 /**
  *              Unique Attribute
@@ -26,7 +22,7 @@ import {
  */
 
 // prettier-ignore
-const SCHOOLS = ['College', 'University', 'Institute', 'School', 'Academy', 'BASIS', 'Magnet']
+const SCHOOLS = ['College', 'University', 'Institute', 'School', 'Academy', 'BASIS', 'Magnet'];
 const hasSchool = (item: TextItem) =>
   SCHOOLS.some((school) => item.text.includes(school));
 // prettier-ignore
@@ -65,25 +61,25 @@ const GPA_FEATURE_SETS: FeatureSet[] = [
 export const extractEducation = (sections: ResumeSectionToLines) => {
   const educations: ResumeEducation[] = [];
   const educationsScores = [];
-  const lines = getSectionLinesByKeywords(sections, ["education"]);
+  const lines = getSectionLinesByKeywords(sections, ['education']);
   const subsections = divideSectionIntoSubsections(lines);
   for (const subsectionLines of subsections) {
     const textItems = subsectionLines.flat();
     const [school, schoolScores] = getTextWithHighestFeatureScore(
       textItems,
-      SCHOOL_FEATURE_SETS
+      SCHOOL_FEATURE_SETS,
     );
     const [degree, degreeScores] = getTextWithHighestFeatureScore(
       textItems,
-      DEGREE_FEATURE_SETS
+      DEGREE_FEATURE_SETS,
     );
     const [gpa, gpaScores] = getTextWithHighestFeatureScore(
       textItems,
-      GPA_FEATURE_SETS
+      GPA_FEATURE_SETS,
     );
     const [date, dateScores] = getTextWithHighestFeatureScore(
       textItems,
-      DATE_FEATURE_SETS
+      DATE_FEATURE_SETS,
     );
 
     let descriptions: string[] = [];
@@ -103,14 +99,13 @@ export const extractEducation = (sections: ResumeSectionToLines) => {
   }
 
   if (educations.length !== 0) {
-    const coursesLines = getSectionLinesByKeywords(sections, ["course"]);
+    const coursesLines = getSectionLinesByKeywords(sections, ['course']);
     if (coursesLines.length !== 0) {
       educations[0].descriptions.push(
-        "Courses: " +
-          coursesLines
-            .flat()
-            .map((item) => item.text)
-            .join(" ")
+        `Courses: ${coursesLines
+          .flat()
+          .map((item) => item.text)
+          .join(' ')}`,
       );
     }
   }

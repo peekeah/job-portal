@@ -1,12 +1,12 @@
-import React from 'react'
-import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import Image from 'next/image'
-import { TextEffect } from '@/components/motion-primitives/text-effect'
-import { AnimatedGroup } from '@/components/motion-primitives/animated-group'
-import { BackgroundBeams } from '../ui/background-beams'
-import Container from '../container'
+import React from 'react';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Image from 'next/image';
+import { TextEffect } from '@/components/motion-primitives/text-effect';
+import { AnimatedGroup } from '@/components/motion-primitives/animated-group';
+import { BackgroundBeams } from '../ui/background-beams';
+import Container from '../container';
 
 const transitionVariants = {
   item: {
@@ -26,7 +26,7 @@ const transitionVariants = {
       },
     },
   },
-}
+};
 
 export default function HeroSection() {
   return (
@@ -34,13 +34,12 @@ export default function HeroSection() {
       <div className="relative overflow-hidden">
         <div
           aria-hidden
-          className="absolute inset-0 isolate hidden opacity-65 contain-strict lg:block">
-        </div>
-        <section className='relative'>
+          className="absolute inset-0 isolate hidden opacity-65 contain-strict lg:block"
+        ></div>
+        <section className="relative">
           <Container>
-            <BackgroundBeams speedFactor={1.5} className='w-full h-full' />
+            <BackgroundBeams speedFactor={1.5} className="h-full w-full" />
           </Container>
-
 
           <div className="relative pt-24 md:pt-36">
             <AnimatedGroup
@@ -68,7 +67,8 @@ export default function HeroSection() {
                   },
                 },
               }}
-              className="mask-b-from-35% mask-b-to-90% absolute inset-0 top-56 -z-20 lg:top-32">
+              className="absolute inset-0 top-56 -z-20 mask-b-from-35% mask-b-to-90% lg:top-32"
+            >
               <Image
                 src="https://ik.imagekit.io/lrigu76hy/tailark/night-background.jpg?updatedAt=1745733451120"
                 alt="background"
@@ -84,12 +84,15 @@ export default function HeroSection() {
             />
 
             <div className="mx-auto max-w-7xl px-6">
-              <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
+              <div className="text-center sm:mx-auto lg:mt-0 lg:mr-auto">
                 <AnimatedGroup variants={transitionVariants}>
                   <Link
                     href="#link"
-                    className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-zinc-950/5 transition-colors duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
-                    <span className="text-foreground text-sm">AI powered Job searching platform</span>
+                    className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-zinc-950/5 transition-colors duration-300 dark:border-t-white/5 dark:shadow-zinc-950"
+                  >
+                    <span className="text-foreground text-sm">
+                      AI powered Job searching platform
+                    </span>
                     <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
 
                     <div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
@@ -109,7 +112,8 @@ export default function HeroSection() {
                   preset="fade-in-blur"
                   speedSegment={0.3}
                   as="h1"
-                  className="font-bold mx-auto mt-8 max-w-4xl text-5xl max-md:font-bold md:text-7xl lg:mt-16">
+                  className="mx-auto mt-8 max-w-4xl text-5xl font-bold max-md:font-bold md:text-7xl lg:mt-16"
+                >
                   Land you next
                 </TextEffect>
                 <TextEffect
@@ -117,7 +121,8 @@ export default function HeroSection() {
                   speedSegment={0.3}
                   delay={0.3}
                   as="h1"
-                  className="text-primary font-bold mx-auto mt-2 max-w-4xl text-5xl max-md:font-bold md:text-7xl">
+                  className="text-primary mx-auto mt-2 max-w-4xl text-5xl font-bold max-md:font-bold md:text-7xl"
+                >
                   Dream Job!
                 </TextEffect>
                 <TextEffect
@@ -126,9 +131,11 @@ export default function HeroSection() {
                   speedSegment={0.3}
                   delay={0.5}
                   as="p"
-                  className="mx-auto mt-8 max-w-2xl text-lg">
-                  Designed to simplify your job search with intelligent filters and curated matches.
-                  NextHire connects you to roles that truly fit.
+                  className="mx-auto mt-8 max-w-2xl text-lg"
+                >
+                  Designed to simplify your job search with intelligent filters
+                  and curated matches. NextHire connects you to roles that truly
+                  fit.
                 </TextEffect>
 
                 <AnimatedGroup
@@ -143,14 +150,10 @@ export default function HeroSection() {
                     },
                     ...transitionVariants,
                   }}
-                  className="mt-12 flex flex-col items-center justify-center gap-3 md:flex-row">
-                  <div
-                    key={1}
-                  >
-                    <Button
-                      asChild
-                      size="lg"
-                      className="w-32 px-5 text-base">
+                  className="mt-12 flex flex-col items-center justify-center gap-3 md:flex-row"
+                >
+                  <div key={1}>
+                    <Button asChild size="lg" className="w-32 px-5 text-base">
                       <Link href="#link">
                         <span className="text-nowrap">Find Jobs</span>
                       </Link>
@@ -161,7 +164,7 @@ export default function HeroSection() {
                     asChild
                     size="lg"
                     variant="ghost"
-                    className='w-32'
+                    className="w-32"
                   >
                     <Link href="#link">
                       <span className="text-nowrap">Browse jobs</span>
@@ -182,18 +185,19 @@ export default function HeroSection() {
                   },
                 },
                 ...transitionVariants,
-              }}>
-              <div className="mask-b-from-55% relative -mr-56 mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-20">
-                <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/15 ring-1">
+              }}
+            >
+              <div className="relative mt-8 -mr-56 overflow-hidden mask-b-from-55% px-2 sm:mt-12 sm:mr-0 md:mt-20">
+                <div className="ring-background bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg ring-1 inset-shadow-2xs shadow-zinc-950/15 dark:inset-shadow-white/20">
                   <Image
-                    className="bg-background aspect-15/8 relative hidden rounded-2xl dark:block"
+                    className="bg-background relative hidden aspect-15/8 rounded-2xl dark:block"
                     src="/globe.svg"
                     alt="app screen"
                     width="2700"
                     height="1440"
                   />
                   <Image
-                    className="z-2 border-border/25 aspect-15/8 relative rounded-2xl border dark:hidden"
+                    className="border-border/25 relative z-2 aspect-15/8 rounded-2xl border dark:hidden"
                     src="/dashboard.png"
                     alt="app screen"
                     width="2700"
@@ -206,5 +210,5 @@ export default function HeroSection() {
         </section>
       </div>
     </>
-  )
+  );
 }

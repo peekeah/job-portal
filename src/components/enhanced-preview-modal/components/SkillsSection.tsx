@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Resume } from "@/mock/resume";
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Resume } from '@/mock/resume';
 
 type Props = {
   data: Resume;
@@ -8,7 +8,6 @@ type Props = {
 };
 
 export const SkillsSection = ({ data, setData }: Props) => {
-
   const handleAddSkill = (idx: number, value: string) => {
     setData({
       ...data,
@@ -16,7 +15,7 @@ export const SkillsSection = ({ data, setData }: Props) => {
         ...data.skills,
         featuredSkills: data.skills.featuredSkills,
         descriptions: data.skills.descriptions.map((desc, i) =>
-          i === idx ? value : desc
+          i === idx ? value : desc,
         ),
       },
     });
@@ -39,34 +38,40 @@ export const SkillsSection = ({ data, setData }: Props) => {
       skills: {
         ...data.skills,
         featuredSkills: data.skills.featuredSkills,
-        descriptions: [...data.skills.descriptions, ""],
+        descriptions: [...data.skills.descriptions, ''],
       },
     });
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-1">Skills</h2>
-      <p className="text-sm text-gray-500 mb-6">Tags for quick scanning, categories for detail</p>
-      <div className="space-y-3 w-full">
-        <label className="block text-xs font-medium w-full">Skills</label>
+    <div className="mx-auto max-w-3xl">
+      <h2 className="mb-1 text-2xl font-semibold">Skills</h2>
+      <p className="mb-6 text-sm text-gray-500">
+        Tags for quick scanning, categories for detail
+      </p>
+      <div className="w-full space-y-3">
+        <label className="block w-full text-xs font-medium">Skills</label>
         {data.skills.descriptions.map((desc, idx) => (
-          <div key={idx} className="flex gap-3 items-center">
+          <div key={idx} className="flex items-center gap-3">
             <Textarea
               value={desc}
-              onChange={e => handleAddSkill(idx, e.target.value)}
+              onChange={(e) => handleAddSkill(idx, e.target.value)}
               placeholder="Skill Category"
               className="w-full"
             />
             <Button
               variant="ghost"
               size="icon"
-              className="text-red-500 hover:text-white hover:bg-red-500 transition-all"
+              className="text-red-500 transition-all hover:bg-red-500 hover:text-white"
               onClick={() => handleRemoveEntry(idx)}
-            >×</Button>
+            >
+              ×
+            </Button>
           </div>
         ))}
-        <Button variant="outline" size="sm" onClick={handleAddEntry}>Add</Button>
+        <Button variant="outline" size="sm" onClick={handleAddEntry}>
+          Add
+        </Button>
       </div>
     </div>
   );
