@@ -14,7 +14,7 @@ import {
 import axios from 'axios';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import ResumeViewer from '@/components//resume-viewer';
-import { Resume } from '@/mock/resume';
+import { initialResume, Resume } from '@/mock/resume';
 import { Tabs, TabsList, TabsTrigger } from '@/components//ui/tabs';
 import {
   AdditionalSection,
@@ -67,20 +67,20 @@ export default function EnhancedJobPreviewModal({
     error,
   } = useSWRMutation('/api/jobs/enhance-resume/', getEnhancededitedResume);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedResume, setEditedResume] = useState<Resume | null>(null);
+  const [editedResume, setEditedResume] = useState<Resume>(initialResume);
 
   useEffect(() => {
     if (jobId) {
       getEnhancededitedResumeAction(jobId);
     }
-  }, [jobId]);
+  }, [jobId, getEnhancededitedResumeAction]);
 
   useEffect(() => {
     if (enhancededitedResumeRes?.data?.json && !isEditing) {
       const raweditedResume = enhancededitedResumeRes.data.json as string;
       setEditedResume(JSON.parse(raweditedResume));
     }
-  }, [enhancededitedResumeRes?.data]);
+  }, [enhancededitedResumeRes?.data, isEditing]);
 
   if (error) {
     onCloseAction();
@@ -169,7 +169,7 @@ export default function EnhancedJobPreviewModal({
 type RendererProps = {
   activeComponent: string;
   data: Resume;
-  setData: () => void;
+  setData: Dispatch<SetStateAction<Resume>>;
 };
 
 const RenderComponent = ({ activeComponent, data, setData }: RendererProps) => {

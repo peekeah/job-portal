@@ -27,7 +27,7 @@ const ResetPassword = () => {
     if (!token) {
       router.push('/');
     }
-  }, [token]);
+  }, [token, router]);
 
   const onInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const { name, value } = e.target;
