@@ -5,11 +5,7 @@ import { Input } from '@/components/ui/input';
 import axios from 'axios';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  ChangeEventHandler,
-  FormEventHandler,
-  useState,
-} from 'react';
+import { ChangeEventHandler, FormEventHandler, useState } from 'react';
 import { toast } from 'sonner';
 
 const ResetPassword = () => {

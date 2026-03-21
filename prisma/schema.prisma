@@ -115,8 +115,6 @@ model AppliedJob {
   applied_resume_id   String
 
   status          JobStatus @default(applied)
-  resume_url_used String?
-
 }
 
 // =========================

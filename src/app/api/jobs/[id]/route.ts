@@ -25,6 +25,7 @@ async function getCandidatesForJob(token: JWT, jobId: string) {
     },
     include: {
       applicant: true,
+      resume: true,
     },
   });
 

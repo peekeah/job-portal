@@ -4,6 +4,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Text } from '@/components/ui/typography';
 import { fetcher } from '@/lib/fetcher';
+import { Resume } from '@prisma/client';
 import { useParams } from 'next/navigation';
 import { useCallback } from 'react';
 import useSWR from 'swr';
@@ -23,7 +24,7 @@ export type Applicants = {
   id: string;
   jobId: string;
   applicant: Applicant;
-  resume_url_used?: string | null;
+  resume: Resume;
 };
 
 type ApiResponse = {
