@@ -45,6 +45,9 @@ model Auth {
   user_type  UserType @default(applicant)
   user_id    String?
   reset_hash String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 // =========================
@@ -64,6 +67,9 @@ model Company {
   size          CompanySize?
   bio           String?
 
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
   jobs Job[]
 }
 
@@ -80,9 +86,14 @@ model Applicant {
   college_name         String?
   college_branch       String?
   college_joining_year String?
+  active_resume_id     String?
 
-  resume      Resume[]
-  appliedJobs AppliedJob[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  active_resume Resume?      @relation("ActiveResume", fields: [active_resume_id], references: [id], onDelete: SetNull)
+  resume        Resume[]     @relation("ApplicantResumes")
+  appliedJobs   AppliedJob[]
 }
 
 // =========================
@@ -94,37 +105,40 @@ model Resume {
   type         ResumeType @default(pdf)
   url          String?
   json         Json?
-  applicant    Applicant  @relation(fields: [applicant_id], references: [id])
   applicant_id String
 
-  appliedJobs  AppliedJob[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  applicant   Applicant   @relation("ApplicantResumes", fields: [applicant_id], references: [id])
+  active_for  Applicant[] @relation("ActiveResume")
+  appliedJobs AppliedJob[]
 }
 
 // =========================
-// APPLIED JOB MODEL (replaces embedded type)
+// APPLIED JOB MODEL
 // =========================
 model AppliedJob {
-  id           String    @id @default(uuid())
-  applicant    Applicant @relation(fields: [applicant_id], references: [id])
-  applicant_id String
+  id                String    @id @default(uuid())
+  applicant_id      String
+  jobId             String
+  applied_resume_id String
+  status            JobStatus @default(applied)
 
-  job   Job    @relation(fields: [jobId], references: [id])
-  jobId String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  resume              Resume @relation(fields: [applied_resume_id], references: [id])
-  applied_resume_id   String
-
-  status          JobStatus @default(applied)
+  applicant Applicant @relation(fields: [applicant_id], references: [id])
+  job       Job       @relation(fields: [jobId], references: [id])
+  resume    Resume    @relation(fields: [applied_resume_id], references: [id])
 }
 
 // =========================
 // JOB MODEL
 // =========================
 model Job {
-  id         String  @id @default(uuid())
-  company_id String
-  company    Company @relation(fields: [company_id], references: [id])
-
+  id              String  @id @default(uuid())
+  company_id      String
   job_role        String
   description     String
   ctc             Float
@@ -132,5 +146,9 @@ model Job {
   location        String
   skills_required Json
 
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  company      Company      @relation(fields: [company_id], references: [id])
   applied_jobs AppliedJob[]
 }

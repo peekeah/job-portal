@@ -54,6 +54,13 @@ async function postResume(req: NextRequest) {
       },
     });
 
+    if (!student.active_resume_id) {
+      await prisma.applicant.update({
+        where: { id: student.id },
+        data: { active_resume_id: newResume.id },
+      });
+    }
+
     return NextResponse.json(
       { status: true, data: newResume },
       { status: 200 },

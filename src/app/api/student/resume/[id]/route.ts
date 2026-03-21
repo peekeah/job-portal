@@ -24,8 +24,13 @@ async function deleteResume(
       throw new CustomError('Unauthoriaed', 409);
     }
 
+    const whereQuery = student.active_resume_id
+      ? { id: student.active_resume_id }
+      : { applicant_id: student.id };
+
     const resume = await prisma.resume.findFirst({
-      where: { id: resumeId, applicant_id: student.id },
+      where: whereQuery,
+      orderBy: { created_at: 'desc' },
       include: {
         _count: {
           select: { appliedJobs: true }, // check if resume is used in any applications
