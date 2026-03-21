@@ -8,7 +8,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ChangeEventHandler,
   FormEventHandler,
-  useLayoutEffect,
   useState,
 } from 'react';
 import { toast } from 'sonner';
@@ -22,12 +21,6 @@ const ResetPassword = () => {
     password: '',
     verifyPassword: '',
   });
-
-  useLayoutEffect(() => {
-    if (!token) {
-      router.push('/');
-    }
-  }, [token, router]);
 
   const onInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const { name, value } = e.target;

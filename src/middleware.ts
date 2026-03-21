@@ -3,6 +3,7 @@ import { getToken } from './lib/token';
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
+  const params = req.nextUrl.searchParams;
   const token = await getToken(req);
 
   const isProtectedRoute = path.startsWith('/dashboard');
@@ -18,9 +19,16 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
+  if (path.startsWith('/reset-password')) {
+    const token = params.get('token');
+    if (!token) {
+      return NextResponse.redirect(new URL('/', req.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/', '/login', '/signup'],
+  matcher: ['/dashboard/:path*', '/', '/login', '/signup', '/reset-password'],
 };
