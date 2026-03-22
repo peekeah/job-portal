@@ -1,7 +1,6 @@
 'use client';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import '@react-pdf-viewer/core/lib/styles/index.css';
-import useSWRMutation from 'swr/mutation';
 
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -11,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components//ui/dialog';
-import axios from 'axios';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import ResumeViewer from '@/components//resume-viewer';
 import { initialResume, Resume } from '@/mock/resume';
@@ -24,7 +22,7 @@ import {
   ProjectsSection,
   SkillsSection,
 } from './components';
-import { toast } from 'sonner';
+import { Resume as ResumeDBEntry } from '@prisma/client';
 
 const SECTIONS = [
   'Personal',
@@ -37,6 +35,8 @@ const SECTIONS = [
 
 type Props = {
   jobId: string;
+  isEnhancing: boolean;
+  enhancedResume: ResumeDBEntry | null;
   onCloseAction: () => void;
   onApplyAction: (
     jobId: string,
@@ -46,57 +46,29 @@ type Props = {
   applying: boolean;
 };
 
-const getEnhancededitedResume = async (
-  url: string,
-  { arg }: { arg: string },
-) => {
-  const res = await axios.post(url + arg);
-  return res.data;
-};
-
 export default function EnhancedJobPreviewModal({
   onApplyAction,
   onCloseAction,
-  applying,
   jobId,
+  applying,
+  isEnhancing,
+  enhancedResume,
 }: Props) {
-  const {
-    data: enhancededitedResumeRes,
-    trigger: getEnhancededitedResumeAction,
-    isMutating: isLoading,
-    error,
-  } = useSWRMutation('/api/jobs/enhance-resume/', getEnhancededitedResume);
   const [isEditing, setIsEditing] = useState(false);
   const [editedResume, setEditedResume] = useState<Resume>(initialResume);
 
   useEffect(() => {
-    if (jobId) {
-      getEnhancededitedResumeAction(jobId);
+    if (enhancedResume?.json) {
+      setEditedResume(JSON.parse(enhancedResume?.json as string));
     }
-  }, [jobId, getEnhancededitedResumeAction]);
-
-  useEffect(() => {
-    if (enhancededitedResumeRes?.data?.json && !isEditing) {
-      const raweditedResume = enhancededitedResumeRes.data.json as string;
-      setEditedResume(JSON.parse(raweditedResume));
-    }
-  }, [enhancededitedResumeRes?.data, isEditing]);
-
-  if (error) {
-    onCloseAction();
-    const errMsg = error?.response?.data?.message || 'Something went wrong';
-    toast.error(errMsg);
-  }
+  }, [enhancedResume]);
 
   const handleSave = () => {
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    if (enhancededitedResumeRes?.data?.json) {
-      const raweditedResume = enhancededitedResumeRes.data.json as string;
-      setEditedResume(JSON.parse(raweditedResume));
-    }
+    setEditedResume(JSON.parse(enhancedResume?.json as string));
     setIsEditing(false);
   };
 
@@ -104,18 +76,18 @@ export default function EnhancedJobPreviewModal({
     <Dialog open={true}>
       <DialogContent
         showCloseButton={false}
-        className="max-h-[90vh] min-w-4xl overflow-auto"
+        className="flex h-[86vh] min-w-4xl flex-col overflow-auto"
       >
         <DialogHeader>
           <DialogTitle className="mx-auto text-3xl">Resume Preview</DialogTitle>
         </DialogHeader>
-        {isLoading || !editedResume ? (
-          <div className="flex h-screen items-center justify-center">
+        {isEnhancing || !editedResume ? (
+          <div className="flex justify-center">
             <Spinner />
           </div>
         ) : (
           <>
-            <div>
+            <div className="flex-1">
               {!isEditing ? (
                 <ResumeViewer resume={editedResume} />
               ) : (
@@ -141,7 +113,7 @@ export default function EnhancedJobPreviewModal({
                     onClick={() =>
                       onApplyAction(
                         jobId,
-                        enhancededitedResumeRes.data.id,
+                        enhancedResume?.id as string,
                         editedResume,
                       )
                     }
@@ -209,7 +181,11 @@ const EditResume = ({
       >
         <TabsList className="w-full">
           {SECTIONS.map((s) => (
-            <TabsTrigger key={s} value={s} className="flex-1 text-xs">
+            <TabsTrigger
+              key={s}
+              value={s}
+              className="flex-1 cursor-pointer text-xs"
+            >
               {s}
             </TabsTrigger>
           ))}

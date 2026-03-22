@@ -96,6 +96,14 @@ const applyJobWithEditsApiCall = async (
   }
 };
 
+const getEnhancededitedResume = async (
+  url: string,
+  { arg }: { arg: string },
+) => {
+  const res = await axios.post(url + arg);
+  return res.data;
+};
+
 export function JobDetails() {
   const formatCompanySize = (size: string) => {
     return `${companySizeMap.get(size)} ` + `employees`;
@@ -119,7 +127,15 @@ export function JobDetails() {
     `/api/jobs/apply-with-edits/`,
     applyJobWithEditsApiCall,
   );
-  const [enahncePreviewJobId, setEnahancePreviewJobId] = useState<string>('');
+
+  const {
+    data: enhancedResume,
+    trigger: getEnhancededitedResumeAction,
+    isMutating: isEnhancing,
+    error,
+  } = useSWRMutation('/api/jobs/enhance-resume/', getEnhancededitedResume);
+
+  const [enhancePreviewJobId, setEnhancePreviewJobId] = useState<string>('');
 
   const { jobId } = useParams<{ jobId: string }>();
 
@@ -134,18 +150,22 @@ export function JobDetails() {
     resumeId: string,
     resumeData: Resume,
   ) => {
-    if (!enahncePreviewJobId) return;
+    if (!enhancePreviewJobId) return;
     try {
       await handleApplyJobWithEdits({
         jobId,
         resumeId,
         resumeData: JSON.stringify(resumeData),
       });
-      setEnahancePreviewJobId('');
+      setEnhancePreviewJobId('');
     } catch (_err) {
       toast.error('error while applying');
     }
   };
+
+  if (error) {
+    setEnhancePreviewJobId('');
+  }
 
   if (isLoading) {
     return (
@@ -244,7 +264,10 @@ export function JobDetails() {
                     </Button>
                     <Button
                       className="lg:text-md bg-white font-semibold text-blue-600 transition-colors hover:bg-blue-50 lg:p-5"
-                      onClick={() => setEnahancePreviewJobId(jobData.id)}
+                      onClick={() => {
+                        getEnhancededitedResumeAction(jobData.id);
+                        setEnhancePreviewJobId(jobData.id);
+                      }}
                     >
                       Enhance & Apply
                     </Button>
@@ -342,13 +365,15 @@ export function JobDetails() {
         </div>
       ) : null}
 
-      {enahncePreviewJobId && (
+      {enhancePreviewJobId && (
         <EnhancedJobPreviewModal
-          jobId={enahncePreviewJobId}
+          jobId={jobId}
+          isEnhancing={isEnhancing}
+          enhancedResume={enhancedResume?.data}
           applying={applying}
           onApplyAction={applyWithEdits}
           onCloseAction={() => {
-            setEnahancePreviewJobId('');
+            setEnhancePreviewJobId('');
           }}
         />
       )}

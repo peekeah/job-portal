@@ -85,6 +85,14 @@ const applyJobWithEditsApiCall = async (
   }
 };
 
+const getEnhancededitedResume = async (
+  url: string,
+  { arg }: { arg: string },
+) => {
+  const res = await axios.post(url + arg);
+  return res.data;
+};
+
 const Jobs = () => {
   const { trigger: handleApplyJob, isMutating: applying } = useSWRMutation(
     `/api/jobs/apply/`,
@@ -95,6 +103,14 @@ const Jobs = () => {
     `/api/jobs/apply-with-edits/`,
     applyJobWithEditsApiCall,
   );
+
+  const {
+    data: enhancedResume,
+    trigger: getEnhancededitedResumeAction,
+    isMutating: isEnhancing,
+    error: enhancingError,
+  } = useSWRMutation('/api/jobs/enhance-resume/', getEnhancededitedResume);
+
   const {
     data: resData,
     error,
@@ -142,6 +158,10 @@ const Jobs = () => {
     }
     setEnahancePreviewJobId('');
   };
+
+  if (enhancingError) {
+    setEnahancePreviewJobId('');
+  }
 
   return (
     <div className="h-full w-full p-5 sm:p-7 md:px-10 lg:px-5">
@@ -192,6 +212,7 @@ const Jobs = () => {
                   <Button
                     onClick={() => {
                       setEnahancePreviewJobId(job.id);
+                      getEnhancededitedResumeAction(job.id);
                     }}
                     variant={'outline'}
                   >
@@ -213,6 +234,8 @@ const Jobs = () => {
       {enahncePreviewJobId && (
         <EnhancedJobPreviewModal
           jobId={enahncePreviewJobId}
+          isEnhancing={isEnhancing}
+          enhancedResume={enhancedResume?.data}
           applying={applying}
           onApplyAction={applyWithEdits}
           onCloseAction={() => {
