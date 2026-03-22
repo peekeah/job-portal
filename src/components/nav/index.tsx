@@ -7,10 +7,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const menuItems = [
-  { name: 'Features', href: '#link' },
-  { name: 'Solution', href: '#link' },
-  { name: 'Pricing', href: '#link' },
-  { name: 'About', href: '#link' },
+  { name: 'Features', href: '/#features' },
+  { name: 'Pricing', href: '/#pricing' },
 ];
 
 export const Navbar = ({ hideLinks = false }: { hideLinks?: boolean }) => {
@@ -84,6 +82,7 @@ export const Navbar = ({ hideLinks = false }: { hideLinks?: boolean }) => {
                       <Link
                         href={item.href}
                         className="text-muted-foreground hover:text-accent-foreground block duration-150"
+                        onClick={() => setMenuState(false)}
                       >
                         <span>{item.name}</span>
                       </Link>
@@ -97,6 +96,7 @@ export const Navbar = ({ hideLinks = false }: { hideLinks?: boolean }) => {
                   variant="outline"
                   size="sm"
                   className={cn(isScrolled && 'lg:hidden')}
+                  onClick={() => setMenuState(false)}
                 >
                   <Link href="/login">
                     <span>Login</span>
@@ -107,17 +107,8 @@ export const Navbar = ({ hideLinks = false }: { hideLinks?: boolean }) => {
                   size="sm"
                   className={cn(isScrolled && 'lg:hidden')}
                 >
-                  <Link href="/signup">
+                  <Link href="/signup" onClick={() => setMenuState(false)}>
                     <span>Sign Up</span>
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  size="sm"
-                  className={cn(isScrolled ? 'lg:inline-flex' : 'hidden')}
-                >
-                  <Link href="#">
-                    <span>Get Started</span>
                   </Link>
                 </Button>
               </div>

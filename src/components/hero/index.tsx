@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -86,26 +85,11 @@ export default function HeroSection() {
             <div className="mx-auto max-w-7xl px-6">
               <div className="text-center sm:mx-auto lg:mt-0 lg:mr-auto">
                 <AnimatedGroup variants={transitionVariants}>
-                  <Link
-                    href="#link"
-                    className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-zinc-950/5 transition-colors duration-300 dark:border-t-white/5 dark:shadow-zinc-950"
-                  >
+                  <div className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border px-4 py-2 shadow-md shadow-zinc-950/5 transition-colors duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
                     <span className="text-foreground text-sm">
                       AI powered Job searching platform
                     </span>
-                    <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
-
-                    <div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
-                      <div className="flex w-12 -translate-x-1/2 duration-500 ease-in-out group-hover:translate-x-0">
-                        <span className="flex size-6">
-                          <ArrowRight className="m-auto size-3" />
-                        </span>
-                        <span className="flex size-6">
-                          <ArrowRight className="m-auto size-3" />
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
+                  </div>
                 </AnimatedGroup>
 
                 <TextEffect
@@ -153,23 +137,15 @@ export default function HeroSection() {
                   className="mt-12 flex flex-col items-center justify-center gap-3 md:flex-row"
                 >
                   <div key={1}>
-                    <Button asChild size="lg" className="w-32 px-5 text-base">
-                      <Link href="#link">
-                        <span className="text-nowrap">Find Jobs</span>
+                    <Button asChild size="lg" className="px-5 text-base">
+                      <Link href="/login">
+                        <span className="text-nowrap">Get Started</span>
+                        <span>
+                          <ArrowRight className="size-5" />
+                        </span>
                       </Link>
                     </Button>
                   </div>
-                  <Button
-                    key={2}
-                    asChild
-                    size="lg"
-                    variant="ghost"
-                    className="w-32"
-                  >
-                    <Link href="#link">
-                      <span className="text-nowrap">Browse jobs</span>
-                    </Link>
-                  </Button>
                 </AnimatedGroup>
               </div>
             </div>

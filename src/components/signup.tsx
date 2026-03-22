@@ -106,7 +106,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <section className="flex h-full dark:bg-transparent">
+    <section className="mt-24 flex h-full md:mt-28 dark:bg-transparent">
       <form
         id="signup-form"
         onSubmit={form.handleSubmit(onSubmit)}
