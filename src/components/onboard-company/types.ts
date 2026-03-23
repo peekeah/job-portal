@@ -13,6 +13,7 @@ export const companyProfileSchema = z.object({
     .max(new Date().getFullYear(), {
       message: 'Founding year cannot be in the future',
     }),
+  profile_pic: z.string().optional(),
   company_type: z.string().nonempty({ message: 'Company type is required' }),
   size: z.enum(CompanySize),
 });

@@ -58,6 +58,7 @@ model Company {
   name          String
   email         String
   founding_year Int
+  profile_pic   String?
   company_type  String
   contact_no    String
   website       String?

@@ -20,6 +20,9 @@ import { CompanySize } from '@prisma/client';
 import z from 'zod';
 import useSWRMutation from 'swr/mutation';
 import { toast } from 'sonner';
+import { formatInitials } from '@/lib/formater';
+import { useUploadThing } from '@/lib/uploadthing-client';
+import { Spinner } from '../ui/spinner';
 
 const profileSchema = z
   .object({
@@ -35,6 +38,7 @@ const initialCompanyValues: CompanyProfile = {
   founding_year: 0,
   company_type: '',
   email: '',
+  profile_pic: '',
   contact_no: '',
   website: '',
   linkedIn: '',
@@ -69,7 +73,7 @@ const postProfileApiCall = async (
 };
 
 export default function CompanyProfile() {
-  const { data, isLoading } = useSWR<{ data: CompanyProfile }>(
+  const { data, isLoading, mutate } = useSWR<{ data: CompanyProfile }>(
     '/api/company/profile',
     fetcher,
   );
@@ -78,6 +82,8 @@ export default function CompanyProfile() {
     '/api/company/profile',
     postProfileApiCall,
   );
+
+  const { startUpload, isUploading } = useUploadThing('avatarUploader');
 
   const company = data?.data;
 
@@ -95,6 +101,21 @@ export default function CompanyProfile() {
 
   const toggleEdit = () => {
     setEditContent((prev) => !prev);
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const res = await startUpload([file]);
+    if (!res?.[0]?.ufsUrl) {
+      toast.error('Failed to upload avatar');
+      return;
+    }
+
+    await axios.post('/api/company/profile', { profile_pic: res[0].ufsUrl });
+    toast.success('Avatar updated');
+    mutate(); // revalidate SWR
   };
 
   const onSubmit = async (payload: CompanyProfile) => {
@@ -139,11 +160,16 @@ export default function CompanyProfile() {
             <div className="mb-3 flex items-center gap-4">
               <Avatar className="size-28">
                 <AvatarImage
-                  src="https://github.com/shadcn.png"
-                  alt="@shadcn"
+                  src={company?.profile_pic ?? ''}
+                  alt={company?.name}
                 />
-                <AvatarFallback>Job</AvatarFallback>
+                <AvatarFallback>
+                  <span className="font-sans text-5xl font-bold">
+                    {formatInitials((company?.name as string) || '')}
+                  </span>
+                </AvatarFallback>
               </Avatar>
+
               <div className="space-y-2">
                 <div className="text-2xl font-bold">{company?.name}</div>
                 <div className="space-x-2 font-medium">
@@ -166,8 +192,27 @@ export default function CompanyProfile() {
                     Founded {company?.founding_year}
                   </Badge>
                 </div>
-                <div>
-                  <Button variant={'outline'}>Change logo</Button>
+                <div className="space-y-2">
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarUpload}
+                      disabled={isUploading}
+                    />
+                    <Button type="button" asChild>
+                      <span>
+                        {isUploading ? (
+                          <span className="flex items-center gap-1.5">
+                            <Spinner className="text-white" /> Loading
+                          </span>
+                        ) : (
+                          'Change Logo'
+                        )}
+                      </span>
+                    </Button>
+                  </label>
                 </div>
               </div>
             </div>

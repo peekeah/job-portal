@@ -19,6 +19,8 @@ import useSWRMutation from 'swr/mutation';
 import { Resume } from '@/mock/resume';
 import { toast } from 'sonner';
 import { useUploadThing } from '@/lib/uploadthing-client';
+import { formatInitials } from '@/lib/formater';
+import { Spinner } from '../ui/spinner';
 
 const initialProfile: Profile = {
   id: '',
@@ -166,16 +168,6 @@ function StudentProfile() {
     }
   };
 
-  const formatInitials = (name: string): string => {
-    let result = '';
-    for (const el of name?.split(' ')) {
-      if (el && el?.[0]) {
-        result += el[0];
-      }
-    }
-    return result;
-  };
-
   const onSubmit = (payload: Profile) => {
     postProfileTrigger({ payload });
     setEditContent(false);
@@ -229,8 +221,16 @@ function StudentProfile() {
                     onChange={handleAvatarUpload}
                     disabled={isUploading}
                   />
-                  <Button variant="outline" type="button" asChild>
-                    <span>{isUploading ? 'Uploading...' : 'Change Image'}</span>
+                  <Button type="button" asChild>
+                    <span>
+                      {isUploading ? (
+                        <span className="flex items-center gap-1.5">
+                          <Spinner className="text-white" /> Loading
+                        </span>
+                      ) : (
+                        'Change Logo'
+                      )}
+                    </span>
                   </Button>
                 </label>
               </div>

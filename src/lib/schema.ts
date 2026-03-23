@@ -11,6 +11,7 @@ export const companySchema = z.object({
     .min(1800, 'Founding year seems invalid')
     .max(new Date().getFullYear(), 'Founding year cannot be in the future'),
   company_type: z.string().min(1, 'Company type is required'),
+  profile_pic: z.string().optional(),
   contact_no: z
     .string()
     .min(7, 'Contact number too short')

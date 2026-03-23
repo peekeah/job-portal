@@ -8,9 +8,7 @@ const Profile = () => {
   const { data } = useSession();
   const role = data?.user?.user_type;
 
-  return (
-    <div>{role === 'company' ? <CompanyProfile /> : <StudentProfile />}</div>
-  );
+  return <>{role === 'company' ? <CompanyProfile /> : <StudentProfile />}</>;
 };
 
 export default Profile;
