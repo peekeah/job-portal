@@ -7,7 +7,6 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { faq } from '@/mock';
-import { DynamicIcon } from 'lucide-react/dynamic';
 import Link from 'next/link';
 
 export default function FAQSection() {
@@ -40,16 +39,14 @@ export default function FAQSection() {
                   className="bg-background rounded-lg border px-4 shadow-xs last:border-b"
                 >
                   <AccordionTrigger className="cursor-pointer items-center py-5 hover:no-underline">
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-6">
-                        <DynamicIcon name={'clock'} className="m-auto size-4" />
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <item.icon className="text-primary" />
                       <span className="text-base">{item.question}</span>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="pb-5">
                     <div className="px-9">
-                      <p className="text-base">{item.answer}</p>
+                      <p className="text-md">{item.answer}</p>
                     </div>
                   </AccordionContent>
                 </AccordionItem>

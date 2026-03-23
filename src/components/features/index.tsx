@@ -1,7 +1,8 @@
 import { features } from '@/mock';
-import { Zap } from 'lucide-react';
 
-export default function FeaturesSection() {
+
+
+const Features = () => {
   return (
     <section className="py-12 md:py-20" id="features">
       <div className="mx-auto max-w-5xl space-y-8 px-6 md:space-y-16">
@@ -10,8 +11,9 @@ export default function FeaturesSection() {
             Features
           </h2>
           <p>
-            We are AI powered job search engine.We are AI powered job search
-            engine.We are AI powered job search engine.
+            From finding roles to improving resume quality before submission,
+            Nexthire is designed for candidates who want a cleaner and more
+            intentional application workflow.
           </p>
         </div>
 
@@ -19,7 +21,7 @@ export default function FeaturesSection() {
           {features.map((el) => (
             <div key={el.title} className="space-y-3">
               <div className="flex items-center gap-2">
-                <Zap className="size-4" />
+                <el.icon className="text-primary" />
                 <h3 className="text-sm font-medium">{el.title}</h3>
               </div>
               <p className="text-sm">{el.description}</p>
@@ -29,4 +31,6 @@ export default function FeaturesSection() {
       </div>
     </section>
   );
-}
+};
+
+export default Features;

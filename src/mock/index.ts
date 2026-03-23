@@ -1,131 +1,162 @@
+import {
+  IconSearch,
+  IconSparkles,
+  IconFileText,
+  IconChecklist,
+  IconBuildingStore,
+  IconStars,
+  IconHelpCircle,
+  IconEdit,
+  IconCreditCard,
+  IconRocket,
+} from '@tabler/icons-react';
+
 export const features = [
   {
-    title: 'Smart Job Search',
+    title: 'Smart Job Discovery',
     description:
-      'Find jobs that match your skills, experience, and preferences using intelligent filters and ranking.',
+      'Search relevant jobs using filters for role, location, and experience with faster decision making.',
+    icon: IconSearch,
+    upcoming: false,
   },
   {
-    title: 'Verified Employers',
+    title: 'AI Resume Enhancement',
     description:
-      'All employers and job postings go through a verification process for maximum trust.',
+      'Improve resume wording and structure before applying using practical AI suggestions.',
+    icon: IconSparkles,
+    upcoming: false,
   },
   {
-    title: 'Candidate Profiles',
+    title: 'Resume Management',
     description:
-      'Create a professional profile showcasing your skills, experience, and achievements.',
-  },
-  {
-    title: 'Company Dashboard',
-    description:
-      'Companies can post jobs, manage applicants, review resumes, and schedule interviews.',
+      'Maintain resume versions in one place for different roles and application needs.',
+    icon: IconFileText,
+    upcoming: false,
   },
   {
     title: 'Application Tracking',
     description:
-      'Track your application status in real-time — viewed, shortlisted, or in review.',
+      'Track saved jobs and submitted applications through one focused dashboard.',
+    icon: IconChecklist,
+    upcoming: false,
   },
   {
-    title: 'Resume Builder',
+    title: 'Verified Employer Listings',
     description:
-      'Generate a polished, professional resume using built-in templates.',
+      'Explore structured listings with company details for better application confidence.',
+    icon: IconBuildingStore,
+    upcoming: false,
+  },
+  {
+    title: 'AI Match Recommendations',
+    description:
+      'Receive smarter job suggestions based on profile relevance and activity.',
+    icon: IconStars,
+    upcoming: true,
   },
 ];
 
-export const pricing = {
-  candidates: [
-    {
-      plan: 'Free',
-      price: '0',
-      features: [
-        'Unlimited job search',
-        'Unlimited job applications',
-        'Create and edit full profile',
-        'Personalized recommendations',
-        'Job alerts',
-        'Save jobs and track applications',
-      ],
-    },
-    {
-      plan: 'Premium',
-      price: '199',
-      currency: 'INR',
-      billing: 'per month',
-      features: [
-        'Featured profile for higher visibility',
-        'Resume review and score',
-        'Premium job recommendations',
-        'Priority customer support',
-        'Access to top-tier opportunities',
-      ],
-    },
-  ],
-  companies: [
-    {
-      plan: 'starter',
-      price: '999',
-      currency: 'INR',
-      billing: 'per month',
-      features: [
-        '3 job postings',
-        'Unlimited candidate search',
-        'Basic applicant tracking',
-        'Company profile',
-      ],
-    },
-    {
-      plan: 'growth',
-      price: '2999',
-      currency: 'INR',
-      billing: 'per month',
-      features: [
-        '10 job postings',
-        'Highlighted job listings',
-        'Smart resume filtering',
-        'Shortlist management',
-        'Interview scheduling',
-      ],
-    },
-    {
-      plan: 'pro',
-      price: '7999',
-      currency: 'INR',
-      billing: 'per month',
-      features: [
-        'Unlimited job postings',
-        'AI-powered candidate matching',
-        'Access to full resume database',
-        'Team collaboration tools',
-        'Dedicated account manager',
-        'Employer brand promotion',
-      ],
-    },
-  ],
-};
+export const pricing = [
+  {
+    plan: 'Free',
+    price: '0',
+    description: 'Everything needed to start applying confidently.',
+    features: [
+      {
+        label: 'Unlimited job search',
+        upcoming: false,
+      },
+      {
+        label: 'Unlimited job applications',
+        upcoming: false,
+      },
+      {
+        label: 'Create and manage candidate profile',
+        upcoming: false,
+      },
+      {
+        label: 'Resume upload and editing',
+        upcoming: false,
+      },
+      {
+        label: 'Track applications',
+        upcoming: false,
+      },
+      {
+        label: 'Save jobs for later',
+        upcoming: false,
+      },
+    ],
+  },
+  {
+    plan: 'Premium',
+    price: '199',
+    description: 'Advanced support for stronger applications.',
+    badge: 'Most Popular',
+    features: [
+      {
+        label: 'AI resume enhancement',
+        upcoming: false,
+      },
+      {
+        label: 'Resume quality suggestions',
+        upcoming: false,
+      },
+      {
+        label: 'Priority profile improvements',
+        upcoming: false,
+      },
+      {
+        label: 'Advanced recommendations',
+        upcoming: true,
+      },
+      {
+        label: 'Active resume selection',
+        upcoming: true,
+      },
+      {
+        label: 'Priority support',
+        upcoming: false,
+      },
+    ],
+  },
+];
 
 export const faq = [
   {
-    question: 'Is the platform free for job seekers?',
+    question: 'Is Nexthire free for job seekers?',
     answer:
-      'Yes. Candidates can search and apply to unlimited jobs for free. Premium features are optional.',
+      'Yes. Core job search, profile creation, resume upload, and applications are available without cost. Premium features are optional.',
+    icon: IconHelpCircle,
   },
   {
-    question: 'How do companies post jobs?',
+    question: 'How does AI resume enhancement help?',
     answer:
-      'They can create a company account, choose a plan, and post jobs directly from the dashboard.',
+      'It improves wording, structure, and clarity so your resume becomes easier to review and better aligned with professional expectations.',
+    icon: IconSparkles,
   },
   {
-    question: 'Can candidates track their application status?',
+    question: 'Can I edit my resume before applying?',
     answer:
-      'Yes. Candidates can see when their application is viewed, shortlisted, or moved to the next stage.',
+      'Yes. Nexthire allows you to review and edit resume content before submitting an application.',
+    icon: IconEdit,
   },
   {
-    question: 'Can recruiters message candidates directly?',
+    question: 'Can I manage multiple job applications together?',
     answer:
-      'Yes. Recruiters can chat with shortlisted candidates using the built-in messaging system.',
+      'Yes. Saved jobs and submitted applications are organized in your dashboard for easier tracking.',
+    icon: IconChecklist,
   },
   {
-    question: 'What payment methods are supported?',
+    question: 'What is included in Premium?',
     answer:
-      'We support UPI, cards, online banking, and invoice billing for enterprise plans.',
+      'Premium adds AI-based resume support, advanced profile improvements, and access to upcoming productivity features.',
+    icon: IconCreditCard,
+  },
+  {
+    question: 'Are more features being added?',
+    answer:
+      'Yes. Upcoming improvements include profile insights, smarter recommendations, and expanded resume workflows.',
+    icon: IconRocket,
   },
 ];

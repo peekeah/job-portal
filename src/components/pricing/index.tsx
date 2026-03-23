@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check } from 'lucide-react';
 import { pricing } from '@/mock';
+import { Badge } from '../ui/badge';
 
 export default function PricingSection() {
   return (
@@ -13,14 +14,13 @@ export default function PricingSection() {
             Pricing that Scales with You
           </h1>
           <p>
-            Gemini is evolving to be more than just the models. It supports an
-            entire to the APIs and platforms helping developers and businesses
-            innovate.
+            Choose a plan that fits your application journey, from essential
+            tools to advanced AI-assisted improvements.
           </p>
         </div>
 
         <div className="mx-auto mt-8 grid max-w-3xl gap-6 md:mt-20 md:grid-cols-2">
-          {pricing.candidates.map((el) => (
+          {pricing.map((el) => (
             <Card key={el.plan}>
               <CardHeader>
                 <CardTitle className="font-medium">{el.plan}</CardTitle>
@@ -36,10 +36,18 @@ export default function PricingSection() {
                 <hr className="border-dashed" />
 
                 <ul className="list-outside space-y-3 text-sm">
-                  {el.features.map((item, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <Check className="size-3" />
-                      {item}
+                  {el.features.map((feature, index) => (
+                    <li key={index} className="between flex items-center gap-2">
+                      <Check className="size-3 text-green-500" />
+                      <span className="flex-1">{feature.label}</span>
+                      {feature.upcoming && (
+                        <Badge
+                          variant="secondary"
+                          className="text-muted-foreground text-xs"
+                        >
+                          Upcoming
+                        </Badge>
+                      )}
                     </li>
                   ))}
                 </ul>
