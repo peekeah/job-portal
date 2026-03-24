@@ -10,11 +10,11 @@ import {
   IconUser,
   IconLogout,
   IconChevronRight,
-  IconBriefcaseFilled,
 } from '@tabler/icons-react';
 
 import { Role } from '@/lib/auth-middleware';
 import { cn } from '@/lib/utils';
+import { Logo } from '@/components/logo';
 
 type Navlink = {
   title: string;
@@ -80,16 +80,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="mx-auto flex h-screen w-full max-w-7xl">
       {/* ── Desktop sidebar ── */}
-      <aside className="bg-background border-border hidden h-screen w-[220px] min-w-[220px] flex-col border-r lg:flex">
-        <div className="border-border flex items-center gap-1.5 border-b px-5 py-6">
-          <IconBriefcaseFilled size={18} className="text-primary" />
-          <span className="text-foreground text-lg leading-none font-semibold tracking-tight">
-            Next<span className="text-primary">Hire</span>
-          </span>
-        </div>
+      <aside className="bg-background border-border hidden h-screen w-55 min-w-55 flex-col border-r lg:flex">
+        <Logo className="border-b px-4 py-6" />
 
         {/* Nav */}
-        <nav className="flex flex-1 flex-col gap-0.5 space-y-1 px-3 py-3">
+        <nav className="flex flex-1 flex-col gap-0.5 space-y-1 px-3 py-4">
           <DesktopLinks
             navlinks={navlinks}
             selectedLink={selectedLink}
@@ -112,11 +107,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           >
             <div className="flex h-14 items-center justify-between">
               <div className="flex items-center justify-center gap-1.5">
-                <Link href="/dashboard" className="flex items-center gap-2">
-                  <IconBriefcaseFilled size={18} className="text-primary" />
-                  <span className="text-foreground text-lg leading-none font-semibold tracking-tight">
-                    Next<span className="text-primary">Hire</span>
-                  </span>
+                <Link href="/dashboard">
+                  <Logo />
                 </Link>
               </div>
 
@@ -157,12 +149,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         >
           {/* Overlay header */}
           <div className="flex items-center justify-between border-b px-6 py-4">
-            <div className="flex items-center justify-center gap-1.5">
-              <IconBriefcaseFilled size={18} className="text-primary" />
-              <span className="text-foreground text-lg leading-none font-semibold tracking-tight">
-                Next<span className="text-primary">Hire</span>
-              </span>
-            </div>
+            <Logo />
             <button
               onClick={() => setMenuState(false)}
               className="border-border bg-muted text-muted-foreground hover:text-foreground hover:bg-accent flex h-9 w-9 items-center justify-center rounded-full border transition-all"
@@ -229,25 +216,33 @@ const DesktopLinks = ({
       const isActive = selectedLink === nav.href;
 
       const base = cn(
-        'flex items-center gap-2.5 px-3 py-2 rounded-lg border text-sm transition-all duration-150 w-full text-left cursor-pointer relative',
-        isActive
-          ? 'bg-primary/10 border-primary/20 text-primary font-medium'
-          : isLogout
-            ? 'bg-transparent border-transparent text-destructive/70 hover:bg-destructive/5 hover:border-destructive/15 font-normal'
-            : 'bg-transparent border-transparent text-muted-foreground hover:bg-primary/10 hover:border-primary/20 hover:text-foreground font-normal',
+        'group flex items-center gap-2.5 px-3 py-2 rounded-lg border text-sm transition-all duration-150 w-full text-left cursor-pointer relative',
+        isLogout
+          ? 'bg-transparent border-transparent text-destructive/70 hover:bg-destructive/5 hover:border-destructive/15 hover:text-destructive font-normal'
+          : 'bg-transparent border-transparent text-muted-foreground hover:bg-primary/10 hover:border-primary/20 hover:text-primary font-normal',
+        isActive &&
+          (isLogout
+            ? 'bg-destructive/10 border-destructive/20 text-destructive font-medium'
+            : 'bg-primary/10 border-primary/20 text-primary font-medium'),
       );
 
       const iconCn = cn(
         'flex-shrink-0 flex transition-colors',
-        isActive
-          ? 'text-primary'
-          : isLogout
-            ? 'text-destructive/40'
-            : 'text-muted-foreground',
+        isLogout ? 'text-destructive/40' : 'text-muted-foreground',
+        !isActive &&
+          (isLogout
+            ? 'group-hover:text-destructive'
+            : 'group-hover:text-primary'),
+        isActive && (isLogout ? 'text-destructive' : 'text-primary'),
       );
 
       const indicator = isActive && (
-        <span className="bg-primary absolute top-1/2 left-0 h-[55%] w-[3px] -translate-y-1/2 rounded-r-sm" />
+        <span
+          className={cn(
+            'bg-primary absolute top-1/2 left-0 h-[55%] w-0.75 -translate-y-1/2 rounded-r-sm',
+            isLogout && 'bg-destructive',
+          )}
+        />
       );
 
       return isLogout ? (

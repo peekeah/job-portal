@@ -1,7 +1,7 @@
 'use client';
-import { LogoIcon } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { IconBriefcaseFilled } from '@tabler/icons-react';
 import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -39,9 +39,9 @@ export default function ForgotPasswordPage() {
       >
         <div className="bg-card -m-px rounded-[calc(var(--radius)+.125rem)] border p-8 pb-6">
           <div className="text-center">
-            <Link href="/" aria-label="go home" className="mx-auto block w-fit">
-              <LogoIcon />
-            </Link>
+            <div className="mx-auto block w-fit">
+              <IconBriefcaseFilled className="text-primary size-7" />
+            </div>
             <h1 className="mt-4 mb-1 text-xl font-semibold">
               Recover Password
             </h1>

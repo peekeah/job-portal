@@ -4,11 +4,11 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AxiosError } from 'axios';
 
-import { LogoIcon } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { IconBriefcaseFilled } from '@tabler/icons-react';
 
 export default function Login() {
   const [user, setUser] = useState({
@@ -53,9 +53,9 @@ export default function Login() {
       <div className="bg-muted h-fit min-w-md overflow-hidden rounded-[calc(var(--radius)+.125rem)] border shadow-md shadow-zinc-950/5 dark:[--color-muted:var(--color-zinc-900)]">
         <div className="bg-card -m-px rounded-[calc(var(--radius)+.125rem)] border p-8 pb-6">
           <div className="text-center">
-            <Link href="/" aria-label="go home" className="mx-auto block w-fit">
-              <LogoIcon />
-            </Link>
+            <div className="mx-auto block w-fit">
+              <IconBriefcaseFilled className="text-primary size-7" />
+            </div>
             <h1 className="mt-4 mb-1 text-xl font-semibold">
               Sign In to Nexthire
             </h1>

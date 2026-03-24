@@ -1,4 +1,3 @@
-import { LogoIcon } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import axios, { AxiosError } from 'axios';
@@ -10,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import useSWRMutation from 'swr/mutation';
 import { Spinner } from './ui/spinner';
 import { toast } from 'sonner';
+import { IconBriefcaseFilled } from '@tabler/icons-react';
 
 const initialFormValues = {
   name: '',
@@ -114,9 +114,9 @@ export default function SignUpPage() {
       >
         <div className="bg-card -m-px rounded-[calc(var(--radius)+.125rem)] border p-8 pb-6">
           <div className="text-center">
-            <Link href="/" aria-label="go home" className="mx-auto block w-fit">
-              <LogoIcon />
-            </Link>
+            <div className="mx-auto block w-fit">
+              <IconBriefcaseFilled className="text-primary size-7" />
+            </div>
             <h1 className="mt-4 mb-1 text-xl font-semibold">Create Account</h1>
             <p className="text-sm">Welcome! Create account to proceed</p>
           </div>
