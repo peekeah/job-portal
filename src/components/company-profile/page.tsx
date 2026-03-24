@@ -135,85 +135,88 @@ export default function CompanyProfile() {
     >
       <div className="flex w-full">
         <h1 className="text-2xl font-semibold">Company Profile</h1>
-        <div className="mx-auto flex flex-1 justify-end">
-          {editContent ? (
-            <div className="space-x-3">
-              <Button type="submit">Save</Button>
-              <Button
-                type="button"
-                onClick={onCancelChanges}
-                variant={'destructive'}
-              >
-                Cancel
-              </Button>
-            </div>
-          ) : (
-            <Button type="button" onClick={toggleEdit}>
-              Edit
-            </Button>
-          )}
-        </div>
       </div>
       <div className="mt-5 max-w-4xl space-y-5">
         <Card>
           <CardContent>
-            <div className="mb-3 flex items-center gap-4">
-              <Avatar className="size-28">
-                <AvatarImage
-                  src={company?.profile_pic ?? ''}
-                  alt={company?.name}
-                />
-                <AvatarFallback>
-                  <span className="font-sans text-5xl font-bold">
-                    {formatInitials((company?.name as string) || '')}
-                  </span>
-                </AvatarFallback>
-              </Avatar>
+            <div className="flex">
+              <div className="mb-3 flex items-center gap-4">
+                <Avatar className="size-28">
+                  <AvatarImage
+                    src={company?.profile_pic ?? ''}
+                    alt={company?.name}
+                  />
+                  <AvatarFallback>
+                    <span className="font-sans text-5xl font-bold">
+                      {formatInitials((company?.name as string) || '')}
+                    </span>
+                  </AvatarFallback>
+                </Avatar>
 
-              <div className="space-y-2">
-                <div className="text-2xl font-bold">{company?.name}</div>
-                <div className="space-x-2 font-medium">
-                  <Badge
-                    variant={'outline'}
-                    className="rounded-full px-2 py-1 font-semibold"
-                  >
-                    {company?.company_type}
-                  </Badge>
-                  <Badge
-                    variant={'outline'}
-                    className="rounded-full px-2 py-1 font-semibold"
-                  >
-                    {companySizeMap.get(company?.size || '') || '0'} employees
-                  </Badge>
-                  <Badge
-                    variant={'outline'}
-                    className="rounded-full px-2 py-1 font-semibold"
-                  >
-                    Founded {company?.founding_year}
-                  </Badge>
-                </div>
                 <div className="space-y-2">
-                  <label className="cursor-pointer">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleAvatarUpload}
-                      disabled={isUploading}
-                    />
-                    <Button type="button" asChild>
-                      <span>
-                        {isUploading ? (
-                          <span className="flex items-center gap-1.5">
-                            <Spinner className="text-white" /> Loading
-                          </span>
-                        ) : (
-                          'Change Logo'
-                        )}
-                      </span>
-                    </Button>
-                  </label>
+                  <div className="text-2xl font-bold">{company?.name}</div>
+                  <div className="space-x-2 font-medium">
+                    <Badge
+                      variant={'outline'}
+                      className="rounded-full px-2 py-1 font-semibold"
+                    >
+                      {company?.company_type}
+                    </Badge>
+                    <Badge
+                      variant={'outline'}
+                      className="rounded-full px-2 py-1 font-semibold"
+                    >
+                      {companySizeMap.get(company?.size || '') || '0'} employees
+                    </Badge>
+                    <Badge
+                      variant={'outline'}
+                      className="rounded-full px-2 py-1 font-semibold"
+                    >
+                      Founded {company?.founding_year}
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleAvatarUpload}
+                        disabled={isUploading}
+                      />
+                      <Button type="button" asChild>
+                        <span>
+                          {isUploading ? (
+                            <span className="flex items-center gap-1.5">
+                              <Spinner className="text-white" /> Loading
+                            </span>
+                          ) : (
+                            'Change Logo'
+                          )}
+                        </span>
+                      </Button>
+                    </label>
+                  </div>
                 </div>
+              </div>
+
+              <div className="mx-auto flex flex-1 justify-end py-4">
+                {editContent ? (
+                  <div className="space-x-3">
+                    <Button type="submit">Save</Button>
+                    <Button
+                      type="button"
+                      onClick={onCancelChanges}
+                      variant={'destructive'}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button type="button" onClick={toggleEdit}>
+                    Edit
+                  </Button>
+                )}
               </div>
             </div>
             <div>

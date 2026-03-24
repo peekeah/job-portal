@@ -180,59 +180,65 @@ function StudentProfile() {
     >
       <div className="flex w-full">
         <h1 className="text-2xl font-semibold">Student Profile</h1>
-        <div className="mx-auto flex flex-1 justify-end">
-          {editContent ? (
-            <div className="space-x-3">
-              <Button type="submit">Save</Button>
-              <Button onClick={onCancel} type="button" variant={'destructive'}>
-                Cancel
-              </Button>
-            </div>
-          ) : (
-            <Button type="button" onClick={toggleEdit}>
-              Edit
-            </Button>
-          )}
-        </div>
       </div>
       {!isLoading && userData ? (
         <Card className="mt-5 max-w-4xl p-5 md:p-7 lg:p-5">
           <CardContent className="mb-4">
-            <div className="mb-5 flex items-center gap-5">
-              <Avatar className="size-28">
-                <AvatarImage
-                  src={userData?.profile_pic ?? ''}
-                  alt={userData?.name}
-                />
-                <AvatarFallback>
-                  <span className="font-sans text-5xl font-bold">
-                    {formatInitials(userData?.name)}
-                  </span>
-                </AvatarFallback>
-              </Avatar>
-
-              <div className="space-y-2">
-                <div className="text-2xl font-bold">{userData.name}</div>
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleAvatarUpload}
-                    disabled={isUploading}
+            <div className="flex items-start justify-center">
+              <div className="mb-5 flex items-center gap-5">
+                <Avatar className="size-28">
+                  <AvatarImage
+                    src={userData?.profile_pic ?? ''}
+                    alt={userData?.name}
                   />
-                  <Button type="button" asChild>
-                    <span>
-                      {isUploading ? (
-                        <span className="flex items-center gap-1.5">
-                          <Spinner className="text-white" /> Loading
-                        </span>
-                      ) : (
-                        'Change Logo'
-                      )}
+                  <AvatarFallback>
+                    <span className="font-sans text-5xl font-bold">
+                      {formatInitials(userData?.name)}
                     </span>
+                  </AvatarFallback>
+                </Avatar>
+
+                <div className="space-y-2">
+                  <div className="text-2xl font-bold">{userData.name}</div>
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarUpload}
+                      disabled={isUploading}
+                    />
+                    <Button type="button" asChild>
+                      <span>
+                        {isUploading ? (
+                          <span className="flex items-center gap-1.5">
+                            <Spinner className="text-white" /> Loading
+                          </span>
+                        ) : (
+                          'Change Logo'
+                        )}
+                      </span>
+                    </Button>
+                  </label>
+                </div>
+              </div>
+              <div className="mx-auto flex flex-1 justify-end pt-4">
+                {editContent ? (
+                  <div className="space-x-3">
+                    <Button type="submit">Save</Button>
+                    <Button
+                      onClick={onCancel}
+                      type="button"
+                      variant={'destructive'}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button type="button" onClick={toggleEdit}>
+                    Edit
                   </Button>
-                </label>
+                )}
               </div>
             </div>
             <div className="mx-auto grid gap-5 md:grid-cols-2">
