@@ -1,6 +1,9 @@
+'use client';
+import { useMediaQuery } from 'usehooks-ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Testimonial, testimonials } from '@/mock/testimonials';
+import { useEffect, useState } from 'react';
 
 const chunkArray = (
   array: Testimonial[],
@@ -13,9 +16,19 @@ const chunkArray = (
   return result;
 };
 
-const testimonialChunks = chunkArray(testimonials, 3);
-
 export function TestimonialSection() {
+  const [mounted, setMounted] = useState(false);
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const testimonialChunks = chunkArray(
+    testimonials,
+    mounted && isDesktop ? 3 : 4,
+  );
+
   return (
     <section>
       <div className="py-16 pb-10 md:py-32 md:pb-18">

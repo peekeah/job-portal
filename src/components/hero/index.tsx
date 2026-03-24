@@ -127,14 +127,16 @@ export default function HeroSection() {
                 ...transitionVariants,
               }}
             >
-              <div className="relative mt-8 -mr-56 overflow-hidden mask-b-from-55% px-2 sm:mt-12 sm:mr-0 md:mt-20">
+              <div className="relative mt-8 overflow-hidden px-6 sm:mt-12 md:mt-20">
                 <div className="ring-primary/5 bg-primary/20 shadow-primary/5 relative mx-auto max-w-6xl overflow-hidden rounded-2xl border shadow-lg ring-1 inset-shadow-2xs dark:inset-shadow-white/20">
-                  <div className="relative h-175 w-full">
+                  <div className="relative w-full">
                     <Image
-                      className="border-border/25 rounded-2xl border object-top shadow-lg dark:hidden"
+                      className="border-border/25 h-auto w-full rounded-2xl border shadow-lg dark:hidden"
                       src="/dashboard.png"
                       alt="app screen"
-                      fill
+                      width={1600}
+                      height={900}
+                      priority
                     />
                   </div>
                 </div>

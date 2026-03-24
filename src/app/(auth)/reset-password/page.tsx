@@ -50,7 +50,7 @@ const ResetPassword = () => {
   };
 
   return (
-    <section className="flex px-4 py-16 md:py-32 dark:bg-transparent">
+    <section className="flex px-4 py-28 md:py-32 lg:py-48 dark:bg-transparent">
       <form
         onSubmit={onSubmit}
         className="bg-muted m-auto h-fit w-full max-w-md overflow-hidden rounded-[calc(var(--radius)+.125rem)] border shadow-md shadow-zinc-950/5 dark:[--color-muted:var(--color-zinc-900)]"

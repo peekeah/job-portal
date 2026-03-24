@@ -31,7 +31,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <section className="flex px-4 py-16 md:py-32 dark:bg-transparent">
+    <section className="flex px-4 py-26 md:py-32 lg:py-42 dark:bg-transparent">
       <form
         action={'#'}
         onSubmit={onSubmit}

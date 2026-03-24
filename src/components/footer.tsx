@@ -16,8 +16,9 @@ export default function FooterSection() {
     <footer className="border-b bg-white pb-6 dark:bg-transparent">
       <div className="mx-auto max-w-6xl px-6">
         <div className="flex flex-wrap justify-between gap-3">
-          <span className="text-muted-foreground order-last block text-center text-sm md:order-first">
-            © {new Date().getFullYear()} Nexthire, All rights reserved
+          <span className="text-muted-foreground order-last flex text-center text-sm md:order-first">
+            <span>©{new Date().getFullYear()} Nexthire</span>
+            <span className="hidden md:block">, All rights reserved</span>
           </span>
           <div className="order-first flex flex-wrap justify-center gap-4 text-sm md:order-last md:gap-6">
             {links.map((link, index) => (
