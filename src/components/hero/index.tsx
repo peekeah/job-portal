@@ -30,53 +30,17 @@ const transitionVariants = {
 export default function HeroSection() {
   return (
     <>
-      <div className="relative overflow-hidden">
+      <div className="relative z-10 overflow-hidden">
         <div
           aria-hidden
           className="absolute inset-0 isolate hidden opacity-65 contain-strict lg:block"
         ></div>
         <section className="relative">
           <Container>
-            <BackgroundBeams speedFactor={1.5} className="h-full w-full" />
+            <BackgroundBeams speedFactor={1.5} className="h-screen w-full" />
           </Container>
 
           <div className="relative pt-24 md:pt-36">
-            <AnimatedGroup
-              variants={{
-                container: {
-                  visible: {
-                    transition: {
-                      delayChildren: 1,
-                    },
-                  },
-                },
-                item: {
-                  hidden: {
-                    opacity: 0,
-                    y: 20,
-                  },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    transition: {
-                      type: 'spring',
-                      bounce: 0.3,
-                      duration: 2,
-                    },
-                  },
-                },
-              }}
-              className="absolute inset-0 top-56 -z-20 mask-b-from-35% mask-b-to-90% lg:top-32"
-            >
-              <Image
-                src="https://ik.imagekit.io/lrigu76hy/tailark/night-background.jpg?updatedAt=1745733451120"
-                alt="background"
-                className="hidden size-full dark:block"
-                width="3276"
-                height="4095"
-              />
-            </AnimatedGroup>
-
             <div
               aria-hidden
               className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--color-background)_75%)]"
@@ -164,21 +128,15 @@ export default function HeroSection() {
               }}
             >
               <div className="relative mt-8 -mr-56 overflow-hidden mask-b-from-55% px-2 sm:mt-12 sm:mr-0 md:mt-20">
-                <div className="ring-background bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg ring-1 inset-shadow-2xs shadow-zinc-950/15 dark:inset-shadow-white/20">
-                  <Image
-                    className="bg-background relative hidden aspect-15/8 rounded-2xl dark:block"
-                    src="/globe.svg"
-                    alt="app screen"
-                    width="2700"
-                    height="1440"
-                  />
-                  <Image
-                    className="border-border/25 relative z-2 aspect-15/8 rounded-2xl border dark:hidden"
-                    src="/dashboard.png"
-                    alt="app screen"
-                    width="2700"
-                    height="1440"
-                  />
+                <div className="ring-primary/5 bg-primary/20 shadow-primary/5 relative mx-auto max-w-6xl overflow-hidden rounded-2xl border shadow-lg ring-1 inset-shadow-2xs dark:inset-shadow-white/20">
+                  <div className="relative h-175 w-full">
+                    <Image
+                      className="border-border/25 rounded-2xl border object-top shadow-lg dark:hidden"
+                      src="/dashboard.png"
+                      alt="app screen"
+                      fill
+                    />
+                  </div>
                 </div>
               </div>
             </AnimatedGroup>

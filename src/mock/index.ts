@@ -84,13 +84,13 @@ export const pricing = [
       },
       {
         label: 'Save jobs for later',
-        upcoming: false,
+        upcoming: true,
       },
     ],
   },
   {
     plan: 'Premium',
-    price: '199',
+    price: '15',
     description: 'Advanced support for stronger applications.',
     badge: 'Most Popular',
     features: [
@@ -107,16 +107,16 @@ export const pricing = [
         upcoming: false,
       },
       {
+        label: 'Priority support',
+        upcoming: false,
+      },
+      {
         label: 'Advanced recommendations',
         upcoming: true,
       },
       {
         label: 'Active resume selection',
         upcoming: true,
-      },
-      {
-        label: 'Priority support',
-        upcoming: false,
       },
     ],
   },

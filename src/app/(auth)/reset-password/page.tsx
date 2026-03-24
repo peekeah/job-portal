@@ -1,7 +1,7 @@
 'use client';
-import { LogoIcon } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { IconBriefcaseFilled } from '@tabler/icons-react';
 import axios from 'axios';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -52,14 +52,13 @@ const ResetPassword = () => {
   return (
     <section className="flex px-4 py-16 md:py-32 dark:bg-transparent">
       <form
-        action={'#'}
         onSubmit={onSubmit}
         className="bg-muted m-auto h-fit w-full max-w-md overflow-hidden rounded-[calc(var(--radius)+.125rem)] border shadow-md shadow-zinc-950/5 dark:[--color-muted:var(--color-zinc-900)]"
       >
         <div className="bg-card -m-px rounded-[calc(var(--radius)+.125rem)] border p-8 pb-6">
           <div className="text-center">
             <Link href="/" aria-label="go home" className="mx-auto block w-fit">
-              <LogoIcon />
+              <IconBriefcaseFilled size={18} className="text-primary" />
             </Link>
             <h1 className="mt-4 mb-1 text-xl font-semibold">Reset Password</h1>
           </div>
