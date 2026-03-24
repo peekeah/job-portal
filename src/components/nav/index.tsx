@@ -151,7 +151,7 @@ export const Navbar = ({ hideLinks = false }: { hideLinks?: boolean }) => {
                 <span className="flex-1 leading-none">{item.name}</span>
                 <IconChevronRight
                   size={15}
-                  className="shrink-0 translate-y-[1px] text-muted-foreground/40"
+                  className="text-muted-foreground/40 shrink-0 translate-y-[1px]"
                 />
               </Link>
             ))}
@@ -185,7 +185,7 @@ export const Navbar = ({ hideLinks = false }: { hideLinks?: boolean }) => {
               <span className="flex-1 leading-none">{item.label}</span>
               <IconChevronRight
                 size={15}
-                className="shrink-0 translate-y-[1px] text-muted-foreground/40"
+                className="text-muted-foreground/40 shrink-0 translate-y-[1px]"
               />
             </Link>
           ))}
