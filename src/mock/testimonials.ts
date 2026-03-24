@@ -5,89 +5,61 @@ export type Testimonial = {
   quote: string;
 };
 
-export const testimonials: Testimonial[] = [
+export const testimonials = [
   {
-    name: 'Jonathan Yombo',
+    name: 'James Carter',
     role: 'Software Engineer',
     image: 'https://randomuser.me/api/portraits/men/1.jpg',
     quote:
-      'Tailus is really extraordinary and very practical, no need to break your head. A real gold mine.',
+      'Got my first callback within a week. The resume editor made the difference.',
   },
   {
-    name: 'Yves Kalume',
-    role: 'GDE - Android',
-    image: 'https://randomuser.me/api/portraits/men/6.jpg',
+    name: 'Sarah Mitchell',
+    role: 'Product Manager',
+    image: 'https://randomuser.me/api/portraits/women/4.jpg',
     quote:
-      'With no experience in webdesign I just redesigned my entire website in a few minutes with tailwindcss thanks to Tailus.',
+      'I had been applying on other platforms for two months with no response. Switched to NextHire, used the AI enhancement on my resume, and had three interviews scheduled within ten days.',
   },
   {
-    name: 'Yucel Faruksahan',
-    role: 'Tailkits Creator',
+    name: 'Daniel Harris',
+    role: 'Data Analyst',
     image: 'https://randomuser.me/api/portraits/men/7.jpg',
     quote:
-      'Great work on tailfolio template. This is one of the best personal website that I have seen so far :)',
+      'Clean platform, relevant listings, and I could actually track where each application stood.',
   },
   {
-    name: 'Anonymous author',
-    role: 'Doing something',
-    image: 'https://randomuser.me/api/portraits/men/8.jpg',
+    name: 'Emily Thomson',
+    role: 'UX Designer',
+    image: 'https://randomuser.me/api/portraits/women/1.jpg',
     quote:
-      'I am really new to Tailwind and I want to give a go to make some page on my own. I searched a lot of hero pages and blocks online. However, most of them are not giving me a clear view or needed some HTML/CSS coding background to make some changes from the original or too expensive to have. I downloaded the one of Tailus template which is very clear to understand at the start and you could modify the codes/blocks to fit perfectly on your purpose of the page.',
+      'The edit before apply feature is something every job platform should have. I stopped sending the same generic resume to every role and the response rate improved noticeably.',
   },
   {
-    name: 'Shekinah Tshiokufila',
-    role: 'Senior Software Engineer',
-    image: 'https://randomuser.me/api/portraits/men/4.jpg',
-    quote:
-      'Tailus is redefining the standard of web design, with these blocks it provides an easy and efficient way for those who love beauty but may lack the time to implement it. I can only recommend this incredible wonder.',
-  },
-  {
-    name: 'Oketa Fred',
-    role: 'Fullstack Developer',
-    image: 'https://randomuser.me/api/portraits/men/2.jpg',
-    quote:
-      'I absolutely love Tailus! The component blocks are beautifully designed and easy to use, which makes creating a great-looking website a breeze.',
-  },
-  {
-    name: 'Zeki',
-    role: 'Founder of ChatExtend',
+    name: 'Ethan Walker',
+    role: 'Backend Engineer',
     image: 'https://randomuser.me/api/portraits/men/5.jpg',
     quote:
-      "Using TailsUI has been like unlocking a secret design superpower. It's the perfect fusion of simplicity and versatility, enabling us to create UIs that are as stunning as they are user-friendly.",
+      'The job recommendations got better the more I used it. By the second week it was surfacing roles I would have spent hours searching for manually.',
   },
   {
-    name: 'Joseph Kitheka',
+    name: 'Charlotte Evans',
+    role: 'Business Analyst',
+    image: 'https://randomuser.me/api/portraits/women/3.jpg',
+    quote:
+      'Finally a job platform where I know the status of every application I have sent.',
+  },
+  {
+    name: 'Oliver Bennett',
     role: 'Fullstack Developer',
-    image: 'https://randomuser.me/api/portraits/men/9.jpg',
+    image: 'https://randomuser.me/api/portraits/men/4.jpg',
     quote:
-      'Tailus has transformed the way I develop web applications. Their extensive collection of UI components, blocks, and templates has significantly accelerated my workflow. The flexibility to customize every aspect allows me to create unique user experiences. Tailus is a game-changer for modern web development!',
+      'I was skeptical about another job platform but NextHire felt different from the start. The listings were relevant, the companies were real, and the application process was straightforward. What I did not expect was how useful the AI resume tool would be — it rewrote my experience section in a way that actually sounded like me, just clearer. Landed a role at a startup I had been following for a year.',
   },
   {
-    name: 'Khatab Wedaa',
-    role: 'MerakiUI Creator',
-    image: 'https://randomuser.me/api/portraits/men/10.jpg',
+    name: 'Laura Hopkins',
+    role: 'HR Associate',
+    image: 'https://randomuser.me/api/portraits/women/2.jpg',
     quote:
-      "Tailus is an elegant, clean, and responsive tailwind css components it's very helpful to start fast with your project.",
-  },
-  {
-    name: 'Rodrigo Aguilar',
-    role: 'TailwindAwesome Creator',
-    image: 'https://randomuser.me/api/portraits/men/11.jpg',
-    quote:
-      'I love Tailus ❤️. The component blocks are well-structured, simple to use, and beautifully designed. It makes it really easy to have a good-looking website in no time.',
-  },
-  {
-    name: 'Eric Ampire',
-    role: 'Mobile Engineer at @BRPNews • @GoogleDevExpert for Android',
-    image: 'https://randomuser.me/api/portraits/men/12.jpg',
-    quote:
-      'Tailus templates are the perfect solution for anyone who wants to create a beautiful and functional website without any web design experience. The templates are easy to use, customizable, and responsive, and the support team is always available to help. I highly recommend Tailus templates to anyone who is looking to create a website.',
-  },
-  {
-    name: 'Roland Tubonge',
-    role: 'Software Engineer',
-    image: 'https://randomuser.me/api/portraits/men/13.jpg',
-    quote:
-      'Tailus is so well designed that even with a very poor knowledge of web design you can do miracles. Let yourself be seduced!',
+      'We posted our first job listing and had qualified applicants within 24 hours. The verification process keeps the quality high on both sides.',
   },
 ];

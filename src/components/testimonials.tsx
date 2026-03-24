@@ -13,10 +13,7 @@ const chunkArray = (
   return result;
 };
 
-const testimonialChunks = chunkArray(
-  testimonials,
-  Math.ceil(testimonials.length / 3),
-);
+const testimonialChunks = chunkArray(testimonials, 3);
 
 export function TestimonialSection() {
   return (
@@ -26,7 +23,8 @@ export function TestimonialSection() {
           <div className="text-center">
             <h2 className="text-3xl font-semibold">Loved by the Community</h2>
             <p className="mt-6">
-              Harum quae dolore orrupti aut temporibus ariatur.
+              Here is what people are saying about their experience with
+              NextHire.
             </p>
           </div>
           <div className="mt-8 grid gap-3 sm:grid-cols-2 md:mt-12 lg:grid-cols-3">
@@ -34,7 +32,7 @@ export function TestimonialSection() {
               <div key={chunkIndex} className="space-y-3">
                 {chunk.map(({ name, role, quote, image }, index) => (
                   <Card key={index}>
-                    <CardContent className="grid grid-cols-[auto_1fr] gap-3 pt-6">
+                    <CardContent className="grid grid-cols-[auto_1fr] gap-3">
                       <Avatar className="size-9">
                         <AvatarImage
                           alt={name}
@@ -48,11 +46,9 @@ export function TestimonialSection() {
 
                       <div>
                         <h3 className="font-medium">{name}</h3>
-
                         <span className="text-muted-foreground block text-sm tracking-wide">
                           {role}
                         </span>
-
                         <blockquote className="mt-3">
                           <p className="text-gray-700 dark:text-gray-300">
                             {quote}

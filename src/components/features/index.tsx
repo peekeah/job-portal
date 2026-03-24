@@ -1,7 +1,5 @@
 import { features } from '@/mock';
 
-
-
 const Features = () => {
   return (
     <section className="py-12 md:py-20" id="features">
