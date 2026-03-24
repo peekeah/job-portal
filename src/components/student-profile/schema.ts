@@ -14,6 +14,7 @@ export const profileSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.email().min(5).max(100),
   mobile: z.string().regex(/^\d{10,12}$/, 'Invalid mobile number'),
+  active_resume_id: z.uuid().optional(),
   profile_pic: z.string().nullable(),
   college_name: z.string().min(2).max(150),
   college_branch: z.string().min(2).max(100),

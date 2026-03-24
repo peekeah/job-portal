@@ -28,6 +28,7 @@ const initialProfile: Profile = {
   email: '',
   mobile: '',
   profile_pic: '',
+  active_resume_id: '',
   college_name: '',
   college_branch: '',
   college_joining_year: '',
@@ -97,7 +98,7 @@ function StudentProfile() {
     }
 
     // Save URL to profile
-    await axios.post('/api/student/profile', { profile_pic: res[0].url });
+    await axios.post('/api/student/profile', { profile_pic: res[0].ufsUrl });
     toast.success('Avatar updated');
     mutate(); // revalidate SWR
   };
