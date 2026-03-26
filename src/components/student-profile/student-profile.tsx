@@ -5,7 +5,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import axios, { AxiosError } from 'axios';
 import { Card, CardContent } from '../ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Upload } from 'lucide-react';
 import { fetcher } from '@/lib/fetcher';
 
@@ -21,6 +21,8 @@ import { toast } from 'sonner';
 import { useUploadThing } from '@/lib/uploadthing-client';
 import { formatInitials } from '@/lib/formater';
 import { Spinner } from '../ui/spinner';
+import { Badge } from '../ui/badge';
+import { IconCamera, IconDeviceFloppy, IconPencil, IconX } from '@tabler/icons-react';
 
 const initialProfile: Profile = {
   id: '',
@@ -183,25 +185,29 @@ function StudentProfile() {
         <h1 className="text-2xl font-semibold">Student Profile</h1>
       </div>
       {!isLoading && userData ? (
-        <Card className="mt-5 max-w-4xl p-5 md:p-7 lg:p-5">
-          <CardContent className="mb-4">
-            <div className="flex items-start justify-center">
-              <div className="mb-5 flex items-center gap-5">
-                <Avatar className="size-28">
-                  <AvatarImage
-                    src={userData?.profile_pic ?? ''}
-                    alt={userData?.name}
-                  />
-                  <AvatarFallback>
-                    <span className="font-sans text-5xl font-bold">
-                      {formatInitials(userData?.name)}
-                    </span>
-                  </AvatarFallback>
-                </Avatar>
+        <Card className="mt-5 max-w-4xl py-4 md:p-7 lg:p-5">
+          <CardContent className="px-4 md:p-0">
+            <div className="flex justify-center">
+              <div className="mb-5 flex items-center gap-2 md:gap-3">
+                <div className='relative rounded-full'>
+                  <Avatar className='size-18 overflow-visible border'>
+                    <AvatarImage
+                      src={userData?.profile_pic ?? ''}
+                      alt={userData?.name}
+                      className='rounded-full'
+                    />
+                    <AvatarFallback>
+                      <span className="font-sans text-3xl font-bold">
+                        {formatInitials(userData?.name)}
+                      </span>
+                    </AvatarFallback>
+                  </Avatar>
 
-                <div className="space-y-2">
-                  <div className="text-2xl font-bold">{userData.name}</div>
-                  <label className="cursor-pointer">
+                  <label className="absolute bottom-0 right-0
+        flex size-6 p-0.5 cursor-pointer items-center justify-center
+        rounded-full border border-primary bg-background shadow-sm
+        hover:bg-background/80 transition
+        z-10">
                     <input
                       type="file"
                       accept="image/*"
@@ -209,36 +215,73 @@ function StudentProfile() {
                       onChange={handleAvatarUpload}
                       disabled={isUploading}
                     />
-                    <Button type="button" asChild>
-                      <span>
-                        {isUploading ? (
-                          <span className="flex items-center gap-1.5">
-                            <Spinner className="text-white" /> Loading
-                          </span>
-                        ) : (
-                          'Change Logo'
-                        )}
-                      </span>
-                    </Button>
+                    <span className='rounded-full'>
+                      {isUploading ? (
+                        <Spinner className="text-primary" />
+                      ) : (
+                        <>
+                          <IconPencil className='size-full text-primary ' />
+                        </>
+                      )}
+                    </span>
                   </label>
+                </div>
+
+                <div className="space-y-0.5">
+                  <div className="text-lg md:text-xl font-bold">{userData.name}</div>
+                  <span><Badge
+                    className='rounded-xl border-primary text-primary bg-primary/10'
+                  >Location</Badge></span>
                 </div>
               </div>
               <div className="mx-auto flex flex-1 justify-end pt-4">
                 {editContent ? (
                   <div className="space-x-3">
-                    <Button type="submit">Save</Button>
-                    <Button
-                      onClick={onCancel}
-                      type="button"
-                      variant={'destructive'}
-                    >
-                      Cancel
-                    </Button>
+                    <div className='space-x-3 hidden sm:block'>
+                      <Button type="submit">Save</Button>
+                      <Button
+                        onClick={onCancel}
+                        type="button"
+                        variant={'destructive'}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                    <div className='space-x-1 sm:hidden'>
+                      <Button
+                        type="submit"
+                        size="icon-sm"
+                        className='rounded-full'
+                      ><IconDeviceFloppy /></Button>
+                      <Button
+                        onClick={onCancel}
+                        size="icon-sm"
+                        className='rounded-full'
+                        type="button"
+                        variant={'destructive'}
+                      >
+                        <IconX />
+                      </Button>
+                    </div>
                   </div>
                 ) : (
-                  <Button type="button" onClick={toggleEdit}>
-                    Edit
-                  </Button>
+                  <>
+                    <Button
+                      className='hidden sm:block'
+                      type="button"
+                      onClick={toggleEdit}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      type="button"
+                      size="icon-sm"
+                      onClick={toggleEdit}
+                      className='rounded-full sm:hidden'
+                    >
+                      <IconPencil />
+                    </Button>
+                  </>
                 )}
               </div>
             </div>

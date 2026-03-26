@@ -22,6 +22,11 @@ import EnhancedJobPreviewModal from '../enhanced-preview-modal';
 import { Resume } from '@/mock/resume';
 import { Spinner } from '../ui/spinner';
 import { toast } from 'sonner';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { formatInitials } from '@/lib/formater';
+import { cn } from '@/lib/utils';
+import { Badge } from '../ui/badge';
+import { IconBriefcase, IconBuilding, IconGlobe, IconMapPin, IconWorld } from '@tabler/icons-react';
 
 type Job = z.infer<typeof jobSchema> & {
   id: string;
@@ -70,6 +75,11 @@ const applyJobApiCall = async (
   }
 };
 
+
+const formatCompanySize = (size: string) => {
+  return `${companySizeMap.get(size)} ` + `employees`;
+};
+
 type ApplyJobWithEditsPayload = {
   jobId: string;
   resumeId: string;
@@ -104,20 +114,37 @@ const getEnhancededitedResume = async (
   return res.data;
 };
 
+type CompanyMetadataProps = {
+  location: string;
+  companyType: string;
+  companySize: string;
+  className?: string;
+}
+
+const CompanyMetadata = ({ location, companyType, companySize, className }: CompanyMetadataProps) => {
+  return (
+    <div className={cn("hidden md:flex flex-wrap items-center gap-2 text-xs sm:gap-4 sm:text-sm", className)}>
+      <div className="flex items-center gap-0.5 text-gray-600 sm:gap-1.5">
+        <IconMapPin className="size-3 text-primary" />
+        <span className="truncate">{location}</span>
+      </div>
+      <div className="flex items-center gap-0.5 text-gray-600 sm:gap-1.5">
+        <IconBuilding className="text-primary size-3" />
+        <span className="truncate">
+          {companyType}
+        </span>
+      </div>
+      <div className="flex items-center gap-1 text-gray-600 sm:gap-1.5">
+        <IconBriefcase className="size-3 text-primary" />
+        <span className="truncate">
+          {formatCompanySize(companySize)}
+        </span>
+      </div>
+    </div>
+  )
+}
+
 export function JobDetails() {
-  const formatCompanySize = (size: string) => {
-    return `${companySizeMap.get(size)} ` + `employees`;
-  };
-
-  const getCompanyInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((word) => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   const { trigger: handleApplyJob, isMutating: applying } = useSWRMutation(
     `/api/jobs/apply/`,
     applyJobApiCall,
@@ -181,182 +208,175 @@ export function JobDetails() {
       {jobData ? (
         <div className="flex min-h-screen px-3 py-4 sm:px-4 sm:py-8 lg:px-6 lg:py-12">
           <div className="w-full max-w-4xl">
-            <Card>
-              <div className="space-y-4 px-4 pt-6 pb-6 sm:space-y-6 sm:px-6 sm:pb-8">
-                <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
-                  <div className="flex w-full gap-3 sm:w-auto sm:gap-5">
-                    <div className="relative shrink-0">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-lg font-bold text-white shadow-lg ring-2 ring-white sm:h-20 sm:w-20 sm:rounded-2xl sm:text-xl sm:ring-4 lg:h-24 lg:w-24 lg:text-2xl">
-                        {getCompanyInitials(jobData.company.name)}
+            <Card className='sm:py-0'>
+              <div className='space-y-4 sm:space-y-0'>
+                <div className="space-y-4 px-4 md:py-6 sm:space-y-6 sm:px-6 sm:pb-8">
+                  <div className="flex flex-col items-start justify-between gap-1 sm:flex-row">
+                    <div className="flex items-center w-full gap-3 sm:w-auto sm:gap-5">
+                      <div className="relative shrink-0">
+                        <Avatar className="size-16 md:size-24">
+                          <AvatarImage
+                            src={jobData.company?.profile_pic ?? ''}
+                            alt={jobData.company?.name}
+                          />
+                          <AvatarFallback>
+                            <span className="font-sans text-3xl md:text-5xl font-bold">
+                              {formatInitials((jobData.company?.name as string) || '')}
+                            </span>
+                          </AvatarFallback>
+                        </Avatar>
                       </div>
-                      <div className="absolute -right-1 -bottom-1 h-5 w-5 rounded-full border-2 border-white bg-green-500 sm:-right-2 sm:-bottom-2 sm:h-7 sm:w-7 sm:border-4"></div>
-                    </div>
-                    <div className="min-w-0 flex-1 space-y-2 sm:space-y-3">
-                      <div className="flex flex-wrap items-center gap-1.5 text-xs text-gray-600 sm:gap-2 sm:text-sm">
-                        <Building2 className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
-                        <span className="truncate font-semibold text-gray-900">
-                          {jobData.company.name}
-                        </span>
-                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-green-700 sm:py-1">
-                          Actively hiring
-                        </span>
-                      </div>
-                      <h1 className="bg-linear-to-r from-slate-900 to-slate-700 bg-clip-text text-2xl leading-tight font-bold text-transparent sm:text-3xl lg:text-4xl">
-                        {jobData.job_role}
-                      </h1>
-                      <div className="flex flex-wrap items-center gap-2 text-xs sm:gap-4 sm:text-sm">
-                        <div className="flex items-center gap-1 text-gray-600 sm:gap-1.5">
-                          <MapPin className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
-                          <span className="truncate">{jobData.location}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-gray-600 sm:gap-1.5">
-                          <Building2 className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
-                          <span className="truncate">
-                            {jobData.company.company_type}
+                      <div className="min-w-0 flex-1 sm:space-y-1">
+                        <div className="flex flex-wrap items-center gap-1 text-xs text-gray-600 sm:gap-2 sm:text-sm">
+                          <IconBuilding className="size-3.5 text-primary" />
+                          <span className="truncate font-semibold sm:text-lg text-gray-900">
+                            {jobData.company.name}
+                          </span>
+                          <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-green-700 sm:py-1">
+                            Actively hiring
                           </span>
                         </div>
-                        <div className="flex items-center gap-1 text-gray-600 sm:gap-1.5">
-                          <Briefcase className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
-                          <span className="truncate">
-                            {formatCompanySize(jobData.company.size!)}
-                          </span>
-                        </div>
+                        <CompanyMetadata
+                          location={jobData.company.address}
+                          companyType={jobData.company.company_type}
+                          companySize={jobData.company.size!}
+                          className='hidden md:flex'
+                        />
                       </div>
                     </div>
-                  </div>
-                  <div className="flex shrink-0 gap-2 self-end sm:self-start">
-                    <button className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 sm:h-10 sm:w-10">
-                      <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    </button>
-                    <button className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 sm:h-10 sm:w-10">
-                      <BookmarkPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    </button>
+                    <CompanyMetadata
+                      location={jobData.company.address}
+                      companyType={jobData.company.company_type}
+                      companySize={jobData.company.size!}
+                      className='flex md:hidden mt-1'
+                    />
                   </div>
                 </div>
-              </div>
 
-              {/* Content */}
-              <div className="space-y-6 px-4 pb-6 sm:space-y-8 sm:px-6 sm:pb-8">
-                {/* CTC Card */}
-                <div className="flex flex-col items-start justify-between gap-4 rounded-xl bg-linear-to-r from-blue-600 to-indigo-500 p-4 text-white sm:flex-row sm:items-center sm:rounded-2xl sm:p-6">
-                  <div className="w-full sm:w-auto">
-                    <div className="mb-2 flex items-center gap-2 text-blue-100">
-                      <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" />
-                      <span className="text-xs font-medium sm:text-sm">
-                        Annual Compensation
-                      </span>
+                {/* Content */}
+                <div className="space-y-6 px-4 pb-6 sm:space-y-8 sm:px-6 sm:pb-8">
+                  {/* CTC Card */}
+                  <div className='space-y-1.5'>
+                    <h1 className="bg-linear-to-r from-slate-900 to-slate-700 bg-clip-text text-2xl leading-tight font-bold text-transparent sm:text-3xl">
+                      {jobData.job_role}
+                    </h1>
+                    <div className="flex flex-col items-start justify-between gap-4 rounded-xl bg-linear-to-r from-blue-600 to-indigo-500 p-4 text-white sm:flex-row sm:items-center sm:rounded-2xl sm:p-6">
+                      <div className="w-full sm:w-auto">
+                        <div className="mb-2 flex items-center gap-2 text-blue-100">
+                          <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" />
+                          <span className="text-xs font-medium sm:text-sm">
+                            Annual Compensation
+                          </span>
+                        </div>
+                        <p className="text-2xl font-bold sm:text-3xl">
+                          ₹{jobData.ctc} LPA
+                        </p>
+                        {jobData.stipend > 0 && (
+                          <p className="mt-1 text-xs text-blue-100 sm:text-sm">
+                            + ₹{jobData.stipend} stipend
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-x-3">
+                        <Button
+                          className="lg:text-md bg-white font-semibold text-blue-600 transition-colors hover:bg-blue-50 lg:p-5"
+                          onClick={() => handleApplyJob({ jobId: jobData?.id })}
+                        >
+                          Apply
+                        </Button>
+                        <Button
+                          className="lg:text-md bg-white font-semibold text-blue-600 transition-colors hover:bg-blue-50 lg:p-5"
+                          onClick={() => {
+                            getEnhancededitedResumeAction(jobData.id);
+                            setEnhancePreviewJobId(jobData.id);
+                          }}
+                        >
+                          Enhance & Apply
+                        </Button>
+                      </div>
                     </div>
-                    <p className="text-2xl font-bold sm:text-3xl">
-                      ₹{jobData.ctc} LPA
+                  </div>
+                  {/* About the Role */}
+                  <div className="space-y-3 sm:space-y-4">
+                    <h2 className="text-xl font-bold sm:text-2xl">
+                      About the Role
+                    </h2>
+                    <p className="text-sm leading-relaxed text-gray-600 sm:text-base">
+                      {jobData.description}
                     </p>
-                    {jobData.stipend > 0 && (
-                      <p className="mt-1 text-xs text-blue-100 sm:text-sm">
-                        + ₹{jobData.stipend} stipend
+                  </div>
+
+                  <hr className="border-gray-200" />
+
+                  {/* Company Info Grid */}
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3">
+                    <div>
+                      <p className="mb-1 text-xs text-gray-600 sm:text-sm">
+                        Company Founded
                       </p>
+                      <p className="text-base font-semibold sm:text-lg">
+                        {jobData.company.founding_year}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="mb-1 text-xs text-gray-600 sm:text-sm">
+                        Company Size
+                      </p>
+                      <p className="text-base font-semibold sm:text-lg">
+                        {formatCompanySize(jobData.company.size!)}
+                      </p>
+                    </div>
+                    <div className="sm:col-span-2 md:col-span-1">
+                      <p className="mb-1 text-xs text-gray-600 sm:text-sm">
+                        Location
+                      </p>
+                      <p className="wrap-break-words text-base font-semibold sm:text-lg">
+                        {jobData.company.address}
+                      </p>
+                    </div>
+                  </div>
+
+                  <hr className="border-gray-200" />
+
+                  {/* About Company */}
+                  <div className="space-y-3 sm:space-y-4">
+                    <h2 className="text-xl font-bold sm:text-2xl">
+                      About {jobData.company.name}
+                    </h2>
+                    <p className="text-sm leading-relaxed text-gray-600 sm:text-base">
+                      {jobData.company.bio}
+                    </p>
+
+                    {jobData.company.website && (
+                      <div className="flex items-center gap-1 text-xs text-gray-600 sm:text-sm">
+                        <IconWorld className='text-primary size-4' />
+                        <a
+                          href={jobData.company.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="break-all text-primary hover:underline"
+                        >
+                          {jobData.company.website}
+                        </a>
+                      </div>
                     )}
                   </div>
-                  <div className="space-x-3">
-                    <Button
-                      className="lg:text-md bg-white font-semibold text-blue-600 transition-colors hover:bg-blue-50 lg:p-5"
-                      onClick={() => handleApplyJob({ jobId: jobData?.id })}
-                    >
-                      Apply
-                    </Button>
-                    <Button
-                      className="lg:text-md bg-white font-semibold text-blue-600 transition-colors hover:bg-blue-50 lg:p-5"
-                      onClick={() => {
-                        getEnhancededitedResumeAction(jobData.id);
-                        setEnhancePreviewJobId(jobData.id);
-                      }}
-                    >
-                      Enhance & Apply
-                    </Button>
-                  </div>
-                </div>
 
-                {/* About the Role */}
-                <div className="space-y-3 sm:space-y-4">
-                  <h2 className="text-xl font-bold sm:text-2xl">
-                    About the Role
-                  </h2>
-                  <p className="text-sm leading-relaxed text-gray-600 sm:text-base">
-                    {jobData.description}
-                  </p>
-                </div>
+                  <hr className="border-gray-200" />
 
-                <hr className="border-gray-200" />
+                  {/* Required Skills */}
+                  <div className="space-y-4 sm:space-y-5">
+                    <h2 className="text-xl font-bold sm:text-2xl">
+                      Required Skills
+                    </h2>
 
-                {/* Company Info Grid */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3">
-                  <div>
-                    <p className="mb-1 text-xs text-gray-600 sm:text-sm">
-                      Company Founded
-                    </p>
-                    <p className="text-base font-semibold sm:text-lg">
-                      {jobData.company.founding_year}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="mb-1 text-xs text-gray-600 sm:text-sm">
-                      Company Size
-                    </p>
-                    <p className="text-base font-semibold sm:text-lg">
-                      {formatCompanySize(jobData.company.size!)}
-                    </p>
-                  </div>
-                  <div className="sm:col-span-2 md:col-span-1">
-                    <p className="mb-1 text-xs text-gray-600 sm:text-sm">
-                      Location
-                    </p>
-                    <p className="wrap-break-words text-base font-semibold sm:text-lg">
-                      {jobData.company.address}
-                    </p>
-                  </div>
-                </div>
-
-                <hr className="border-gray-200" />
-
-                {/* About Company */}
-                <div className="space-y-3 sm:space-y-4">
-                  <h2 className="text-xl font-bold sm:text-2xl">
-                    About {jobData.company.name}
-                  </h2>
-                  <p className="text-sm leading-relaxed text-gray-600 sm:text-base">
-                    {jobData.company.bio}
-                  </p>
-
-                  {jobData.company.website && (
-                    <div className="flex items-center gap-2 text-xs text-gray-600 sm:text-sm">
-                      <span>🌐</span>
-                      <a
-                        href={jobData.company.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="break-all text-blue-600 hover:underline"
-                      >
-                        {jobData.company.website}
-                      </a>
+                    <div className="flex flex-wrap gap-2 sm:gap-3">
+                      {jobData.skills_required.map((skill, index) => (
+                        <Badge key={skill + index} variant={'outline'} className='rounded-xl border-primary text-primary bg-primary/10'>
+                          {skill}
+                        </Badge>
+                      ))}
                     </div>
-                  )}
-                </div>
-
-                <hr className="border-gray-200" />
-
-                {/* Required Skills */}
-                <div className="space-y-4 sm:space-y-5">
-                  <h2 className="text-xl font-bold sm:text-2xl">
-                    Required Skills
-                  </h2>
-
-                  <div className="flex flex-wrap gap-2 sm:gap-3">
-                    {jobData.skills_required.map((skill, index) => (
-                      <span
-                        key={index}
-                        className="flex items-center rounded-full bg-blue-50 px-2.5 py-1.5 text-sm font-medium text-blue-600 sm:px-3 sm:py-2 sm:text-base"
-                      >
-                        {skill}
-                      </span>
-                    ))}
                   </div>
                 </div>
               </div>

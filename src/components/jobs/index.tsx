@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation';
 import { Resume } from '@/mock/resume';
 import EnhancedJobPreviewModal from '../enhanced-preview-modal';
 import { toast } from 'sonner';
+import { formatInitials } from '@/lib/formater';
 
 export type Job = {
   id: string;
@@ -26,6 +27,7 @@ export type Job = {
   location: string;
   company: {
     name: string;
+    profile_pic?: string;
     company_founding_year: number;
     company_type: string;
     address: string;
@@ -176,15 +178,19 @@ const Jobs = () => {
       ) : (
         <div className="mt-5 grid grid-cols-1 gap-5 pb-3 lg:grid-cols-2">
           {jobs?.map((job) => (
-            <Card key={job.id}>
-              <CardContent>
+            <Card
+              key={job.id}
+              className='cursor-pointer py-4 md:py-5'
+              onClick={() => router.push(`dashboard/job/${job.id}`)}
+            >
+              <CardContent className='px-4 md:px-6'>
                 <div className="mb-3 flex items-center gap-4">
                   <Avatar className="size-12">
                     <AvatarImage
-                      src="https://github.com/shadcn.png"
-                      alt="@shadcn"
+                      src={job.company.profile_pic}
+                      alt="company"
                     />
-                    <AvatarFallback>Job</AvatarFallback>
+                    <AvatarFallback>{formatInitials(job.company.name)}</AvatarFallback>
                   </Avatar>
                   <div>
                     <div className="font-medium">{job.company.name}</div>
@@ -197,10 +203,12 @@ const Jobs = () => {
                 <Text className="line-clamp-2 text-neutral-500">
                   {job.description}
                 </Text>
-                <Text className="my-2">$ {job.ctc}k/year</Text>
+
+                <Text className="my-2 font-semibold">$ {job.ctc}k/year</Text>
                 <Text className="space-x-1 text-neutral-500">
-                  {job.skills_required.map((el) => (
-                    <Badge key={el} variant={'outline'}>
+
+                  {job?.skills_required.map((el) => (
+                    <Badge key={el} variant={'outline'} className='rounded-xl border-primary text-primary bg-primary/10'>
                       {el}
                     </Badge>
                   ))}
@@ -217,12 +225,6 @@ const Jobs = () => {
                     variant={'outline'}
                   >
                     Enhance & apply
-                  </Button>
-                  <Button
-                    variant={'outline'}
-                    onClick={() => router.push(`dashboard/job/${job.id}`)}
-                  >
-                    View Job
                   </Button>
                 </div>
               </CardContent>

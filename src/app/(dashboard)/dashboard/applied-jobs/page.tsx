@@ -7,9 +7,9 @@ import { Spinner } from '@/components/ui/spinner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Heading, Text } from '@/components/ui/typography';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { formatInitials } from '@/lib/formater';
 
 export type Job = {
   id: string;
@@ -23,6 +23,7 @@ export type Job = {
     id: string;
     name: string;
     type: string;
+    profile_pic?: string;
     address: string;
     website: string;
     size: string;
@@ -41,13 +42,12 @@ export type ApiResponse = {
 };
 
 const badgeClasses = new Map([
-  ['applied', 'bg-blue-100 text-blue-400'],
-  ['shortlisted', 'bg-yellow-100 text-yellow-400'],
-  ['hired', 'bg-green-100 text-green-400'],
+  ['applied', 'text-primary bg-primary/10 border-primary'],
+  ['shortlisted', 'bg-yellow-50 text-yellow-400 border-yellow-400'],
+  ['hired', 'bg-green-50 text-green-400 border-green-400'],
 ]);
 
 function AppliedJobs() {
-  const router = useRouter();
   const { data, error, isLoading } = useSWR<ApiResponse>(
     '/api/student/applied-jobs',
     fetcher,
@@ -78,56 +78,50 @@ function AppliedJobs() {
             const status = el.status;
 
             return (
-              <Card key={job.id}>
-                <CardContent>
-                  <div className="flex justify-between">
-                    <div className="mb-3 flex items-center gap-4">
-                      <Avatar className="size-12">
-                        <AvatarImage
-                          src="https://github.com/shadcn.png"
-                          alt="@shadcn"
-                        />
-                        <AvatarFallback>Company</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">{company.name}</div>
-                        <div className="text-sm text-neutral-500">
-                          {company.address}
+              <Card key={job.id} className='py-4 md:py-6'>
+                <Link href={`job/${job.id}`}>
+                  <CardContent className='px-4 md:px-6'>
+                    <div className="flex justify-between">
+                      <div className="mb-3 flex items-center gap-2 md:gap-4">
+                        <Avatar className="size-12">
+                          <AvatarImage
+                            src={job.company.profile_pic}
+                            alt="profile"
+                          />
+                          <AvatarFallback>{formatInitials(job.company.name)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium text-md">{company.name}</div>
+                          <div className="text-sm text-neutral-500">
+                            {company.address}
+                          </div>
                         </div>
                       </div>
+                      <div>
+                        <Badge
+                          className={cn(
+                            'rounded-full',
+                            badgeClasses.get(status),
+                          )}
+                        >
+                          {status[0].toUpperCase() + status.slice(1)}
+                        </Badge>
+                      </div>
                     </div>
-                    <div>
-                      <Badge
-                        className={cn(
-                          'rounded-full px-2 py-1.5 text-sm',
-                          badgeClasses.get(status),
-                        )}
-                      >
-                        {status}
-                      </Badge>
-                    </div>
-                  </div>
-                  <Heading variant="h4">{job.job_role}</Heading>
-                  <Text className="line-clamp-2 text-neutral-500">
-                    {job.description}
-                  </Text>
-                  <Text className="my-2">$ {job.ctc}k/year</Text>
-                  <Text className="space-x-1 text-neutral-500">
-                    {job?.skills_required.map((el) => (
-                      <Badge key={el} variant={'outline'}>
-                        {el}
-                      </Badge>
-                    ))}
-                  </Text>
-                  <div className="mt-4 space-x-3">
-                    <Button
-                      variant={'outline'}
-                      onClick={() => router.push(`job/${job.id}`)}
-                    >
-                      View Job
-                    </Button>
-                  </div>
-                </CardContent>
+                    <Heading variant="h4">{job.job_role}</Heading>
+                    <Text className="line-clamp-2 text-neutral-500">
+                      {job.description}
+                    </Text>
+                    <Text className="my-2 font-semibold">$ {job.ctc}k/year</Text>
+                    <Text className="space-x-1 text-neutral-500">
+                      {job?.skills_required.map((el) => (
+                        <Badge key={el} variant={'outline'} className='rounded-xl border-primary text-primary bg-primary/10'>
+                          {el}
+                        </Badge>
+                      ))}
+                    </Text>
+                  </CardContent>
+                </Link>
               </Card>
             );
           })}
