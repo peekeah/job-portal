@@ -78,9 +78,9 @@ function AppliedJobs() {
             const status = el.status;
 
             return (
-              <Card key={job.id} className='py-4 md:py-6'>
+              <Card key={job.id} className="py-4 md:py-6">
                 <Link href={`job/${job.id}`}>
-                  <CardContent className='px-4 md:px-6'>
+                  <CardContent className="px-4 md:px-6">
                     <div className="flex justify-between">
                       <div className="mb-3 flex items-center gap-2 md:gap-4">
                         <Avatar className="size-12">
@@ -88,10 +88,14 @@ function AppliedJobs() {
                             src={job.company.profile_pic}
                             alt="profile"
                           />
-                          <AvatarFallback>{formatInitials(job.company.name)}</AvatarFallback>
+                          <AvatarFallback>
+                            {formatInitials(job.company.name)}
+                          </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-medium text-md">{company.name}</div>
+                          <div className="text-md font-medium">
+                            {company.name}
+                          </div>
                           <div className="text-sm text-neutral-500">
                             {company.address}
                           </div>
@@ -112,10 +116,16 @@ function AppliedJobs() {
                     <Text className="line-clamp-2 text-neutral-500">
                       {job.description}
                     </Text>
-                    <Text className="my-2 font-semibold">$ {job.ctc}k/year</Text>
+                    <Text className="my-2 font-semibold">
+                      $ {job.ctc}k/year
+                    </Text>
                     <Text className="space-x-1 text-neutral-500">
                       {job?.skills_required.map((el) => (
-                        <Badge key={el} variant={'outline'} className='rounded-xl border-primary text-primary bg-primary/10'>
+                        <Badge
+                          key={el}
+                          variant={'outline'}
+                          className="border-primary text-primary bg-primary/10 rounded-xl"
+                        >
                           {el}
                         </Badge>
                       ))}

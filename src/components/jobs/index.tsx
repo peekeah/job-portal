@@ -180,17 +180,16 @@ const Jobs = () => {
           {jobs?.map((job) => (
             <Card
               key={job.id}
-              className='cursor-pointer py-4 md:py-5'
+              className="cursor-pointer py-4 md:py-5"
               onClick={() => router.push(`dashboard/job/${job.id}`)}
             >
-              <CardContent className='px-4 md:px-6'>
+              <CardContent className="px-4 md:px-6">
                 <div className="mb-3 flex items-center gap-4">
                   <Avatar className="size-12">
-                    <AvatarImage
-                      src={job.company.profile_pic}
-                      alt="company"
-                    />
-                    <AvatarFallback>{formatInitials(job.company.name)}</AvatarFallback>
+                    <AvatarImage src={job.company.profile_pic} alt="company" />
+                    <AvatarFallback>
+                      {formatInitials(job.company.name)}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
                     <div className="font-medium">{job.company.name}</div>
@@ -206,9 +205,12 @@ const Jobs = () => {
 
                 <Text className="my-2 font-semibold">$ {job.ctc}k/year</Text>
                 <Text className="space-x-1 text-neutral-500">
-
                   {job?.skills_required.map((el) => (
-                    <Badge key={el} variant={'outline'} className='rounded-xl border-primary text-primary bg-primary/10'>
+                    <Badge
+                      key={el}
+                      variant={'outline'}
+                      className="border-primary text-primary bg-primary/10 rounded-xl"
+                    >
                       {el}
                     </Badge>
                   ))}

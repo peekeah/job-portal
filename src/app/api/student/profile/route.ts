@@ -36,6 +36,7 @@ async function postProfile(req: NextRequest) {
       name,
       mobile,
       bio,
+      location,
       profile_pic,
       college_name,
       college_branch,
@@ -51,6 +52,7 @@ async function postProfile(req: NextRequest) {
     const profileData = {
       ...(name && { name }),
       ...(mobile && { mobile }),
+      ...(location && { location }),
       ...(bio && { bio }),
       ...(profile_pic && { profile_pic }),
       ...(college_name && { college_name }),

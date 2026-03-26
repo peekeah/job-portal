@@ -5,7 +5,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import axios, { AxiosError } from 'axios';
 import { Card, CardContent } from '../ui/card';
-import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Upload } from 'lucide-react';
 import { fetcher } from '@/lib/fetcher';
 
@@ -22,13 +22,14 @@ import { useUploadThing } from '@/lib/uploadthing-client';
 import { formatInitials } from '@/lib/formater';
 import { Spinner } from '../ui/spinner';
 import { Badge } from '../ui/badge';
-import { IconCamera, IconDeviceFloppy, IconPencil, IconX } from '@tabler/icons-react';
+import { IconDeviceFloppy, IconPencil, IconX } from '@tabler/icons-react';
 
 const initialProfile: Profile = {
   id: '',
   name: '',
   email: '',
   mobile: '',
+  location: '',
   profile_pic: '',
   active_resume_id: '',
   college_name: '',
@@ -77,7 +78,11 @@ function StudentProfile() {
   const form = useForm<Profile>({
     resolver: zodResolver(profileSchema),
     defaultValues: initialProfile,
-    values: userData,
+    values: {
+      ...initialProfile,
+      ...userData,
+      active_resume_id: userData?.active_resume_id ?? '',
+    },
   });
 
   const toggleEdit = () => {
@@ -189,12 +194,12 @@ function StudentProfile() {
           <CardContent className="px-4 md:p-0">
             <div className="flex justify-center">
               <div className="mb-5 flex items-center gap-2 md:gap-3">
-                <div className='relative rounded-full'>
-                  <Avatar className='size-18 overflow-visible border'>
+                <div className="relative rounded-full">
+                  <Avatar className="size-18 overflow-visible border">
                     <AvatarImage
                       src={userData?.profile_pic ?? ''}
                       alt={userData?.name}
-                      className='rounded-full'
+                      className="rounded-full"
                     />
                     <AvatarFallback>
                       <span className="font-sans text-3xl font-bold">
@@ -203,11 +208,7 @@ function StudentProfile() {
                     </AvatarFallback>
                   </Avatar>
 
-                  <label className="absolute bottom-0 right-0
-        flex size-6 p-0.5 cursor-pointer items-center justify-center
-        rounded-full border border-primary bg-background shadow-sm
-        hover:bg-background/80 transition
-        z-10">
+                  <label className="border-primary bg-background hover:bg-background/80 absolute right-0 bottom-0 z-10 flex size-6 cursor-pointer items-center justify-center rounded-full border p-0.5 shadow-sm transition">
                     <input
                       type="file"
                       accept="image/*"
@@ -215,12 +216,12 @@ function StudentProfile() {
                       onChange={handleAvatarUpload}
                       disabled={isUploading}
                     />
-                    <span className='rounded-full'>
+                    <span className="rounded-full">
                       {isUploading ? (
                         <Spinner className="text-primary" />
                       ) : (
                         <>
-                          <IconPencil className='size-full text-primary ' />
+                          <IconPencil className="text-primary size-full" />
                         </>
                       )}
                     </span>
@@ -228,16 +229,20 @@ function StudentProfile() {
                 </div>
 
                 <div className="space-y-0.5">
-                  <div className="text-lg md:text-xl font-bold">{userData.name}</div>
-                  <span><Badge
-                    className='rounded-xl border-primary text-primary bg-primary/10'
-                  >Location</Badge></span>
+                  <div className="text-lg font-bold md:text-xl">
+                    {userData.name}
+                  </div>
+                  <span>
+                    <Badge className="border-primary text-primary bg-primary/10 rounded-xl">
+                      Location
+                    </Badge>
+                  </span>
                 </div>
               </div>
               <div className="mx-auto flex flex-1 justify-end pt-4">
                 {editContent ? (
                   <div className="space-x-3">
-                    <div className='space-x-3 hidden sm:block'>
+                    <div className="hidden space-x-3 sm:block">
                       <Button type="submit">Save</Button>
                       <Button
                         onClick={onCancel}
@@ -247,16 +252,18 @@ function StudentProfile() {
                         Cancel
                       </Button>
                     </div>
-                    <div className='space-x-1 sm:hidden'>
+                    <div className="space-x-1 sm:hidden">
                       <Button
                         type="submit"
                         size="icon-sm"
-                        className='rounded-full'
-                      ><IconDeviceFloppy /></Button>
+                        className="rounded-full"
+                      >
+                        <IconDeviceFloppy />
+                      </Button>
                       <Button
                         onClick={onCancel}
                         size="icon-sm"
-                        className='rounded-full'
+                        className="rounded-full"
                         type="button"
                         variant={'destructive'}
                       >
@@ -267,7 +274,7 @@ function StudentProfile() {
                 ) : (
                   <>
                     <Button
-                      className='hidden sm:block'
+                      className="hidden sm:block"
                       type="button"
                       onClick={toggleEdit}
                     >
@@ -277,7 +284,7 @@ function StudentProfile() {
                       type="button"
                       size="icon-sm"
                       onClick={toggleEdit}
-                      className='rounded-full sm:hidden'
+                      className="rounded-full sm:hidden"
                     >
                       <IconPencil />
                     </Button>
@@ -294,6 +301,7 @@ function StudentProfile() {
                     {...field}
                     label="Name"
                     aria-invalid={invalid}
+                    value={field.value ?? ''}
                     placeholder="Name"
                     disabled={!editContent}
                     error={error ? error.message : ''}
@@ -309,6 +317,23 @@ function StudentProfile() {
                     label="Contact"
                     aria-invalid={invalid}
                     placeholder="Contact"
+                    value={field.value ?? ''}
+                    disabled={!editContent}
+                    error={error ? error.message : ''}
+                  />
+                )}
+              />
+
+              <Controller
+                name="location"
+                control={form.control}
+                render={({ field, fieldState: { error, invalid } }) => (
+                  <Input
+                    {...field}
+                    label="Location"
+                    aria-invalid={invalid}
+                    placeholder="Location"
+                    value={field.value ?? ''}
                     disabled={!editContent}
                     error={error ? error.message : ''}
                   />
@@ -323,6 +348,7 @@ function StudentProfile() {
                     label="College Name"
                     aria-invalid={invalid}
                     placeholder="College Name"
+                    value={field.value ?? ''}
                     disabled={!editContent}
                     error={error ? error.message : ''}
                   />
@@ -337,6 +363,7 @@ function StudentProfile() {
                     label="College Branch"
                     aria-invalid={invalid}
                     placeholder="College Branch"
+                    value={field.value ?? ''}
                     disabled={!editContent}
                     error={error ? error.message : ''}
                   />
@@ -350,6 +377,7 @@ function StudentProfile() {
                     {...field}
                     label="College Joining Year"
                     aria-invalid={invalid}
+                    value={field.value ?? ''}
                     placeholder="College Joining Year"
                     disabled={!editContent}
                     error={error ? error.message : ''}

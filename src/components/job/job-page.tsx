@@ -1,13 +1,6 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import {
-  MapPin,
-  Briefcase,
-  DollarSign,
-  Building2,
-  BookmarkPlus,
-  Share2,
-} from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 import useSWR from 'swr';
 import z from 'zod';
 import { companySchema, jobSchema } from '@/lib/schema';
@@ -26,7 +19,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { formatInitials } from '@/lib/formater';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
-import { IconBriefcase, IconBuilding, IconGlobe, IconMapPin, IconWorld } from '@tabler/icons-react';
+import {
+  IconBriefcase,
+  IconBuilding,
+  IconMapPin,
+  IconWorld,
+} from '@tabler/icons-react';
 
 type Job = z.infer<typeof jobSchema> & {
   id: string;
@@ -75,7 +73,6 @@ const applyJobApiCall = async (
   }
 };
 
-
 const formatCompanySize = (size: string) => {
   return `${companySizeMap.get(size)} ` + `employees`;
 };
@@ -119,30 +116,36 @@ type CompanyMetadataProps = {
   companyType: string;
   companySize: string;
   className?: string;
-}
+};
 
-const CompanyMetadata = ({ location, companyType, companySize, className }: CompanyMetadataProps) => {
+const CompanyMetadata = ({
+  location,
+  companyType,
+  companySize,
+  className,
+}: CompanyMetadataProps) => {
   return (
-    <div className={cn("hidden md:flex flex-wrap items-center gap-2 text-xs sm:gap-4 sm:text-sm", className)}>
+    <div
+      className={cn(
+        'hidden flex-wrap items-center gap-2 text-xs sm:gap-4 sm:text-sm md:flex',
+        className,
+      )}
+    >
       <div className="flex items-center gap-0.5 text-gray-600 sm:gap-1.5">
-        <IconMapPin className="size-3 text-primary" />
+        <IconMapPin className="text-primary size-3" />
         <span className="truncate">{location}</span>
       </div>
       <div className="flex items-center gap-0.5 text-gray-600 sm:gap-1.5">
         <IconBuilding className="text-primary size-3" />
-        <span className="truncate">
-          {companyType}
-        </span>
+        <span className="truncate">{companyType}</span>
       </div>
       <div className="flex items-center gap-1 text-gray-600 sm:gap-1.5">
-        <IconBriefcase className="size-3 text-primary" />
-        <span className="truncate">
-          {formatCompanySize(companySize)}
-        </span>
+        <IconBriefcase className="text-primary size-3" />
+        <span className="truncate">{formatCompanySize(companySize)}</span>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export function JobDetails() {
   const { trigger: handleApplyJob, isMutating: applying } = useSWRMutation(
@@ -208,11 +211,11 @@ export function JobDetails() {
       {jobData ? (
         <div className="flex min-h-screen px-3 py-4 sm:px-4 sm:py-8 lg:px-6 lg:py-12">
           <div className="w-full max-w-4xl">
-            <Card className='sm:py-0'>
-              <div className='space-y-4 sm:space-y-0'>
-                <div className="space-y-4 px-4 md:py-6 sm:space-y-6 sm:px-6 sm:pb-8">
+            <Card className="sm:py-0">
+              <div className="space-y-4 sm:space-y-0">
+                <div className="space-y-4 px-4 sm:space-y-6 sm:px-6 sm:pb-8 md:py-6">
                   <div className="flex flex-col items-start justify-between gap-1 sm:flex-row">
-                    <div className="flex items-center w-full gap-3 sm:w-auto sm:gap-5">
+                    <div className="flex w-full items-center gap-3 sm:w-auto sm:gap-5">
                       <div className="relative shrink-0">
                         <Avatar className="size-16 md:size-24">
                           <AvatarImage
@@ -220,16 +223,18 @@ export function JobDetails() {
                             alt={jobData.company?.name}
                           />
                           <AvatarFallback>
-                            <span className="font-sans text-3xl md:text-5xl font-bold">
-                              {formatInitials((jobData.company?.name as string) || '')}
+                            <span className="font-sans text-3xl font-bold md:text-5xl">
+                              {formatInitials(
+                                (jobData.company?.name as string) || '',
+                              )}
                             </span>
                           </AvatarFallback>
                         </Avatar>
                       </div>
                       <div className="min-w-0 flex-1 sm:space-y-1">
                         <div className="flex flex-wrap items-center gap-1 text-xs text-gray-600 sm:gap-2 sm:text-sm">
-                          <IconBuilding className="size-3.5 text-primary" />
-                          <span className="truncate font-semibold sm:text-lg text-gray-900">
+                          <IconBuilding className="text-primary size-3.5" />
+                          <span className="truncate font-semibold text-gray-900 sm:text-lg">
                             {jobData.company.name}
                           </span>
                           <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-green-700 sm:py-1">
@@ -240,7 +245,7 @@ export function JobDetails() {
                           location={jobData.company.address}
                           companyType={jobData.company.company_type}
                           companySize={jobData.company.size!}
-                          className='hidden md:flex'
+                          className="hidden md:flex"
                         />
                       </div>
                     </div>
@@ -248,7 +253,7 @@ export function JobDetails() {
                       location={jobData.company.address}
                       companyType={jobData.company.company_type}
                       companySize={jobData.company.size!}
-                      className='flex md:hidden mt-1'
+                      className="mt-1 flex md:hidden"
                     />
                   </div>
                 </div>
@@ -256,7 +261,7 @@ export function JobDetails() {
                 {/* Content */}
                 <div className="space-y-6 px-4 pb-6 sm:space-y-8 sm:px-6 sm:pb-8">
                   {/* CTC Card */}
-                  <div className='space-y-1.5'>
+                  <div className="space-y-1.5">
                     <h1 className="bg-linear-to-r from-slate-900 to-slate-700 bg-clip-text text-2xl leading-tight font-bold text-transparent sm:text-3xl">
                       {jobData.job_role}
                     </h1>
@@ -349,12 +354,12 @@ export function JobDetails() {
 
                     {jobData.company.website && (
                       <div className="flex items-center gap-1 text-xs text-gray-600 sm:text-sm">
-                        <IconWorld className='text-primary size-4' />
+                        <IconWorld className="text-primary size-4" />
                         <a
                           href={jobData.company.website}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="break-all text-primary hover:underline"
+                          className="text-primary break-all hover:underline"
                         >
                           {jobData.company.website}
                         </a>
@@ -372,7 +377,11 @@ export function JobDetails() {
 
                     <div className="flex flex-wrap gap-2 sm:gap-3">
                       {jobData.skills_required.map((skill, index) => (
-                        <Badge key={skill + index} variant={'outline'} className='rounded-xl border-primary text-primary bg-primary/10'>
+                        <Badge
+                          key={skill + index}
+                          variant={'outline'}
+                          className="border-primary text-primary bg-primary/10 rounded-xl"
+                        >
                           {skill}
                         </Badge>
                       ))}

@@ -81,6 +81,7 @@ model Applicant {
   id                   String  @id @default(uuid())
   name                 String
   mobile               String?
+  location             String?
   email                String  @unique
   profile_pic          String?
   bio                  String?
