@@ -23,6 +23,7 @@ import { toast } from 'sonner';
 import { formatInitials } from '@/lib/formater';
 import { useUploadThing } from '@/lib/uploadthing-client';
 import { Spinner } from '../ui/spinner';
+import { IconDeviceFloppy, IconPencil, IconX } from '@tabler/icons-react';
 
 const profileSchema = z
   .object({
@@ -137,85 +138,111 @@ export default function CompanyProfile() {
         <h1 className="text-2xl font-semibold">Company Profile</h1>
       </div>
       <div className="mt-5 max-w-4xl space-y-5">
-        <Card>
-          <CardContent>
+        <Card className="py-4 sm:py-5 lg:py-6">
+          <CardContent className="px-4 sm:px-5 lg:px-6">
             <div className="flex">
-              <div className="mb-3 flex items-center gap-4">
-                <Avatar className="size-28">
-                  <AvatarImage
-                    src={company?.profile_pic ?? ''}
-                    alt={company?.name}
-                  />
-                  <AvatarFallback>
-                    <span className="font-sans text-5xl font-bold">
-                      {formatInitials((company?.name as string) || '')}
-                    </span>
-                  </AvatarFallback>
-                </Avatar>
+              <div className="mb-3 flex items-center gap-2 sm:gap-3 lg:gap-4">
+                <div className="relative">
+                  <Avatar className="size-16 border lg:size-20">
+                    <AvatarImage
+                      src={company?.profile_pic ?? ''}
+                      alt={company?.name}
+                    />
+                    <AvatarFallback>
+                      <span className="font-sans text-xl font-bold lg:text-5xl">
+                        {formatInitials((company?.name as string) || '')}
+                      </span>
+                    </AvatarFallback>
+                  </Avatar>
 
-                <div className="space-y-2">
-                  <div className="text-2xl font-bold">{company?.name}</div>
-                  <div className="space-x-2 font-medium">
-                    <Badge
-                      variant={'outline'}
-                      className="rounded-full px-2 py-1 font-semibold"
-                    >
+                  <label className="border-primary bg-background hover:bg-background/80 absolute right-0 bottom-0 z-10 flex size-6 cursor-pointer items-center justify-center rounded-full border p-0.5 shadow-sm transition">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarUpload}
+                      disabled={isUploading}
+                    />
+                    <span className="rounded-full">
+                      {isUploading ? (
+                        <Spinner className="text-primary" />
+                      ) : (
+                        <>
+                          <IconPencil className="text-primary size-full" />
+                        </>
+                      )}
+                    </span>
+                  </label>
+                </div>
+
+                <div className="space-y-0.5">
+                  <div className="text-lg font-bold lg:text-xl">
+                    {company?.name}
+                  </div>
+                  <div className="flex gap-2 font-medium">
+                    <Badge className="border-primary text-primary bg-primary/10 rounded-xl">
                       {company?.company_type}
                     </Badge>
-                    <Badge
-                      variant={'outline'}
-                      className="rounded-full px-2 py-1 font-semibold"
-                    >
-                      {companySizeMap.get(company?.size || '') || '0'} employees
+                    <Badge className="border-primary text-primary bg-primary/10 hidden rounded-xl sm:block">
+                      {companySizeMap.get(company?.size || '') || '0'}
                     </Badge>
-                    <Badge
-                      variant={'outline'}
-                      className="rounded-full px-2 py-1 font-semibold"
-                    >
+                    <Badge className="border-primary text-primary bg-primary/10 hidden rounded-xl sm:block">
                       Founded {company?.founding_year}
                     </Badge>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="cursor-pointer">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleAvatarUpload}
-                        disabled={isUploading}
-                      />
-                      <Button type="button" asChild>
-                        <span>
-                          {isUploading ? (
-                            <span className="flex items-center gap-1.5">
-                              <Spinner className="text-white" /> Loading
-                            </span>
-                          ) : (
-                            'Change Logo'
-                          )}
-                        </span>
-                      </Button>
-                    </label>
                   </div>
                 </div>
               </div>
 
               <div className="mx-auto flex flex-1 justify-end py-4">
                 {editContent ? (
-                  <div className="space-x-3">
-                    <Button type="submit">Save</Button>
+                  <>
+                    <div className="hidden space-x-3 sm:block">
+                      <Button type="submit">Save</Button>
+                      <Button
+                        type="button"
+                        onClick={onCancelChanges}
+                        variant={'destructive'}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                    <div className="space-x-1 sm:hidden">
+                      <Button
+                        type="submit"
+                        size="icon-sm"
+                        className="rounded-full"
+                      >
+                        <IconDeviceFloppy />
+                      </Button>
+                      <Button
+                        onClick={onCancelChanges}
+                        size="icon-sm"
+                        className="rounded-full"
+                        type="button"
+                        variant={'destructive'}
+                      >
+                        <IconX />
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      className="hidden sm:block"
+                      type="button"
+                      onClick={toggleEdit}
+                    >
+                      Edit
+                    </Button>
                     <Button
                       type="button"
-                      onClick={onCancelChanges}
-                      variant={'destructive'}
+                      size="icon-sm"
+                      onClick={toggleEdit}
+                      className="rounded-full sm:hidden"
                     >
-                      Cancel
+                      <IconPencil />
                     </Button>
-                  </div>
-                ) : (
-                  <Button type="button" onClick={toggleEdit}>
-                    Edit
-                  </Button>
+                  </>
                 )}
               </div>
             </div>
@@ -241,8 +268,8 @@ export default function CompanyProfile() {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent>
+        <Card className="py-4 sm:py-5 lg:py-6">
+          <CardContent className="px-4 sm:px-5 lg:px-6">
             <Heading variant="h4" className="mb-3">
               Contact Information
             </Heading>
@@ -293,8 +320,9 @@ export default function CompanyProfile() {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent>
+        <Card className="py-4 sm:py-5 lg:py-6">
+          <CardContent className="px-4 sm:px-5 lg:px-6">
+            <div className="flex"></div>
             <Heading variant="h4" className="mb-3">
               Social Media
             </Heading>
@@ -333,8 +361,9 @@ export default function CompanyProfile() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent>
+        <Card className="py-4 sm:py-5 lg:py-6">
+          <CardContent className="px-4 sm:px-5 lg:px-6">
+            <div className="flex"></div>
             <Heading variant="h4" className="mb-3">
               Company Details
             </Heading>

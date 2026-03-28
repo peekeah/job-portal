@@ -28,7 +28,7 @@ const PostedJobs = () => {
   }
 
   return (
-    <div className="h-full w-full p-5 sm:p-7 md:px-10 lg:px-5">
+    <div className="mb-5 p-5 sm:p-7 md:px-10 lg:px-5">
       <Text className="text-2xl font-semibold text-gray-800">Posted Jobs</Text>
       <div>
         {isLoading ? (
@@ -37,7 +37,7 @@ const PostedJobs = () => {
             <span className="ml-2 text-gray-500">Loading...</span>
           </div>
         ) : jobs && jobs?.length > 0 ? (
-          <div className="mt-5 grid min-h-44 w-full grid-cols-2 gap-5">
+          <div className="mt-2 grid w-full gap-5 lg:mt-5 lg:grid-cols-2">
             {jobs.map((job) => {
               return (
                 <Card key={job.id}>

@@ -2,7 +2,7 @@
 import axios, { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
 
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -98,14 +98,17 @@ export default function PostJob() {
   };
 
   return (
-    <div className="h-full w-full p-5 sm:p-7 md:px-10 lg:px-5">
+    <div className="w-full p-5 sm:p-7 md:px-10 lg:px-5">
       <Text className="text-2xl font-semibold">Post Job</Text>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className="bg-muted/10 mx-10 my-5 mt-24 flex justify-center"
+        className="bg-muted/10 my-3 flex justify-center sm:mt-18 lg:mx-10 lg:mt-24"
       >
-        <Card className="w-full max-w-3xl min-w-2xl px-2 py-10 shadow-sm">
-          <CardContent className="space-y-5">
+        <Card className="w-full max-w-3xl gap-2 py-5 shadow-sm lg:min-w-2xl lg:gap-5 lg:py-6">
+          <CardHeader className="text-center text-lg font-bold">
+            Job Detail
+          </CardHeader>
+          <CardContent className="space-y-5 px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Controller
                 name="job_role"

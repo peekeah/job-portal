@@ -36,7 +36,7 @@ const studentNavLinks: Navlink[] = [
 const companyNavLinks: Navlink[] = [
   { title: 'Dashboard', href: '/', icon: <IconLayoutDashboard size={17} /> },
   {
-    title: 'Posted Jobs',
+    title: 'Post Job',
     href: '/post-job',
     icon: <IconBriefcase size={17} />,
   },
