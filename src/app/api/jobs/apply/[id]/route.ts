@@ -48,10 +48,12 @@ export async function POST(
       throw new CustomError('You already applied for this job', 403);
     }
 
+    const whereClause = studentData.active_resume_id
+      ? { id: studentData.active_resume_id, applicant_id: studentData.id }
+      : { applicant_id: studentData.id };
+
     const dbRes = await prisma.resume.findFirst({
-      where: {
-        applicant_id: studentData.id,
-      },
+      where: whereClause,
     });
 
     if (!dbRes) {

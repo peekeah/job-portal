@@ -21,26 +21,20 @@ async function deleteResume(
     });
 
     if (!student) {
-      throw new CustomError('Unauthoriaed', 409);
+      throw new CustomError('Unauthorized', 401);
     }
 
-    const whereQuery = student.active_resume_id
-      ? { id: student.active_resume_id }
-      : { applicant_id: student.id };
-
     const resume = await prisma.resume.findFirst({
-      where: whereQuery,
-      orderBy: { created_at: 'desc' },
+      where: { id: resumeId, applicant_id: student.id },
       include: {
         _count: {
-          select: { appliedJobs: true }, // check if resume is used in any applications
+          select: { appliedJobs: true },
         },
       },
     });
 
     if (!resume) throw new CustomError('Resume not found', 404);
 
-    // Block deletion if resume is linked to any job applications
     if (resume._count.appliedJobs > 0) {
       throw new CustomError(
         'Cannot delete resume that has been used for job applications',
@@ -48,17 +42,34 @@ async function deleteResume(
       );
     }
 
+    // Fetch remaining resumes before deletion (excluding the one being deleted)
+    const remainingResumes = await prisma.resume.findMany({
+      where: {
+        applicant_id: student.id,
+        id: { not: resumeId },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+
+    // Delete file from UploadThing if it exists
     if (resume.url) {
       const fileKey = resume.url.split('/f/')[1];
       if (fileKey) await utapi.deleteFiles(fileKey);
     }
 
-    await prisma.resume.delete({
-      where: {
-        id: resumeId,
-        applicant_id: student.id,
-      },
-    });
+    // Delete resume and update active_resume_id atomically
+    await prisma.$transaction([
+      prisma.resume.delete({
+        where: {
+          id: resumeId,
+          applicant_id: student.id,
+        },
+      }),
+      prisma.applicant.update({
+        where: { id: student.id },
+        data: { active_resume_id: remainingResumes[0]?.id ?? null },
+      }),
+    ]);
 
     return NextResponse.json(
       { status: true, data: 'successfully deleted resume' },
