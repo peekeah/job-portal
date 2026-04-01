@@ -58,7 +58,6 @@ async function postProfile(req: NextRequest) {
       ...(college_name && { college_name }),
       ...(college_branch && { college_branch }),
       ...(college_joining_year && { college_joining_year }),
-      ...(hashedPassword && { password: hashedPassword }),
       ...(profile_pic && { profile_pic }),
     };
 
@@ -68,6 +67,13 @@ async function postProfile(req: NextRequest) {
       },
       data: profileData,
     });
+
+    if (hashedPassword) {
+      await prisma.auth.update({
+        where: { id: token.id },
+        data: { password: hashedPassword },
+      });
+    }
 
     return NextResponse.json({ status: true, data: updated });
   } catch (err) {

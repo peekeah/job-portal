@@ -5,7 +5,9 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        hostname: 'ik.imagekit.io',
+        protocol: 'https',
+        hostname: 'ufs.sh',
+        pathname: '/f/*',
       },
     ],
   },
