@@ -82,8 +82,8 @@ export default function EnhancedJobPreviewModal({
           <DialogTitle className="mx-auto text-3xl">Resume Preview</DialogTitle>
         </DialogHeader>
         {isEnhancing || !editedResume ? (
-          <div className="flex justify-center">
-            <Spinner />
+          <div className="mt-52 flex justify-center">
+            <Spinner className='size-8' />
           </div>
         ) : (
           <>

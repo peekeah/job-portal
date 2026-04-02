@@ -10,13 +10,14 @@ import { Spinner } from '../ui/spinner';
 import { Heading, Text } from '../ui/typography';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
-import { useState } from 'react';
+import { MouseEvent, useState } from 'react';
 import useSWRMutation from 'swr/mutation';
 import { useRouter } from 'next/navigation';
 import { Resume } from '@/mock/resume';
 import EnhancedJobPreviewModal from '../enhanced-preview-modal';
 import { toast } from 'sonner';
 import { formatInitials } from '@/lib/formater';
+import { Profile } from '../student-profile/schema';
 
 export type Job = {
   id: string;
@@ -106,6 +107,11 @@ const Jobs = () => {
     applyJobWithEditsApiCall,
   );
 
+  const { data: applicantProfile } = useSWR<{ data: Profile }>(
+    '/api/student/profile',
+    fetcher,
+  );
+
   const {
     data: enhancedResume,
     trigger: getEnhancededitedResumeAction,
@@ -118,11 +124,33 @@ const Jobs = () => {
     error,
     isLoading,
   } = useSWR<Response>('/api/jobs', fetcher);
+
   const jobs = resData?.data;
 
   const router = useRouter();
   const { mutate } = useSWRConfig();
   const [enahncePreviewJobId, setEnahancePreviewJobId] = useState<string>('');
+
+  const onJobApply = async (e: MouseEvent, jobId: string) => {
+    e.stopPropagation();
+    if (applicantProfile?.data.active_resume_id) {
+      handleApplyJob({ jobId })
+    } else {
+      toast.error("upload resume first");
+      router.push("/dashboard/profile") // redirect to settings
+    }
+  }
+
+  const onEnahanceAndApply = (e: MouseEvent, jobId: string) => {
+    e.stopPropagation();
+    if (applicantProfile?.data.active_resume_id) {
+      setEnahancePreviewJobId(jobId);
+      getEnhancededitedResumeAction(jobId);
+    } else {
+      toast.error("upload resume first");
+      router.push("/dashboard/profile") // redirect to settings
+    }
+  }
 
   if (error || (!isLoading && !resData)) {
     return (
@@ -171,7 +199,7 @@ const Jobs = () => {
         Jobs
       </CardTitle>
       {isLoading ? (
-        <div className="mt-32 flex items-center justify-center py-10">
+        <div className="mt-52 h-full flex justify-center py-10">
           <Spinner className="h-6 w-6 animate-spin text-gray-500" />
           <span className="ml-2 text-gray-500">Loading...</span>
         </div>
@@ -216,14 +244,11 @@ const Jobs = () => {
                   ))}
                 </Text>
                 <div className="mt-4 space-x-3">
-                  <Button onClick={() => handleApplyJob({ jobId: job.id })}>
+                  <Button onClick={(e) => onJobApply(e, job.id)}>
                     Apply
                   </Button>
                   <Button
-                    onClick={() => {
-                      setEnahancePreviewJobId(job.id);
-                      getEnhancededitedResumeAction(job.id);
-                    }}
+                    onClick={(e) => onEnahanceAndApply(e, job.id)}
                     variant={'outline'}
                   >
                     Enhance & apply

@@ -6,7 +6,7 @@ import z from 'zod';
 import { companySchema, jobSchema } from '@/lib/schema';
 import { fetcher } from '@/lib/fetcher';
 import { companySizeMap } from '@/components/company-profile/page';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import axios, { AxiosError } from 'axios';
 import { useState } from 'react';
 import useSWRMutation from 'swr/mutation';
@@ -25,6 +25,7 @@ import {
   IconMapPin,
   IconWorld,
 } from '@tabler/icons-react';
+import { Profile } from '../student-profile/schema';
 
 type Job = z.infer<typeof jobSchema> & {
   id: string;
@@ -167,7 +168,13 @@ export function JobDetails() {
 
   const [enhancePreviewJobId, setEnhancePreviewJobId] = useState<string>('');
 
+  const router = useRouter();
   const { jobId } = useParams<{ jobId: string }>();
+
+  const { data: applicantProfile } = useSWR<{ data: Profile }>(
+    '/api/student/profile',
+    fetcher,
+  );
 
   const { data: jobRes, isLoading } = useSWR<{ data: Job }>(
     `/api/jobs/${jobId}`,
@@ -193,13 +200,32 @@ export function JobDetails() {
     }
   };
 
+  const onJobApply = (jobId: string) => {
+    if (applicantProfile?.data.active_resume_id) {
+      handleApplyJob({ jobId })
+    } else {
+      toast.error("upload resume first");
+      router.push("/dashboard/profile") // redirect to settings
+    }
+  }
+
+  const onEnhanceAndApply = (jobId: string) => {
+    if (applicantProfile?.data.active_resume_id) {
+      getEnhancededitedResumeAction(jobId);
+      setEnhancePreviewJobId(jobId);
+    } else {
+      toast.error("upload resume first");
+      router.push("/dashboard/profile") // redirect to settings
+    }
+  }
+
   if (error) {
     setEnhancePreviewJobId('');
   }
 
   if (isLoading) {
     return (
-      <div className="mt-72 flex items-center justify-center py-10">
+      <div className="mt-72 size-full flex center justify-center py-10">
         <Spinner className="h-6 w-6 animate-spin text-gray-500" />
         <span className="ml-2 text-gray-500">Loading...</span>
       </div>
@@ -285,16 +311,13 @@ export function JobDetails() {
                       <div className="space-x-3">
                         <Button
                           className="lg:text-md bg-white font-semibold text-blue-600 transition-colors hover:bg-blue-50 lg:p-5"
-                          onClick={() => handleApplyJob({ jobId: jobData?.id })}
+                          onClick={() => onJobApply(jobData.id)}
                         >
                           Apply
                         </Button>
                         <Button
                           className="lg:text-md bg-white font-semibold text-blue-600 transition-colors hover:bg-blue-50 lg:p-5"
-                          onClick={() => {
-                            getEnhancededitedResumeAction(jobData.id);
-                            setEnhancePreviewJobId(jobData.id);
-                          }}
+                          onClick={() => onEnhanceAndApply(jobData.id)}
                         >
                           Enhance & Apply
                         </Button>
