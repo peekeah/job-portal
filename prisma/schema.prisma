@@ -1,11 +1,13 @@
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  extensions = [vector]
 }
 
 // =========================
@@ -112,9 +114,10 @@ model Resume {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  applicant   Applicant   @relation("ApplicantResumes", fields: [applicant_id], references: [id])
-  active_for  Applicant[] @relation("ActiveResume")
+  applicant   Applicant        @relation("ApplicantResumes", fields: [applicant_id], references: [id])
+  active_for  Applicant[]      @relation("ActiveResume")
   appliedJobs AppliedJob[]
+  embedding   ResumeEmbedding?
 }
 
 // =========================
@@ -136,6 +139,32 @@ model AppliedJob {
 }
 
 // =========================
+// RESUME EMBEDDING MODEL
+// =========================
+model ResumeEmbedding {
+  id          String   @id @default(uuid())
+  resume_id   String   @unique
+  embedding   Unsupported("vector(1536)")  // Vector embedding using pgvector
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  resume Resume @relation(fields: [resume_id], references: [id], onDelete: Cascade)
+}
+
+// =========================
+// JOB EMBEDDING MODEL
+// =========================
+model JobEmbedding {
+  id          String   @id @default(uuid())
+  job_id      String   @unique
+  embedding   Unsupported("vector(1536)")  // Vector embedding using pgvector
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  job Job @relation(fields: [job_id], references: [id], onDelete: Cascade)
+}
+
+// =========================
 // JOB MODEL
 // =========================
 model Job {
@@ -153,4 +182,5 @@ model Job {
 
   company      Company      @relation(fields: [company_id], references: [id])
   applied_jobs AppliedJob[]
+  embedding     JobEmbedding?
 }

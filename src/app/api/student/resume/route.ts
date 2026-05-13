@@ -3,6 +3,9 @@ import { errorHandler, CustomError } from '@/lib/errorHandler';
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
 import { UTApi } from 'uploadthing/server';
+import { parseResumeFromPdf } from '@/lib/resume-parser';
+import { generateResumeEmbedding } from '@/lib/embeddings';
+import { vectorStorage } from '@/lib/vector-storage';
 
 const utapi = new UTApi();
 
@@ -45,24 +48,56 @@ async function postResume(req: NextRequest) {
 
     const filename = `${student.id}-${Date.now()}-${file.name}`;
 
-    const newResume = await prisma.resume.create({
-      data: {
-        title: filename,
-        type: 'pdf',
-        url: response.data.ufsUrl,
-        applicant_id: student.id,
-      },
+    // Use transaction to ensure atomicity: upload -> parse -> embed -> commit
+    const result = await prisma.$transaction(async (tx) => {
+      // Create resume record
+      const newResume = await tx.resume.create({
+        data: {
+          title: filename,
+          type: 'pdf',
+          url: response.data.ufsUrl,
+          applicant_id: student.id,
+        },
+      });
+
+      // Parse resume PDF to extract structured content
+      let parsedResume;
+      try {
+        parsedResume = await parseResumeFromPdf(response.data.ufsUrl);
+      } catch (parseError) {
+        throw new CustomError('Failed to parse resume PDF', 500);
+      }
+
+      // Store parsed JSON in resume record
+      await tx.resume.update({
+        where: { id: newResume.id },
+        data: { json: parsedResume as any },
+      });
+
+      // Generate embeddings from parsed content
+      let embedding;
+      try {
+        embedding = await generateResumeEmbedding(parsedResume);
+      } catch (embeddingError) {
+        throw new CustomError('Failed to generate resume embeddings', 500);
+      }
+
+      // Store embeddings using vector storage abstraction
+      await vectorStorage.storeResumeEmbedding(newResume.id, embedding, tx);
+
+      // Update applicant's active resume if needed
+      if (!student.active_resume_id) {
+        await tx.applicant.update({
+          where: { id: student.id },
+          data: { active_resume_id: newResume.id },
+        });
+      }
+
+      return newResume;
     });
 
-    if (!student.active_resume_id) {
-      await prisma.applicant.update({
-        where: { id: student.id },
-        data: { active_resume_id: newResume.id },
-      });
-    }
-
     return NextResponse.json(
-      { status: true, data: newResume },
+      { status: true, data: result },
       { status: 200 },
     );
   } catch (err) {
