@@ -83,7 +83,7 @@ export default function EnhancedJobPreviewModal({
         </DialogHeader>
         {isEnhancing || !editedResume ? (
           <div className="mt-52 flex justify-center">
-            <Spinner className='size-8' />
+            <Spinner className="size-8" />
           </div>
         ) : (
           <>

@@ -1,3 +1,13 @@
+import type { Prisma } from '@prisma/client';
+
+type JobWithCompany = Prisma.JobGetPayload<{
+  include: { company: true };
+}>;
+
+type ResumeWithApplicant = Prisma.ResumeGetPayload<{
+  include: { applicant: true };
+}>;
+
 /**
  * Calculate cosine similarity between two vectors (fallback for non-pgvector operations)
  */
@@ -29,15 +39,18 @@ export function cosineSimilarity(vectorA: number[], vectorB: number[]): number {
 export async function findSimilarJobs(
   resumeEmbedding: number[],
   maxResults: number = 10,
-  minSimilarity: number = 0.5
-): Promise<Array<{ job: any; similarity: number }>> {
+  minSimilarity: number = 0.5,
+): Promise<Array<{ job: JobWithCompany; similarity: number }>> {
   // Use the pgvector storage implementation for efficient similarity search
   const { vectorStorage } = await import('./vector-storage');
-  
-  const similarJobs = await vectorStorage.findSimilarJobs(resumeEmbedding, maxResults);
-  
+
+  const similarJobs = await vectorStorage.findSimilarJobs(
+    resumeEmbedding,
+    maxResults,
+  );
+
   // Filter by minimum similarity threshold
-  return similarJobs.filter(item => item.similarity >= minSimilarity);
+  return similarJobs.filter((item) => item.similarity >= minSimilarity);
 }
 
 /**
@@ -46,13 +59,16 @@ export async function findSimilarJobs(
 export async function findSimilarResumes(
   jobEmbedding: number[],
   maxResults: number = 10,
-  minSimilarity: number = 0.5
-): Promise<Array<{ resume: any; similarity: number }>> {
+  minSimilarity: number = 0.5,
+): Promise<Array<{ resume: ResumeWithApplicant; similarity: number }>> {
   // Use the pgvector storage implementation for efficient similarity search
   const { vectorStorage } = await import('./vector-storage');
-  
-  const similarResumes = await vectorStorage.findSimilarResumes(jobEmbedding, maxResults);
-  
+
+  const similarResumes = await vectorStorage.findSimilarResumes(
+    jobEmbedding,
+    maxResults,
+  );
+
   // Filter by minimum similarity threshold
-  return similarResumes.filter(item => item.similarity >= minSimilarity);
+  return similarResumes.filter((item) => item.similarity >= minSimilarity);
 }

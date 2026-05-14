@@ -3,6 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { errorHandler, CustomError } from '@/lib/errorHandler';
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
+import {
+  calculateJobMatchScore,
+  getApplicantResumeEmbedding,
+} from '@/lib/match-score';
 
 export async function POST(
   req: NextRequest,
@@ -48,9 +52,16 @@ export async function POST(
       throw new CustomError('You already applied for this job', 403);
     }
 
-    const whereClause = studentData.active_resume_id
-      ? { id: studentData.active_resume_id, applicant_id: studentData.id }
-      : { applicant_id: studentData.id };
+    const resumeMatchSource = await getApplicantResumeEmbedding(
+      studentData.id,
+      studentData.active_resume_id,
+    );
+
+    const whereClause = resumeMatchSource
+      ? { id: resumeMatchSource.resumeId, applicant_id: studentData.id }
+      : studentData.active_resume_id
+        ? { id: studentData.active_resume_id, applicant_id: studentData.id }
+        : { applicant_id: studentData.id };
 
     const dbRes = await prisma.resume.findFirst({
       where: whereClause,
@@ -60,12 +71,15 @@ export async function POST(
       throw new CustomError('upload resume first', 400);
     }
 
+    const matchScore = await calculateJobMatchScore(dbRes.id, jobId);
+
     await prisma.appliedJob.create({
       data: {
         status: 'applied',
         applicant_id: studentData.id,
         jobId,
         applied_resume_id: dbRes.id,
+        match_score: matchScore,
       },
     });
 

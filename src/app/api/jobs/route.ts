@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
@@ -6,22 +7,36 @@ import { errorHandler, CustomError } from '@/lib/errorHandler';
 import { jobSchema } from '@/lib/schema';
 import { generateJobEmbedding } from '@/lib/embeddings';
 import { vectorStorage } from '@/lib/vector-storage';
-import { cosineSimilarity } from '@/lib/cosine-similarity';
+import {
+  calculateJobMatchScoreFromResumeEmbedding,
+  getApplicantResumeEmbedding,
+} from '@/lib/match-score';
+
+type JobWithCompany = Prisma.JobGetPayload<{
+  include: { company: true };
+}>;
+
+type JobWithMatchScore = JobWithCompany & {
+  embedding: null;
+  matchScore: number;
+  hasJobEmbedding?: boolean;
+  hasResumeEmbedding?: boolean;
+  matchedResumeId?: string | null;
+};
 
 export async function GET(req: NextRequest) {
   try {
     const token = await authMiddleware(req);
 
-    let jobs;
+    let jobs: JobWithCompany[] | JobWithMatchScore[];
     if (token.user_type === 'applicant') {
       const applicant = await prisma.applicant.findFirstOrThrow({
         where: { email: token.email },
       });
 
-      jobs = await prisma.job.findMany({
+      const availableJobs = await prisma.job.findMany({
         include: {
           company: true,
-          embedding: true,
         },
         where: {
           NOT: {
@@ -34,55 +49,44 @@ export async function GET(req: NextRequest) {
         },
       });
 
-      // Get applicant's active resume embedding for matching
-      const activeResume = (await prisma.resume.findFirst({
-        where: {
-          applicant_id: applicant.id,
-          ...(applicant.active_resume_id && { id: applicant.active_resume_id }),
-        },
-        include: { embedding: true },
-      })) as any;
+      const resumeMatchSource = await getApplicantResumeEmbedding(
+        applicant.id,
+        applicant.active_resume_id,
+      );
 
-      if (activeResume?.embedding && activeResume.embedding.embedding) {
+      if (resumeMatchSource) {
         // Calculate cosine similarity for each job
-        const resumeEmbedding: number[] = JSON.parse(
-          activeResume.embedding.embedding
-            .replace(/</g, '[')
-            .replace(/>/g, ']'),
-        );
+        const jobsWithScores: JobWithMatchScore[] = [];
 
-        jobs = (jobs as any[]).map((job: any) => {
-          if (job.embedding && job.embedding.embedding) {
-            const jobEmbedding: number[] = JSON.parse(
-              job.embedding.embedding.replace(/</g, '[').replace(/>/g, ']'),
+        for (const job of availableJobs) {
+          const { matchScore, hasJobEmbedding } =
+            await calculateJobMatchScoreFromResumeEmbedding(
+              resumeMatchSource.embedding,
+              job.id,
             );
 
-            const similarity = cosineSimilarity(resumeEmbedding, jobEmbedding);
-
-            return {
-              ...job,
-              matchScore: isNaN(similarity) ? 0 : (similarity * 100).toFixed(2),
-            };
-          }
-          return {
+          jobsWithScores.push({
             ...job,
-            matchScore: 0,
-          };
-        });
+            embedding: null,
+            matchScore,
+            hasJobEmbedding,
+            hasResumeEmbedding: true,
+            matchedResumeId: resumeMatchSource.resumeId,
+          });
+        }
 
         // Sort jobs by match score (highest first)
-        jobs.sort(
-          (a: any, b: any) =>
-            parseFloat(b.matchScore) - parseFloat(a.matchScore),
-        );
+        jobsWithScores.sort((a, b) => b.matchScore - a.matchScore);
+        jobs = jobsWithScores;
       } else {
         // No resume embedding available, add 0 match score
-        jobs = jobs.map((job) => ({
+        jobs = availableJobs.map((job) => ({
           ...job,
+          embedding: null,
+          hasResumeEmbedding: false,
           matchScore: 0,
         }));
       }
-
     } else {
       jobs = await prisma.job.findMany({
         include: {
@@ -111,7 +115,7 @@ export async function POST(req: NextRequest) {
     if (!companyData) throw new CustomError('Company not found', 403);
 
     // Use transaction to ensure atomicity: create job -> embed -> commit
-    const result = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       // Create job record
       const newJob = await tx.job.create({
         data: {
@@ -124,7 +128,7 @@ export async function POST(req: NextRequest) {
       let embedding;
       try {
         embedding = await generateJobEmbedding(payload);
-      } catch (embeddingError) {
+      } catch (_err) {
         throw new CustomError('Failed to generate job embeddings', 500);
       }
 

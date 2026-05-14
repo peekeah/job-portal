@@ -129,6 +129,7 @@ model AppliedJob {
   jobId             String
   applied_resume_id String
   status            JobStatus @default(applied)
+  match_score       Float?    // Resume-to-JD similarity score (0-100)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

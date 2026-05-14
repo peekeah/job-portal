@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
 import { CustomError, errorHandler } from '@/lib/errorHandler';
+import { calculateJobMatchScore } from '@/lib/match-score';
+import { generateResumeEmbedding } from '@/lib/embeddings';
+import { vectorStorage } from '@/lib/vector-storage';
 import z from 'zod';
 
 const payloadSchema = z.object({
@@ -69,14 +72,35 @@ export async function POST(
       throw new CustomError('You already applied for this job', 403);
     }
 
-    const dbRes = await prisma.resume.update({
-      where: {
-        id: payload.resumeId,
-      },
-      data: {
-        json: payload.resumeData,
-      },
+    let resumeJson: unknown;
+    try {
+      resumeJson = JSON.parse(payload.resumeData);
+    } catch (_err) {
+      throw new CustomError('Invalid resume data', 400);
+    }
+
+    const resumeEmbedding = await generateResumeEmbedding(resumeJson);
+
+    const dbRes = await prisma.$transaction(async (tx) => {
+      const updatedResume = await tx.resume.update({
+        where: {
+          id: payload.resumeId,
+        },
+        data: {
+          json: JSON.stringify(resumeJson),
+        },
+      });
+
+      await vectorStorage.storeResumeEmbedding(
+        updatedResume.id,
+        resumeEmbedding,
+        tx,
+      );
+
+      return updatedResume;
     });
+
+    const matchScore = await calculateJobMatchScore(dbRes.id, jobId);
 
     await prisma.appliedJob.create({
       data: {
@@ -84,6 +108,7 @@ export async function POST(
         applicant_id: studentData.id,
         jobId,
         applied_resume_id: dbRes.id,
+        match_score: matchScore,
       },
     });
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { errorHandler, CustomError } from '@/lib/errorHandler';
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
@@ -61,24 +62,24 @@ async function postResume(req: NextRequest) {
       });
 
       // Parse resume PDF to extract structured content
-      let parsedResume;
+      let parsedResume: unknown;
       try {
         parsedResume = await parseResumeFromPdf(response.data.ufsUrl);
-      } catch (parseError) {
+      } catch (_parseError) {
         throw new CustomError('Failed to parse resume PDF', 500);
       }
 
       // Store parsed JSON in resume record
       await tx.resume.update({
         where: { id: newResume.id },
-        data: { json: parsedResume as any },
+        data: { json: parsedResume as Prisma.InputJsonValue },
       });
 
       // Generate embeddings from parsed content
       let embedding;
       try {
         embedding = await generateResumeEmbedding(parsedResume);
-      } catch (embeddingError) {
+      } catch (_embeddingError) {
         throw new CustomError('Failed to generate resume embeddings', 500);
       }
 
@@ -96,10 +97,7 @@ async function postResume(req: NextRequest) {
       return newResume;
     });
 
-    return NextResponse.json(
-      { status: true, data: result },
-      { status: 200 },
-    );
+    return NextResponse.json({ status: true, data: result }, { status: 200 });
   } catch (err) {
     const [res, status] = errorHandler(err);
     return NextResponse.json(res, status);

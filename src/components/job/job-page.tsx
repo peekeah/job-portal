@@ -202,22 +202,22 @@ export function JobDetails() {
 
   const onJobApply = (jobId: string) => {
     if (applicantProfile?.data.active_resume_id) {
-      handleApplyJob({ jobId })
+      handleApplyJob({ jobId });
     } else {
-      toast.error("upload resume first");
-      router.push("/dashboard/profile") // redirect to settings
+      toast.error('upload resume first');
+      router.push('/dashboard/profile'); // redirect to settings
     }
-  }
+  };
 
   const onEnhanceAndApply = (jobId: string) => {
     if (applicantProfile?.data.active_resume_id) {
       getEnhancededitedResumeAction(jobId);
       setEnhancePreviewJobId(jobId);
     } else {
-      toast.error("upload resume first");
-      router.push("/dashboard/profile") // redirect to settings
+      toast.error('upload resume first');
+      router.push('/dashboard/profile'); // redirect to settings
     }
-  }
+  };
 
   if (error) {
     setEnhancePreviewJobId('');
@@ -225,7 +225,7 @@ export function JobDetails() {
 
   if (isLoading) {
     return (
-      <div className="mt-72 size-full flex center justify-center py-10">
+      <div className="center mt-72 flex size-full justify-center py-10">
         <Spinner className="h-6 w-6 animate-spin text-gray-500" />
         <span className="ml-2 text-gray-500">Loading...</span>
       </div>

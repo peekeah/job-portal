@@ -26,6 +26,7 @@ export type Job = {
   ctc: number;
   stipend: number;
   location: string;
+  matchScore: number;
   company: {
     name: string;
     profile_pic?: string;
@@ -134,12 +135,12 @@ const Jobs = () => {
   const onJobApply = async (e: MouseEvent, jobId: string) => {
     e.stopPropagation();
     if (applicantProfile?.data.active_resume_id) {
-      handleApplyJob({ jobId })
+      handleApplyJob({ jobId });
     } else {
-      toast.error("upload resume first");
-      router.push("/dashboard/profile") // redirect to settings
+      toast.error('upload resume first');
+      router.push('/dashboard/profile'); // redirect to settings
     }
-  }
+  };
 
   const onEnahanceAndApply = (e: MouseEvent, jobId: string) => {
     e.stopPropagation();
@@ -147,10 +148,10 @@ const Jobs = () => {
       setEnahancePreviewJobId(jobId);
       getEnhancededitedResumeAction(jobId);
     } else {
-      toast.error("upload resume first");
-      router.push("/dashboard/profile") // redirect to settings
+      toast.error('upload resume first');
+      router.push('/dashboard/profile'); // redirect to settings
     }
-  }
+  };
 
   if (error || (!isLoading && !resData)) {
     return (
@@ -199,7 +200,7 @@ const Jobs = () => {
         Jobs
       </CardTitle>
       {isLoading ? (
-        <div className="mt-52 h-full flex justify-center py-10">
+        <div className="mt-52 flex h-full justify-center py-10">
           <Spinner className="h-6 w-6 animate-spin text-gray-500" />
           <span className="ml-2 text-gray-500">Loading...</span>
         </div>
@@ -212,19 +213,31 @@ const Jobs = () => {
               onClick={() => router.push(`dashboard/job/${job.id}`)}
             >
               <CardContent className="px-4 md:px-6">
-                <div className="mb-3 flex items-center gap-4">
-                  <Avatar className="size-12">
-                    <AvatarImage src={job.company.profile_pic} alt="company" />
-                    <AvatarFallback>
-                      {formatInitials(job.company.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">{job.company.name}</div>
-                    <div className="text-sm text-neutral-500">
-                      {job.company.address}
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="size-12">
+                      <AvatarImage
+                        src={job.company.profile_pic}
+                        alt="company"
+                      />
+                      <AvatarFallback>
+                        {formatInitials(job.company.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{job.company.name}</div>
+                      <div className="text-sm text-neutral-500">
+                        {job.company.address}
+                      </div>
                     </div>
                   </div>
+
+                  <Badge
+                    variant={'outline'}
+                    className="border-green-500 text-green-500 bg-green-100 rounded-xl"
+                  >
+                    {job.matchScore}% Match
+                  </Badge>
                 </div>
                 <Heading variant="h4">{job.job_role}</Heading>
                 <Text className="line-clamp-2 text-neutral-500">
@@ -244,9 +257,7 @@ const Jobs = () => {
                   ))}
                 </Text>
                 <div className="mt-4 space-x-3">
-                  <Button onClick={(e) => onJobApply(e, job.id)}>
-                    Apply
-                  </Button>
+                  <Button onClick={(e) => onJobApply(e, job.id)}>Apply</Button>
                   <Button
                     onClick={(e) => onEnahanceAndApply(e, job.id)}
                     variant={'outline'}
