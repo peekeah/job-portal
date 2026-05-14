@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { cosineSimilarity } from '@/lib/cosine-similarity';
 import { calibrateScore } from '@/lib/normalize';
@@ -31,18 +32,19 @@ const findLatestEmbeddedResumeId = async (
   applicantId: string,
   excludeResumeId?: string | null,
 ) => {
-  const rows = await prisma.$queryRawUnsafe<Array<{ id: string }>>(
-    `
+  const rows = await prisma.$queryRaw<Array<{ id: string }>>(
+    Prisma.sql`
       SELECT r.id
       FROM "Resume" r
       JOIN "ResumeEmbedding" re ON re.resume_id = r.id
-      WHERE r.applicant_id = $1
-        AND ($2::text IS NULL OR r.id <> $2::text)
+      WHERE r.applicant_id = ${applicantId}
+        AND (
+          ${excludeResumeId ?? null} IS NULL
+          OR r.id <> ${excludeResumeId ?? null}
+        )
       ORDER BY r.updated_at DESC
       LIMIT 1
     `,
-    applicantId,
-    excludeResumeId ?? null,
   );
 
   return rows[0]?.id ?? null;
@@ -91,13 +93,4 @@ export const calculateJobMatchScore = async (
 
   return calculateMatchScoreFromEmbeddings(resumeEmbedding, jobEmbedding)
     .matchScore;
-};
-
-export const calculateJobMatchScoreFromResumeEmbedding = async (
-  resumeEmbedding: number[],
-  jobId: string,
-) => {
-  const jobEmbedding = await vectorStorage.getJobEmbedding(jobId);
-
-  return calculateMatchScoreFromEmbeddings(resumeEmbedding, jobEmbedding);
 };
