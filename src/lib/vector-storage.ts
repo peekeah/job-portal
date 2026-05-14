@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { prisma } from './db';
 
 type ResumeWithApplicant = Prisma.ResumeGetPayload<{
@@ -39,6 +39,30 @@ export interface VectorStorage {
   ): Promise<Array<{ job: JobWithCompany; similarity: number }>>;
 }
 
+const validateEmbedding = (embedding: number[]) => {
+  if (!Array.isArray(embedding) || embedding.length === 0) {
+    throw new Error('Embedding must be a non-empty array of finite numbers');
+  }
+  if (!embedding.every(Number.isFinite)) {
+    throw new Error('Embedding values must all be finite numbers');
+  }
+};
+
+const parsePgVectorText = (vectorText: string): number[] => {
+  const trimmed = vectorText.trim();
+  const normalized =
+    trimmed.startsWith('<') && trimmed.endsWith('>')
+      ? `[${trimmed.slice(1, -1)}]`
+      : trimmed;
+
+  const parsed = JSON.parse(normalized);
+  if (!Array.isArray(parsed) || !parsed.every(Number.isFinite)) {
+    throw new Error('Invalid vector text returned by database');
+  }
+
+  return parsed;
+};
+
 /**
  * Pgvector-based storage implementation
  * Uses raw SQL for vector operations as per Prisma pgvector documentation
@@ -49,6 +73,7 @@ class PgVectorStorage implements VectorStorage {
     embedding: number[],
     tx?: VectorClient,
   ): Promise<void> {
+    validateEmbedding(embedding);
     const vectorString = `[${embedding.join(',')}]`;
     const embeddingId = crypto.randomUUID();
     const client = tx || prisma;
@@ -65,6 +90,7 @@ class PgVectorStorage implements VectorStorage {
     embedding: number[],
     tx?: VectorClient,
   ): Promise<void> {
+    validateEmbedding(embedding);
     const vectorString = `[${embedding.join(',')}]`;
     const embeddingId = crypto.randomUUID();
     const client = tx || prisma;
@@ -77,38 +103,54 @@ class PgVectorStorage implements VectorStorage {
   }
 
   async getResumeEmbedding(resumeId: string): Promise<number[] | null> {
-    const result = await prisma.$queryRawUnsafe<Array<{ embedding: string }>>(
-      'SELECT embedding::text FROM "ResumeEmbedding" WHERE resume_id = $1',
-      resumeId,
+    const result = await prisma.$queryRaw<Array<{ embedding: string }>>(
+      Prisma.sql`SELECT embedding::text as embedding FROM "ResumeEmbedding" WHERE resume_id = ${resumeId}`,
     );
 
     if (!result[0]) return null;
 
-    // Parse vector string back to array
     const vectorText = result[0].embedding;
-    return JSON.parse(vectorText.replace(/</g, '[').replace(/>/g, ']'));
+    return parsePgVectorText(vectorText);
   }
 
   async getJobEmbedding(jobId: string): Promise<number[] | null> {
-    const result = await prisma.$queryRawUnsafe<Array<{ embedding: string }>>(
-      'SELECT embedding::text FROM "JobEmbedding" WHERE job_id = $1',
-      jobId,
+    const result = await prisma.$queryRaw<Array<{ embedding: string }>>(
+      Prisma.sql`SELECT embedding::text as embedding FROM "JobEmbedding" WHERE job_id = ${jobId}`,
     );
 
     if (!result[0]) return null;
 
-    // Parse vector string back to array
     const vectorText = result[0].embedding;
-    return JSON.parse(vectorText.replace(/</g, '[').replace(/>/g, ']'));
+    return parsePgVectorText(vectorText);
+  }
+
+  async getJobEmbeddings(jobIds: string[]): Promise<Record<string, number[]>> {
+    if (!jobIds.length) return {};
+
+    const rows = await prisma.$queryRaw<
+      Array<{ job_id: string; embedding: string }>
+    >(
+      Prisma.sql`
+        SELECT job_id, embedding::text as embedding
+        FROM "JobEmbedding"
+        WHERE job_id IN (${Prisma.join(jobIds)})
+      `,
+    );
+
+    return rows.reduce<Record<string, number[]>>((acc, row) => {
+      acc[row.job_id] = parsePgVectorText(row.embedding);
+      return acc;
+    }, {});
   }
 
   async findSimilarResumes(
     queryEmbedding: number[],
     limit: number = 10,
   ): Promise<Array<{ resume: ResumeWithApplicant; similarity: number }>> {
-    const vectorArray = queryEmbedding;
+    validateEmbedding(queryEmbedding);
+    const vectorParams = Prisma.join(queryEmbedding);
 
-    const results = await prisma.$queryRawUnsafe<
+    const results = await prisma.$queryRaw<
       Array<{
         id: string;
         title: string;
@@ -116,12 +158,14 @@ class PgVectorStorage implements VectorStorage {
         similarity: number;
       }>
     >(
-      `SELECT r.id, r.title, r.applicant_id, 1 - (re.embedding <=> ARRAY[${vectorArray.join(', ')}]::vector) as similarity
-       FROM "Resume" r
-       JOIN "ResumeEmbedding" re ON r.id = re.resume_id
-       ORDER BY re.embedding <=> ARRAY[${vectorArray.join(', ')}]::vector
-       LIMIT $1`,
-      limit,
+      Prisma.sql`
+        SELECT r.id, r.title, r.applicant_id,
+               1 - (re.embedding <=> ARRAY[${vectorParams}]::vector) as similarity
+        FROM "Resume" r
+        JOIN "ResumeEmbedding" re ON r.id = re.resume_id
+        ORDER BY re.embedding <=> ARRAY[${vectorParams}]::vector
+        LIMIT ${limit}
+      `,
     );
 
     // Fetch full resume data
@@ -148,9 +192,10 @@ class PgVectorStorage implements VectorStorage {
     queryEmbedding: number[],
     limit: number = 10,
   ): Promise<Array<{ job: JobWithCompany; similarity: number }>> {
-    const vectorArray = queryEmbedding;
+    validateEmbedding(queryEmbedding);
+    const vectorParams = Prisma.join(queryEmbedding);
 
-    const results = await prisma.$queryRawUnsafe<
+    const results = await prisma.$queryRaw<
       Array<{
         id: string;
         job_role: string;
@@ -158,12 +203,14 @@ class PgVectorStorage implements VectorStorage {
         similarity: number;
       }>
     >(
-      `SELECT j.id, j.job_role, j.company_id, 1 - (je.embedding <=> ARRAY[${vectorArray.join(', ')}]::vector) as similarity
-       FROM "Job" j
-       JOIN "JobEmbedding" je ON j.id = je.job_id
-       ORDER BY je.embedding <=> ARRAY[${vectorArray.join(', ')}]::vector
-       LIMIT $1`,
-      limit,
+      Prisma.sql`
+        SELECT j.id, j.job_role, j.company_id,
+               1 - (je.embedding <=> ARRAY[${vectorParams}]::vector) as similarity
+        FROM "Job" j
+        JOIN "JobEmbedding" je ON j.id = je.job_id
+        ORDER BY je.embedding <=> ARRAY[${vectorParams}]::vector
+        LIMIT ${limit}
+      `,
     );
 
     // Fetch full job data

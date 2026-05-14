@@ -8,7 +8,7 @@ import { jobSchema } from '@/lib/schema';
 import { generateJobEmbedding } from '@/lib/embeddings';
 import { vectorStorage } from '@/lib/vector-storage';
 import {
-  calculateJobMatchScoreFromResumeEmbedding,
+  calculateMatchScoreFromEmbeddings,
   getApplicantResumeEmbedding,
 } from '@/lib/match-score';
 
@@ -56,24 +56,27 @@ export async function GET(req: NextRequest) {
 
       if (resumeMatchSource) {
         // Calculate cosine similarity for each job
-        const jobsWithScores: JobWithMatchScore[] = [];
+        const jobIds = availableJobs.map((job) => job.id);
+      const jobEmbeddings = await vectorStorage.getJobEmbeddings(jobIds);
+      const jobsWithScores: JobWithMatchScore[] = [];
 
-        for (const job of availableJobs) {
-          const { matchScore, hasJobEmbedding } =
-            await calculateJobMatchScoreFromResumeEmbedding(
-              resumeMatchSource.embedding,
-              job.id,
-            );
+      for (const job of availableJobs) {
+        const jobEmbedding = jobEmbeddings[job.id] ?? null;
+        const { matchScore, hasJobEmbedding } =
+          calculateMatchScoreFromEmbeddings(
+            resumeMatchSource.embedding,
+            jobEmbedding,
+          );
 
-          jobsWithScores.push({
-            ...job,
-            embedding: null,
-            matchScore,
-            hasJobEmbedding,
-            hasResumeEmbedding: true,
-            matchedResumeId: resumeMatchSource.resumeId,
-          });
-        }
+        jobsWithScores.push({
+          ...job,
+          embedding: null,
+          matchScore,
+          hasJobEmbedding,
+          hasResumeEmbedding: true,
+          matchedResumeId: resumeMatchSource.resumeId,
+        });
+      }
 
         // Sort jobs by match score (highest first)
         jobsWithScores.sort((a, b) => b.matchScore - a.matchScore);

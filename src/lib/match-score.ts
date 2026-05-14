@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
 import { cosineSimilarity } from '@/lib/cosine-similarity';
+import { calibrateScore } from '@/lib/normalize';
 import { vectorStorage } from '@/lib/vector-storage';
 
 type ApplicantResumeEmbedding = {
@@ -14,8 +15,17 @@ const toMatchScore = (
   if (!resumeEmbedding || !jobEmbedding) return null;
 
   const similarity = cosineSimilarity(resumeEmbedding, jobEmbedding);
-  return Number.isNaN(similarity) ? 0 : Number((similarity * 100).toFixed(2));
+  if (Number.isNaN(similarity)) return 0;
+  return Number(calibrateScore(similarity).toFixed(1));
 };
+
+export const calculateMatchScoreFromEmbeddings = (
+  resumeEmbedding: number[] | null,
+  jobEmbedding: number[] | null,
+) => ({
+  matchScore: toMatchScore(resumeEmbedding, jobEmbedding) ?? 0,
+  hasJobEmbedding: Boolean(jobEmbedding),
+});
 
 const findLatestEmbeddedResumeId = async (
   applicantId: string,
@@ -79,7 +89,8 @@ export const calculateJobMatchScore = async (
     vectorStorage.getJobEmbedding(jobId),
   ]);
 
-  return toMatchScore(resumeEmbedding, jobEmbedding);
+  return calculateMatchScoreFromEmbeddings(resumeEmbedding, jobEmbedding)
+    .matchScore;
 };
 
 export const calculateJobMatchScoreFromResumeEmbedding = async (
@@ -88,8 +99,5 @@ export const calculateJobMatchScoreFromResumeEmbedding = async (
 ) => {
   const jobEmbedding = await vectorStorage.getJobEmbedding(jobId);
 
-  return {
-    matchScore: toMatchScore(resumeEmbedding, jobEmbedding) ?? 0,
-    hasJobEmbedding: Boolean(jobEmbedding),
-  };
+  return calculateMatchScoreFromEmbeddings(resumeEmbedding, jobEmbedding);
 };

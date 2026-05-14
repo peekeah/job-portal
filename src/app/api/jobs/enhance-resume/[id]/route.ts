@@ -78,9 +78,34 @@ export async function POST(
     const response = await callLLm(llmInput, 'gpt-5.2', 0.3, 0.85);
 
     let output = response.output[0].content[0].text;
-    output = output.replace('```json', '').replace('```', '');
+    const cleanedOutput = output
+      .replace(/```json/gi, '')
+      .replace(/```/g, '')
+      .trim();
 
-    const enhancedResume = JSON.parse(output) as Resume;
+    const extractJsonPayload = (text: string) => {
+      const firstBrace = text.indexOf('{');
+      const firstBracket = text.indexOf('[');
+      const startIndex = [firstBrace, firstBracket]
+        .filter((index) => index !== -1)
+        .sort((a, b) => a - b)[0];
+
+      if (startIndex === undefined) return text;
+
+      const endBrace = text.lastIndexOf('}');
+      const endBracket = text.lastIndexOf(']');
+      const endIndex = Math.max(endBrace, endBracket);
+
+      return endIndex > startIndex ? text.slice(startIndex, endIndex + 1) : text;
+    };
+
+    let enhancedResume: Resume;
+    try {
+      enhancedResume = JSON.parse(extractJsonPayload(cleanedOutput)) as Resume;
+    } catch (_err) {
+      throw new CustomError('LLM returned unparseable response', 502);
+    }
+
     enhancedResume.profile.name = profile.name;
     enhancedResume.profile.email = profile.email;
     enhancedResume.profile.phone = profile.phone;
