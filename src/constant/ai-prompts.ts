@@ -103,3 +103,29 @@ ${jobDescription}
 RETURN ONLY THE FINAL RESUME JSON
 ====================================
 `;
+
+export const getResumeCritiquePrompt = (resumeInput: string) => `
+You are a professional resume critique agent. Review the resume JSON below and provide a structured evaluation that includes:
+- Strengths
+- Weaknesses
+- Specific improvement suggestions
+
+Output format:
+Strengths:
+- ...
+Weaknesses:
+- ...
+Specific Improvement Suggestions:
+- ...
+
+Instructions:
+- Focus on the resume content only.
+- Do not invent experience or qualifications.
+- Keep the result concise, actionable, and easy to read.
+- Use bullet points for each section.
+
+RESUME_JSON:
+${resumeInput}
+
+Return only the critique text with the three sections above.
+`;

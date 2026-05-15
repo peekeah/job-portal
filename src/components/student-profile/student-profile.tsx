@@ -10,15 +10,22 @@ import { Upload } from 'lucide-react';
 import { fetcher } from '@/lib/fetcher';
 
 import ResumeViewer from '../resume-viewer';
+import ResumeCritiquePanel from '../ai/resume-critique-panel';
 import { Dialog } from '@radix-ui/react-dialog';
 import { DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Profile, profileSchema } from './schema';
+import { Profile, resumeSchema, profileSchema } from './schema';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import useSWRMutation from 'swr/mutation';
 import { Resume } from '@/mock/resume';
+import type { Resume as ResumeResponse } from '@prisma/client';
 import { toast } from 'sonner';
 import { useUploadThing } from '@/lib/uploadthing-client';
+import { z } from 'zod';
+
+type ResumeDisplay = z.infer<typeof resumeSchema>;
+
+
 import { formatInitials } from '@/lib/formater';
 import { Spinner } from '../ui/spinner';
 import { Badge } from '../ui/badge';
@@ -57,7 +64,9 @@ const postProfileApiCall = async (
 
 function StudentProfile() {
   const [selectResumeToDisplay, setSelectResumeToDisplay] =
-    useState<Resume | null>(null);
+    useState<ResumeDisplay | null>(null);
+  const [selectedResumeForCritique, setSelectedResumeForCritique] =
+    useState<ResumeDisplay | null>(null);
 
   const { data, isLoading, mutate } = useSWR<{ data: Profile }>(
     '/api/student/profile',
@@ -424,15 +433,21 @@ function StudentProfile() {
                                 type="button"
                                 variant="secondary"
                                 size="sm"
-                                onClick={() =>
-                                  setSelectResumeToDisplay(
-                                    el?.json ? JSON.parse(el.json) : el,
-                                  )
-                                }
+                                onClick={() => setSelectResumeToDisplay(el)}
                               >
                                 Show
                               </Button>
                             ) : null}
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={() =>
+                                setSelectedResumeForCritique(el)
+                              }
+                            >
+                              Critique
+                            </Button>
                             <Button
                               type="button"
                               onClick={() => handleResumeDelete(el.id)}
@@ -461,6 +476,13 @@ function StudentProfile() {
                       </DialogContent>
                     </Dialog>
                   )}
+
+                  {selectedResumeForCritique ? (
+                    <ResumeCritiquePanel
+                      resume={selectedResumeForCritique}
+                      onClose={() => setSelectedResumeForCritique(null)}
+                    />
+                  ) : null}
                 </div>
               </div>
             </div>

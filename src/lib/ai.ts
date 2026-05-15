@@ -44,3 +44,37 @@ export const getEmbeddings = async (
 
   return response.data[0].embedding;
 };
+
+export const createChatCompletionStream = async (
+  messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
+  model: string = 'gpt-4o',
+  temperature: number = 0.3,
+  topP: number = 0.85,
+) => {
+  const stream = (await client.chat.completions.create({
+    model,
+    messages,
+    temperature,
+    top_p: topP,
+    stream: true,
+  })) as AsyncIterable<any>;
+
+  const encoder = new TextEncoder();
+
+  return new ReadableStream({
+    async start(controller) {
+      try {
+        for await (const chunk of stream) {
+          const text = chunk?.choices?.[0]?.delta?.content;
+          if (typeof text === 'string' && text.length > 0) {
+            controller.enqueue(encoder.encode(text));
+          }
+        }
+      } catch (error) {
+        controller.error(error);
+      } finally {
+        controller.close();
+      }
+    },
+  });
+};

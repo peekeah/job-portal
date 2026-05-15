@@ -1,12 +1,14 @@
 import { z } from 'zod';
 
 export const resumeSchema = z.object({
-  id: z.uuid(),
+  id: z.string(),
   title: z.string().min(3).max(255),
   type: z.enum(['pdf', 'json']),
   url: z.string().nullable(),
   json: z.string().nullable(),
-  applicant_id: z.uuid(),
+  applicant_id: z.string(),
+  created_at: z.date(),
+  updated_at: z.date(),
 });
 
 export const profileSchema = z.object({
