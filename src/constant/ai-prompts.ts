@@ -129,3 +129,36 @@ ${resumeInput}
 
 Return only the critique text with the three sections above.
 `;
+
+export const getCoverLetterPrompt = ({
+  jobTitle,
+  companyName,
+  jobDescription,
+  resumeContent,
+}: {
+  jobTitle: string;
+  companyName: string;
+  jobDescription: string;
+  resumeContent: string;
+}) => `
+You are a professional cover letter writer. Create a compelling, personalized cover letter for the job application below.
+
+Job Details:
+- Position: ${jobTitle}
+- Company: ${companyName}
+- Job Description: ${jobDescription}
+
+Candidate Resume Content:
+${resumeContent}
+
+Instructions:
+- Write a professional cover letter (250-400 words)
+- Address the hiring manager using "Dear Hiring Manager"
+- Highlight relevant experience and skills from the resume
+- Connect the candidate's background to the job requirements
+- Show enthusiasm for the role and company
+- End with a call to action
+- Use professional, clear language
+
+Return only the complete cover letter text with proper formatting.
+`;

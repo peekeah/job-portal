@@ -31,6 +31,7 @@ const ApplicantsTable = ({
 }: ApplicantTableProps) => {
   const [selectResumeToDisplay, setSelectResumeToDisplay] =
     useState<Resume | null>(null);
+  const [selectedCoverLetter, setSelectedCoverLetter] = useState<string | null>(null);
 
   const onActionSubmit = async (
     jobId: string,
@@ -61,6 +62,7 @@ const ApplicantsTable = ({
             <TableHead>Email</TableHead>
             <TableHead>Mobile</TableHead>
             <TableHead>Resume</TableHead>
+            <TableHead>Cover Letter</TableHead>
             {type !== 'hired' ? <TableHead>Action</TableHead> : null}
           </TableRow>
         </TableHeader>
@@ -79,6 +81,18 @@ const ApplicantsTable = ({
                   {el.resume.url ? (
                     <Button
                       onClick={() => setSelectResumeToDisplay(el?.resume)}
+                    >
+                      View
+                    </Button>
+                  ) : (
+                    <span className="text-gray-500">N/A</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {el.cover_letter ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => setSelectedCoverLetter(el.cover_letter || null)}
                     >
                       View
                     </Button>
@@ -119,6 +133,18 @@ const ApplicantsTable = ({
               <DialogTitle>title</DialogTitle>
             </DialogHeader>
             <ResumeViewer resume={selectResumeToDisplay} />
+          </DialogContent>
+        </Dialog>
+      )}
+      {selectedCoverLetter && (
+        <Dialog open={true} onOpenChange={() => setSelectedCoverLetter(null)}>
+          <DialogContent className="max-h-[90vh] min-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Cover Letter</DialogTitle>
+            </DialogHeader>
+            <div className="max-h-[70vh] overflow-auto rounded-lg border border-gray-200 bg-white p-6 text-sm leading-relaxed text-gray-800 whitespace-pre-wrap">
+              {selectedCoverLetter}
+            </div>
           </DialogContent>
         </Dialog>
       )}

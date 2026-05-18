@@ -130,6 +130,7 @@ model AppliedJob {
   applied_resume_id String
   status            JobStatus @default(applied)
   match_score       Float?    // Resume-to-JD similarity score (0-100)
+  cover_letter      String?   // AI-generated cover letter
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

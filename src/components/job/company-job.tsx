@@ -25,6 +25,7 @@ export type Applicants = {
   jobId: string;
   applicant: Applicant;
   resume: Resume;
+  cover_letter?: string | null;
 };
 
 type ApiResponse = {

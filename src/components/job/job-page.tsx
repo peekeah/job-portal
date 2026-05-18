@@ -26,6 +26,7 @@ import {
   IconWorld,
 } from '@tabler/icons-react';
 import { Profile } from '../student-profile/schema';
+import CoverLetterGenerator from '../ai/cover-letter-generator';
 
 type Job = z.infer<typeof jobSchema> & {
   id: string;
@@ -112,6 +113,32 @@ const getEnhancededitedResume = async (
   return res.data;
 };
 
+type ApplyWithCoverLetterPayload = {
+  jobId: string;
+  resumeId: string;
+  coverLetter: string;
+};
+
+const applyWithCoverLetterApiCall = async (
+  url: string,
+  { arg: { jobId, resumeId, coverLetter } }: { arg: ApplyWithCoverLetterPayload },
+) => {
+  try {
+    const response = await axios.post(url + jobId, {
+      resumeId,
+      coverLetter,
+    });
+    toast.success(response.data.data);
+    return response.data;
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      toast.error(err?.response?.data?.message);
+    } else {
+      toast.error('something went wrong');
+    }
+  }
+};
+
 type CompanyMetadataProps = {
   location: string;
   companyType: string;
@@ -159,6 +186,11 @@ export function JobDetails() {
     applyJobWithEditsApiCall,
   );
 
+  const { trigger: handleApplyWithCoverLetter } = useSWRMutation(
+    `/api/jobs/apply-with-cover-letter/`,
+    applyWithCoverLetterApiCall,
+  );
+
   const {
     data: enhancedResume,
     trigger: getEnhancededitedResumeAction,
@@ -167,6 +199,7 @@ export function JobDetails() {
   } = useSWRMutation('/api/jobs/enhance-resume/', getEnhancededitedResume);
 
   const [enhancePreviewJobId, setEnhancePreviewJobId] = useState<string>('');
+  const [isCoverLetterOpen, setIsCoverLetterOpen] = useState(false);
 
   const router = useRouter();
   const { jobId } = useParams<{ jobId: string }>();
@@ -216,6 +249,18 @@ export function JobDetails() {
     } else {
       toast.error('upload resume first');
       router.push('/dashboard/profile'); // redirect to settings
+    }
+  };
+
+  const onApplyWithCoverLetter = async (resumeId: string, coverLetter: string) => {
+    try {
+      await handleApplyWithCoverLetter({
+        jobId: jobData!.id,
+        resumeId,
+        coverLetter,
+      });
+    } catch (_err) {
+      throw _err;
     }
   };
 
@@ -321,6 +366,13 @@ export function JobDetails() {
                         >
                           Enhance & Apply
                         </Button>
+                        <Button
+                          className="lg:text-md bg-white font-semibold text-blue-600 transition-colors hover:bg-blue-50 lg:p-5"
+                          onClick={() => setIsCoverLetterOpen(true)}
+                          disabled={!applicantProfile?.data.resume?.length}
+                        >
+                          Generate Cover Letter
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -413,6 +465,16 @@ export function JobDetails() {
                 </div>
               </div>
             </Card>
+            <CoverLetterGenerator
+              jobId={jobData.id}
+              jobTitle={jobData.job_role}
+              companyName={jobData.company.name}
+              jobDescription={jobData.description}
+              resumes={applicantProfile?.data.resume ?? []}
+              open={isCoverLetterOpen}
+              onOpenChange={setIsCoverLetterOpen}
+              onApplyWithCoverLetter={onApplyWithCoverLetter}
+            />
           </div>
         </div>
       ) : null}
