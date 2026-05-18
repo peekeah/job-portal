@@ -3,6 +3,8 @@ node_modules
 dist
 /generated/prisma
 
+tsconfig.tsbuildinfo
+
 !.env.example
 
 .env.*
