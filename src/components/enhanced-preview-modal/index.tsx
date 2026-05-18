@@ -43,6 +43,8 @@ type Props = {
     editedResumeId: string,
     editedResume: Resume,
   ) => void;
+  onGenerateCoverLetter?: (resumeId: string) => void;
+  showCoverLetterAction?: boolean;
   applying: boolean;
 };
 
@@ -53,13 +55,15 @@ export default function EnhancedJobPreviewModal({
   applying,
   isEnhancing,
   enhancedResume,
+  showCoverLetterAction,
+  onGenerateCoverLetter,
 }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedResume, setEditedResume] = useState<Resume>(initialResume);
 
   useEffect(() => {
     if (enhancedResume?.json) {
-      setEditedResume(JSON.parse(enhancedResume?.json as string));
+      setEditedResume(JSON.parse(enhancedResume.json as string));
     }
   }, [enhancedResume]);
 
@@ -68,7 +72,9 @@ export default function EnhancedJobPreviewModal({
   };
 
   const handleCancel = () => {
-    setEditedResume(JSON.parse(enhancedResume?.json as string));
+    if (enhancedResume?.json) {
+      setEditedResume(JSON.parse(enhancedResume.json as string));
+    }
     setIsEditing(false);
   };
 
@@ -81,7 +87,7 @@ export default function EnhancedJobPreviewModal({
         <DialogHeader>
           <DialogTitle className="mx-auto text-3xl">Resume Preview</DialogTitle>
         </DialogHeader>
-        {isEnhancing || !editedResume ? (
+        {isEnhancing || !enhancedResume ? (
           <div className="mt-52 flex justify-center">
             <Spinner className="size-8" />
           </div>
@@ -109,18 +115,29 @@ export default function EnhancedJobPreviewModal({
                   >
                     Edit
                   </Button>
-                  <Button
-                    onClick={() =>
-                      onApplyAction(
-                        jobId,
-                        enhancedResume?.id as string,
-                        editedResume,
-                      )
-                    }
-                    disabled={applying}
-                  >
-                    {applying ? <Spinner /> : 'Apply'}
-                  </Button>
+                  {showCoverLetterAction ? (
+                    <Button
+                      onClick={() =>
+                        onGenerateCoverLetter?.(enhancedResume?.id as string)
+                      }
+                      disabled={!enhancedResume?.id}
+                    >
+                      Generate Cover Letter
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() =>
+                        onApplyAction(
+                          jobId,
+                          enhancedResume?.id as string,
+                          editedResume,
+                        )
+                      }
+                      disabled={applying}
+                    >
+                      {applying ? <Spinner /> : 'Apply'}
+                    </Button>
+                  )}
                 </>
               ) : (
                 <>

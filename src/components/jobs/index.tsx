@@ -10,11 +10,13 @@ import { Spinner } from '../ui/spinner';
 import { Heading, Text } from '../ui/typography';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
-import { MouseEvent, useState } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
 import useSWRMutation from 'swr/mutation';
 import { useRouter } from 'next/navigation';
 import { Resume } from '@/mock/resume';
 import EnhancedJobPreviewModal from '../enhanced-preview-modal';
+import CoverLetterGenerator from '../ai/cover-letter-generator';
+import SmartApplyDialog from '@/components/ai/smart-apply-dialog';
 import { toast } from 'sonner';
 import { formatInitials } from '@/lib/formater';
 import { Profile } from '../student-profile/schema';
@@ -108,6 +110,29 @@ const Jobs = () => {
     applyJobWithEditsApiCall,
   );
 
+  const { trigger: handleApplyWithCoverLetter } = useSWRMutation(
+    `/api/jobs/apply-with-cover-letter/`,
+    async (
+      url: string,
+      { arg }: { arg: { jobId: string; resumeId: string; coverLetter: string } },
+    ) => {
+      try {
+        const response = await axios.post(url + arg.jobId, {
+          resumeId: arg.resumeId,
+          coverLetter: arg.coverLetter,
+        });
+        toast.success(response.data.data);
+        return response.data;
+      } catch (err) {
+        if (err instanceof AxiosError) {
+          toast.error(err?.response?.data?.message);
+        } else {
+          toast.error('something went wrong');
+        }
+      }
+    },
+  );
+
   const { data: applicantProfile } = useSWR<{ data: Profile }>(
     '/api/student/profile',
     fetcher,
@@ -130,7 +155,14 @@ const Jobs = () => {
 
   const router = useRouter();
   const { mutate } = useSWRConfig();
-  const [enahncePreviewJobId, setEnahancePreviewJobId] = useState<string>('');
+  const [smartApplyJobId, setSmartApplyJobId] = useState<string>('');
+  const [smartApplyOption, setSmartApplyOption] = useState<
+    'resumeOnly' | 'withCoverLetter' | null
+  >(null);
+  const [isSmartApplyDialogOpen, setIsSmartApplyDialogOpen] = useState(false);
+  const [isCoverLetterOpen, setIsCoverLetterOpen] = useState(false);
+  const [selectedSmartApplyJobId, setSelectedSmartApplyJobId] = useState('');
+  const selectedJob = jobs?.find((job) => job.id === smartApplyJobId);
 
   const onJobApply = async (e: MouseEvent, jobId: string) => {
     e.stopPropagation();
@@ -142,14 +174,40 @@ const Jobs = () => {
     }
   };
 
-  const onEnahanceAndApply = (e: MouseEvent, jobId: string) => {
+  const onSmartApplyClick = (e: MouseEvent, jobId: string) => {
     e.stopPropagation();
     if (applicantProfile?.data.active_resume_id) {
-      setEnahancePreviewJobId(jobId);
-      getEnhancededitedResumeAction(jobId);
+      setSelectedSmartApplyJobId(jobId);
+      setIsSmartApplyDialogOpen(true);
     } else {
       toast.error('upload resume first');
       router.push('/dashboard/profile'); // redirect to settings
+    }
+  };
+
+  const handleSmartApplySelect = async (
+    option: 'resumeOnly' | 'withCoverLetter',
+  ) => {
+    if (!selectedSmartApplyJobId) return;
+
+    setSmartApplyOption(option);
+    setSmartApplyJobId(selectedSmartApplyJobId);
+    setIsSmartApplyDialogOpen(false);
+    await getEnhancededitedResumeAction(selectedSmartApplyJobId);
+  };
+
+  const onApplyWithCoverLetter = async (resumeId: string, coverLetter: string) => {
+    try {
+      await handleApplyWithCoverLetter({
+        jobId: smartApplyJobId,
+        resumeId,
+        coverLetter,
+      });
+      setSmartApplyJobId('');
+      setSmartApplyOption(null);
+      setIsCoverLetterOpen(false);
+    } catch (_err) {
+      throw _err;
     }
   };
 
@@ -166,7 +224,7 @@ const Jobs = () => {
     resumeId: string,
     resumeData: Resume,
   ) => {
-    if (!enahncePreviewJobId) return;
+    if (!smartApplyJobId) return;
     mutate(
       '/api/jobs',
       (currentData?: Response) => {
@@ -184,15 +242,19 @@ const Jobs = () => {
         resumeId,
         resumeData: JSON.stringify(resumeData),
       });
+      setSmartApplyJobId('');
+      setSmartApplyOption(null);
     } catch (_err) {
       mutate('/api/jobs');
     }
-    setEnahancePreviewJobId('');
   };
 
-  if (enhancingError) {
-    setEnahancePreviewJobId('');
-  }
+  useEffect(() => {
+    if (enhancingError) {
+      setSmartApplyJobId('');
+      setSmartApplyOption(null);
+    }
+  }, [enhancingError]);
 
   return (
     <div className="h-full w-full p-5 sm:p-7 md:px-10 lg:px-5">
@@ -259,10 +321,10 @@ const Jobs = () => {
                 <div className="mt-4 space-x-3">
                   <Button onClick={(e) => onJobApply(e, job.id)}>Apply</Button>
                   <Button
-                    onClick={(e) => onEnahanceAndApply(e, job.id)}
+                    onClick={(e) => onSmartApplyClick(e, job.id)}
                     variant={'outline'}
                   >
-                    Enhance & apply
+                    Smart Apply
                   </Button>
                 </div>
               </CardContent>
@@ -271,16 +333,39 @@ const Jobs = () => {
         </div>
       )}
 
-      {enahncePreviewJobId && (
+      <SmartApplyDialog
+        open={isSmartApplyDialogOpen}
+        onOpenChange={setIsSmartApplyDialogOpen}
+        onSelectOption={handleSmartApplySelect}
+        isLoading={isEnhancing}
+      />
+
+      {smartApplyJobId && (
         <EnhancedJobPreviewModal
-          jobId={enahncePreviewJobId}
+          jobId={smartApplyJobId}
           isEnhancing={isEnhancing}
           enhancedResume={enhancedResume?.data}
           applying={applying}
           onApplyAction={applyWithEdits}
+          onGenerateCoverLetter={() => setIsCoverLetterOpen(true)}
+          showCoverLetterAction={smartApplyOption === 'withCoverLetter'}
           onCloseAction={() => {
-            setEnahancePreviewJobId('');
+            setSmartApplyJobId('');
+            setSmartApplyOption(null);
           }}
+        />
+      )}
+
+      {smartApplyOption === 'withCoverLetter' && enhancedResume?.data && selectedJob && (
+        <CoverLetterGenerator
+          jobId={smartApplyJobId}
+          jobTitle={selectedJob.job_role}
+          companyName={selectedJob.company.name}
+          jobDescription={selectedJob.description}
+          resumes={[enhancedResume.data]}
+          open={isCoverLetterOpen}
+          onOpenChange={setIsCoverLetterOpen}
+          onApplyWithCoverLetter={onApplyWithCoverLetter}
         />
       )}
     </div>
