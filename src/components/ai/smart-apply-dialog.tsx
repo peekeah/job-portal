@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Text } from '@/components/ui/typography';
+import { useEffect, useState } from 'react';
 
 type SmartApplyDialogProps = {
   open: boolean;
@@ -17,6 +18,19 @@ export default function SmartApplyDialog({
   onSelectOption,
   isLoading = false,
 }: SmartApplyDialogProps) {
+  const [clickedOption, setClickedOption] = useState<'resumeOnly' | 'withCoverLetter' | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setClickedOption(null);
+    }
+  }, [open]);
+
+  const handleSelectOption = (option: 'resumeOnly' | 'withCoverLetter') => {
+    setClickedOption(option);
+    onSelectOption(option);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -35,10 +49,10 @@ export default function SmartApplyDialog({
             </p>
             <Button
               className="mt-4 w-full"
-              onClick={() => onSelectOption('resumeOnly')}
-              disabled={isLoading}
+              onClick={() => handleSelectOption('resumeOnly')}
+              disabled={isLoading && clickedOption === 'resumeOnly'}
             >
-              {isLoading ? 'Preparing...' : 'Enhance resume only'}
+              {isLoading && clickedOption === 'resumeOnly' ? 'Preparing...' : 'Enhance resume only'}
             </Button>
           </div>
 
@@ -49,14 +63,14 @@ export default function SmartApplyDialog({
             </p>
             <Button
               className="mt-4 w-full"
-              onClick={() => onSelectOption('withCoverLetter')}
-              disabled={isLoading}
+              onClick={() => handleSelectOption('withCoverLetter')}
+              disabled={isLoading && clickedOption === 'withCoverLetter'}
             >
-              {isLoading ? 'Preparing...' : 'Enhance resume + cover letter'}
+              {isLoading && clickedOption === 'withCoverLetter' ? 'Preparing...' : 'Enhance resume + cover letter'}
             </Button>
           </div>
 
-          <Button variant="ghost" className="w-full" onClick={() => onOpenChange(false)}>
+          <Button variant="ghost" className="w-full" onClick={() => onOpenChange(false)} disabled={isLoading}>
             Cancel
           </Button>
         </div>

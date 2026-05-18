@@ -243,7 +243,7 @@ export function JobDetails() {
       handleApplyJob({ jobId });
     } else {
       toast.error('upload resume first');
-      router.push('/dashboard/profile'); // redirect to settings
+      router.push('/dashboard/profile');
     }
   };
 
@@ -253,7 +253,7 @@ export function JobDetails() {
       setIsSmartApplyDialogOpen(true);
     } else {
       toast.error('upload resume first');
-      router.push('/dashboard/profile'); // redirect to settings
+      router.push('/dashboard/profile');
     }
   };
 
@@ -287,6 +287,12 @@ export function JobDetails() {
       setEnhancePreviewJobId('');
     }
   }, [error]);
+
+  useEffect(() => {
+    if (smartApplyOption === 'withCoverLetter' && enhancedResume?.data) {
+      setIsCoverLetterOpen(true);
+    }
+  }, [smartApplyOption, enhancedResume?.data]);
 
   if (isLoading) {
     return (
@@ -380,12 +386,12 @@ export function JobDetails() {
                         >
                           Apply
                         </Button>
-                                        <Button
-                            className="lg:text-md bg-white font-semibold text-blue-600 transition-colors hover:bg-blue-50 lg:p-5"
-                            onClick={() => onEnhanceAndApply(jobData.id)}
-                          >
-                            Smart Apply
-                          </Button>
+                        <Button
+                          className="lg:text-md bg-white font-semibold text-blue-600 transition-colors hover:bg-blue-50 lg:p-5"
+                          onClick={() => onEnhanceAndApply(jobData.id)}
+                        >
+                          Smart Apply
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -462,7 +468,6 @@ export function JobDetails() {
                     <h2 className="text-xl font-bold sm:text-2xl">
                       Required Skills
                     </h2>
-
                     <div className="flex flex-wrap gap-2 sm:gap-3">
                       {jobData.skills_required.map((skill, index) => (
                         <Badge
@@ -507,7 +512,10 @@ export function JobDetails() {
           enhancedResume={enhancedResume?.data}
           applying={applying}
           onApplyAction={applyWithEdits}
-          onGenerateCoverLetter={() => setIsCoverLetterOpen(true)}
+          onGenerateCoverLetter={() => {
+            setEnhancePreviewJobId('');
+            setIsCoverLetterOpen(true);
+          }}
           showCoverLetterAction={smartApplyOption === 'withCoverLetter'}
           onCloseAction={() => {
             setEnhancePreviewJobId('');
