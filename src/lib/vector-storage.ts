@@ -35,6 +35,11 @@ export interface VectorStorage {
   ): Promise<void>;
   getResumeEmbedding(resumeId: string): Promise<number[] | null>;
   getJobEmbedding(jobId: string): Promise<number[] | null>;
+  retrieveRelevantSections(
+    jobDescriptionEmbedding: number[],
+    resumeId: string,
+    topK?: number,
+  ): Promise<Array<{ section: SectionName; similarity: number }>>;
   findSimilarResumes(
     queryEmbedding: number[],
     limit?: number,
@@ -175,6 +180,36 @@ class PgVectorStorage implements VectorStorage {
       acc[row.job_id] = parsePgVectorText(row.embedding);
       return acc;
     }, {});
+  }
+
+  async retrieveRelevantSections(
+    jobDescriptionEmbedding: number[],
+    resumeId: string,
+    topK: number = 3,
+  ): Promise<Array<{ section: SectionName; similarity: number }>> {
+    validateEmbedding(jobDescriptionEmbedding);
+    const vectorParams = Prisma.join(jobDescriptionEmbedding);
+
+    const results = await prisma.$queryRaw<
+      Array<{
+        section: string;
+        similarity: number;
+      }>
+    >(
+      Prisma.sql`
+        SELECT section,
+               1 - (embedding <=> ARRAY[${vectorParams}]::vector) as similarity
+        FROM "ResumeEmbedding"
+        WHERE resume_id = ${resumeId} AND section != 'full'
+        ORDER BY embedding <=> ARRAY[${vectorParams}]::vector
+        LIMIT ${topK}
+      `,
+    );
+
+    return results.map((result) => ({
+      section: result.section as SectionName,
+      similarity: result.similarity,
+    }));
   }
 
   async findSimilarResumes(

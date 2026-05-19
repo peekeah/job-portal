@@ -7,6 +7,9 @@ import { CustomError, errorHandler } from '@/lib/errorHandler';
 import { parseResumeFromPdf } from '@/lib/resume-parser';
 import { createChatCompletionStream } from '@/lib/ai';
 import { getCoverLetterPrompt } from '@/constant/ai-prompts';
+import { generateJobEmbedding } from '@/lib/embeddings';
+import { vectorStorage } from '@/lib/vector-storage';
+import { extractResumeSections } from '@/lib/embeddings';
 
 const requestSchema = z.object({
   jobId: z.string(),
@@ -49,26 +52,48 @@ export async function POST(req: NextRequest) {
       throw new CustomError('Resume not found', 404);
     }
 
-    let resumeContent = '';
+    let resumeJson: unknown;
     if (resume.json) {
-      if (typeof resume.json === 'string') {
-        resumeContent = resume.json;
-      } else {
-        resumeContent = JSON.stringify(resume.json);
-      }
+      resumeJson = resume.json;
     } else {
       if (resume.type !== 'pdf' || !resume.url) {
         throw new CustomError('Resume content is unavailable', 404);
       }
-      const parsedResume = await parseResumeFromPdf(resume.url);
-      resumeContent = JSON.stringify(parsedResume);
+      resumeJson = await parseResumeFromPdf(resume.url);
     }
+
+    // Generate job description embedding
+    const jobEmbedding = await generateJobEmbedding({
+      job_role: job.job_role,
+      description: job.description,
+      skills_required: job.skills_required,
+      location: job.location,
+      ctc: job.ctc,
+      stipend: job.stipend,
+    });
+
+    // Retrieve top-3 most relevant resume sections
+    const relevantSections = await vectorStorage.retrieveRelevantSections(
+      jobEmbedding,
+      resumeId,
+      3,
+    );
+
+    // Extract content for the retrieved sections
+    const sectionContents = extractResumeSections(resumeJson);
+    const retrievedSectionsContent = relevantSections
+      .map((rs) => ({
+        section: rs.section,
+        content: sectionContents[rs.section] || '',
+        similarity: rs.similarity,
+      }))
+      .filter((rs) => rs.content.trim().length > 0);
 
     const prompt = getCoverLetterPrompt({
       jobTitle: job.job_role,
       companyName: job.company.name,
       jobDescription: job.description,
-      resumeContent,
+      retrievedSections: retrievedSectionsContent,
     });
 
     const stream = await createChatCompletionStream(
