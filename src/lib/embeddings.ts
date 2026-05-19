@@ -2,6 +2,8 @@ import { getEmbeddings } from './ai';
 
 type JsonRecord = Record<string, unknown>;
 
+export type SectionName = 'experience' | 'skills' | 'projects' | 'education' | 'summary';
+
 const isRecord = (value: unknown): value is JsonRecord =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
@@ -25,6 +27,132 @@ const appendStringList = (sections: string[], values: unknown) => {
       if (typeof value === 'string') sections.push(`- ${value}`);
     });
   }
+};
+
+/**
+ * Extracts individual sections from resume JSON for sectional embedding
+ */
+export const extractResumeSections = (
+  resumeJson: unknown,
+): Record<SectionName, string> => {
+  if (!isRecord(resumeJson)) {
+    return { experience: '', skills: '', projects: '', education: '', summary: '' };
+  }
+
+  const sections: Record<SectionName, string> = {
+    experience: '',
+    skills: '',
+    projects: '',
+    education: '',
+    summary: '',
+  };
+
+  // Extract summary
+  const personalInfo = isRecord(resumeJson.personalInfo)
+    ? resumeJson.personalInfo
+    : isRecord(resumeJson.profile)
+      ? resumeJson.profile
+      : null;
+
+  if (personalInfo) {
+    const summary =
+      asString(personalInfo.summary) ||
+      asString(resumeJson.summary) ||
+      asString(resumeJson.objective);
+    sections.summary = summary;
+  }
+
+  // Extract experience
+  const workExperience = [
+    ...asRecordArray(resumeJson.workExperience),
+    ...asRecordArray(resumeJson.workExperiences),
+  ];
+
+  if (workExperience.length) {
+    const expSections: string[] = [];
+    workExperience.forEach((exp, index) => {
+      expSections.push(
+        `${index + 1}. ${asString(exp.jobTitle)} at ${asString(exp.company)}`,
+      );
+
+      const duration = asString(exp.duration) || asString(exp.date);
+      if (duration) expSections.push(`Duration: ${duration}`);
+
+      const description = asString(exp.description);
+      if (description) expSections.push(`Description: ${description}`);
+
+      appendStringList(expSections, exp.responsibilities);
+      appendStringList(expSections, exp.descriptions);
+    });
+    sections.experience = expSections.join('\n');
+  }
+
+  // Extract education
+  const education = [
+    ...asRecordArray(resumeJson.education),
+    ...asRecordArray(resumeJson.educations),
+  ];
+
+  if (education.length) {
+    const eduSections: string[] = [];
+    education.forEach((edu, index) => {
+      const institution = asString(edu.institution) || asString(edu.school);
+      eduSections.push(
+        `${index + 1}. ${asString(edu.degree)} from ${institution}`,
+      );
+
+      const graduationYear =
+        asNumber(edu.graduationYear)?.toString() || asString(edu.date);
+      if (graduationYear) eduSections.push(`Graduation Year: ${graduationYear}`);
+      if (edu.gpa) eduSections.push(`GPA: ${asString(edu.gpa)}`);
+      appendStringList(eduSections, edu.descriptions);
+    });
+    sections.education = eduSections.join('\n');
+  }
+
+  // Extract skills
+  const skillSections: string[] = [];
+  if (resumeJson.skills) {
+    if (typeof resumeJson.skills === 'string') {
+      skillSections.push(resumeJson.skills);
+    } else if (Array.isArray(resumeJson.skills)) {
+      appendStringList(skillSections, resumeJson.skills);
+    } else if (isRecord(resumeJson.skills)) {
+      appendStringList(skillSections, resumeJson.skills.descriptions);
+
+      asRecordArray(resumeJson.skills.featuredSkills).forEach((skill) => {
+        const skillName = asString(skill.skill);
+        if (skillName) skillSections.push(`- ${skillName}`);
+      });
+    }
+  }
+
+  appendStringList(skillSections, resumeJson.technical);
+  appendStringList(skillSections, resumeJson.soft);
+  sections.skills = skillSections.join('\n');
+
+  // Extract projects
+  const projects = asRecordArray(resumeJson.projects);
+  if (projects.length) {
+    const projectSections: string[] = [];
+    projects.forEach((project, index) => {
+      const projectName = asString(project.name) || asString(project.project);
+      projectSections.push(`${index + 1}. ${projectName}`);
+
+      if (project.description) {
+        projectSections.push(`Description: ${asString(project.description)}`);
+      }
+
+      if (project.technologies) {
+        projectSections.push(`Technologies: ${asString(project.technologies)}`);
+      }
+
+      appendStringList(projectSections, project.descriptions);
+    });
+    sections.projects = projectSections.join('\n');
+  }
+
+  return sections;
 };
 
 /**
@@ -220,6 +348,40 @@ export const generateResumeEmbedding = async (
   }
 
   return await getEmbeddings(content);
+};
+
+/**
+ * Generates sectional embeddings for resume sections
+ */
+export const generateSectionalEmbeddings = async (
+  resumeJson: unknown,
+): Promise<Record<SectionName, number[]>> => {
+  const sections = extractResumeSections(resumeJson);
+
+  const embeddings: Record<SectionName, number[]> = {
+    experience: [],
+    skills: [],
+    projects: [],
+    education: [],
+    summary: [],
+  };
+
+  // Generate embedding for each section that has content
+  const embeddingPromises: Promise<void>[] = [];
+
+  for (const [sectionName, content] of Object.entries(sections)) {
+    if (content.trim()) {
+      embeddingPromises.push(
+        getEmbeddings(content).then((embedding) => {
+          embeddings[sectionName as SectionName] = embedding;
+        }),
+      );
+    }
+  }
+
+  await Promise.all(embeddingPromises);
+
+  return embeddings;
 };
 
 /**

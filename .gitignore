@@ -4,6 +4,7 @@ dist
 /generated/prisma
 
 tsconfig.tsbuildinfo
+next-env.d.ts
 
 !.env.example
 

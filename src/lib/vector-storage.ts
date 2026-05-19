@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from './db';
+import type { SectionName } from './embeddings';
 
 type ResumeWithApplicant = Prisma.ResumeGetPayload<{
   include: { applicant: true };
@@ -20,6 +21,11 @@ export interface VectorStorage {
   storeResumeEmbedding(
     resumeId: string,
     embedding: number[],
+    tx?: VectorClient,
+  ): Promise<void>;
+  storeSectionalEmbeddings(
+    resumeId: string,
+    embeddings: Record<SectionName, number[]>,
     tx?: VectorClient,
   ): Promise<void>;
   storeJobEmbedding(
@@ -78,11 +84,39 @@ class PgVectorStorage implements VectorStorage {
     const embeddingId = crypto.randomUUID();
     const client = tx || prisma;
     await client.$executeRaw`
-      INSERT INTO "ResumeEmbedding" (id, resume_id, embedding, created_at, updated_at) 
-      VALUES (${embeddingId}, ${resumeId}, ${vectorString}::vector, NOW(), NOW())
-      ON CONFLICT (resume_id) 
+      INSERT INTO "ResumeEmbedding" (id, resume_id, section, embedding, created_at, updated_at)
+      VALUES (${embeddingId}, ${resumeId}, 'full'::"ResumeSection", ${vectorString}::vector, NOW(), NOW())
+      ON CONFLICT (resume_id, section)
       DO UPDATE SET embedding = ${vectorString}::vector, updated_at = NOW()
     `;
+  }
+
+  async storeSectionalEmbeddings(
+    resumeId: string,
+    embeddings: Record<SectionName, number[]>,
+    tx?: VectorClient,
+  ): Promise<void> {
+    const client = tx || prisma;
+
+    // Delete existing sectional embeddings for this resume (excluding 'full')
+    await client.$executeRaw`
+      DELETE FROM "ResumeEmbedding"
+      WHERE resume_id = ${resumeId} AND section != 'full'
+    `;
+
+    // Insert new sectional embeddings
+    for (const [sectionName, embedding] of Object.entries(embeddings)) {
+      if (embedding.length === 0) continue; // Skip empty embeddings
+
+      validateEmbedding(embedding);
+      const vectorString = `[${embedding.join(',')}]`;
+      const embeddingId = crypto.randomUUID();
+
+      await client.$executeRaw`
+        INSERT INTO "ResumeEmbedding" (id, resume_id, section, embedding, created_at, updated_at)
+        VALUES (${embeddingId}, ${resumeId}, ${sectionName}::"ResumeSection", ${vectorString}::vector, NOW(), NOW())
+      `;
+    }
   }
 
   async storeJobEmbedding(

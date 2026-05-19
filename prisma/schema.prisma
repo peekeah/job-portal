@@ -37,6 +37,15 @@ enum ResumeType {
   json
 }
 
+enum ResumeSection {
+  experience
+  skills
+  projects
+  education
+  summary
+  full
+}
+
 // =========================
 // USER MODEL
 // =========================
@@ -117,7 +126,7 @@ model Resume {
   applicant   Applicant        @relation("ApplicantResumes", fields: [applicant_id], references: [id])
   active_for  Applicant[]      @relation("ActiveResume")
   appliedJobs AppliedJob[]
-  embedding   ResumeEmbedding?
+  embeddings  ResumeEmbedding[]
 }
 
 // =========================
@@ -144,13 +153,16 @@ model AppliedJob {
 // RESUME EMBEDDING MODEL
 // =========================
 model ResumeEmbedding {
-  id          String   @id @default(uuid())
-  resume_id   String   @unique
+  id          String        @id @default(uuid())
+  resume_id   String
+  section     ResumeSection @default(full)
   embedding   Unsupported("vector(1536)")  // Vector embedding using pgvector
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at DateTime      @default(now())
+  updated_at DateTime      @updatedAt
 
   resume Resume @relation(fields: [resume_id], references: [id], onDelete: Cascade)
+
+  @@unique([resume_id, section])
 }
 
 // =========================

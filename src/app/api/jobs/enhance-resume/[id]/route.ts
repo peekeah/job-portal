@@ -10,7 +10,7 @@ import { readPdf } from '@/lib/resume-parser/read-pdf';
 import { callLLm } from '@/lib/ai';
 import { getResumeBuilderPrompt } from '@/constant/ai-prompts';
 import { initialResume, Resume } from '@/mock/resume';
-import { generateResumeEmbedding } from '@/lib/embeddings';
+import { generateSectionalEmbeddings } from '@/lib/embeddings';
 import { vectorStorage } from '@/lib/vector-storage';
 
 export async function POST(
@@ -114,7 +114,7 @@ export async function POST(
 
     const resumeTitle = existResume.title.replace('.pdf', '') + Date.now();
 
-    const resumeEmbedding = await generateResumeEmbedding(enhancedResume);
+    const sectionalEmbeddings = await generateSectionalEmbeddings(enhancedResume);
 
     // Save in the DB
     const dbRes = await prisma.$transaction(async (tx) => {
@@ -127,9 +127,9 @@ export async function POST(
         },
       });
 
-      await vectorStorage.storeResumeEmbedding(
+      await vectorStorage.storeSectionalEmbeddings(
         newResume.id,
-        resumeEmbedding,
+        sectionalEmbeddings,
         tx,
       );
 
