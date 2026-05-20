@@ -7,14 +7,56 @@ import { CustomError, errorHandler } from '@/lib/errorHandler';
 import { parseResumeFromPdf } from '@/lib/resume-parser';
 import { createChatCompletionStream } from '@/lib/ai';
 import { getCoverLetterPrompt } from '@/constant/ai-prompts';
-import { generateJobEmbedding } from '@/lib/embeddings';
+import {
+  extractResumeSections,
+  generateJobEmbedding,
+  prepareResumeContent,
+} from '@/lib/embeddings';
 import { vectorStorage } from '@/lib/vector-storage';
-import { extractResumeSections } from '@/lib/embeddings';
 
 const requestSchema = z.object({
   jobId: z.string(),
   resumeId: z.string(),
 });
+
+const parseStoredResumeJson = (value: unknown) => {
+  if (typeof value !== 'string') return value;
+
+  try {
+    return JSON.parse(value);
+  } catch (_err) {
+    return value;
+  }
+};
+
+const stringifyResumeJson = (value: unknown) => {
+  if (typeof value === 'string') return value;
+  return JSON.stringify(value, null, 2) ?? '';
+};
+
+const getFallbackResumeSections = (resumeJson: unknown) => {
+  const extractedSections = extractResumeSections(resumeJson);
+  const sections = Object.entries(extractedSections)
+    .map(([section, content]) => ({
+      section,
+      content,
+    }))
+    .filter((section) => section.content.trim().length > 0);
+
+  if (sections.length > 0) return sections;
+
+  const fullResumeContent = prepareResumeContent(resumeJson);
+  if (fullResumeContent.trim()) {
+    return [{ section: 'resume', content: fullResumeContent }];
+  }
+
+  const resumeJsonContent = stringifyResumeJson(resumeJson);
+  if (resumeJsonContent.trim()) {
+    return [{ section: 'resume_json', content: resumeJsonContent }];
+  }
+
+  return [];
+};
 
 export async function POST(req: NextRequest) {
   try {
@@ -54,7 +96,7 @@ export async function POST(req: NextRequest) {
 
     let resumeJson: unknown;
     if (resume.json) {
-      resumeJson = resume.json;
+      resumeJson = parseStoredResumeJson(resume.json);
     } else {
       if (resume.type !== 'pdf' || !resume.url) {
         throw new CustomError('Resume content is unavailable', 404);
@@ -79,21 +121,16 @@ export async function POST(req: NextRequest) {
       3,
     );
 
-    // Extract content for the retrieved sections
-    const sectionContents = extractResumeSections(resumeJson);
-    const retrievedSectionsContent = relevantSections
-      .map((rs) => ({
-        section: rs.section,
-        content: sectionContents[rs.section] || '',
-        similarity: rs.similarity,
-      }))
-      .filter((rs) => rs.content.trim().length > 0);
+    const resumeSections =
+      relevantSections.length > 0
+        ? relevantSections
+        : getFallbackResumeSections(resumeJson);
 
     const prompt = getCoverLetterPrompt({
       jobTitle: job.job_role,
       companyName: job.company.name,
       jobDescription: job.description,
-      retrievedSections: retrievedSectionsContent,
+      retrievedSections: resumeSections,
     });
 
     const stream = await createChatCompletionStream(

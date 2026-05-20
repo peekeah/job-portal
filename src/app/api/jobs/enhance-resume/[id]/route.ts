@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
@@ -10,7 +11,10 @@ import { readPdf } from '@/lib/resume-parser/read-pdf';
 import { callLLm } from '@/lib/ai';
 import { getResumeBuilderPrompt } from '@/constant/ai-prompts';
 import { initialResume, Resume } from '@/mock/resume';
-import { generateSectionalEmbeddings } from '@/lib/embeddings';
+import {
+  generateResumeEmbedding,
+  generateSectionalEmbeddings,
+} from '@/lib/embeddings';
 import { vectorStorage } from '@/lib/vector-storage';
 
 export async function POST(
@@ -77,7 +81,7 @@ export async function POST(
 
     const response = await callLLm(llmInput, 'gpt-5.2', 0.3, 0.85);
 
-    let output = response.output[0].content[0].text;
+    const output = response.output[0].content[0].text;
     const cleanedOutput = output
       .replace(/```json/gi, '')
       .replace(/```/g, '')
@@ -96,7 +100,9 @@ export async function POST(
       const endBracket = text.lastIndexOf(']');
       const endIndex = Math.max(endBrace, endBracket);
 
-      return endIndex > startIndex ? text.slice(startIndex, endIndex + 1) : text;
+      return endIndex > startIndex
+        ? text.slice(startIndex, endIndex + 1)
+        : text;
     };
 
     let enhancedResume: Resume;
@@ -114,7 +120,10 @@ export async function POST(
 
     const resumeTitle = existResume.title.replace('.pdf', '') + Date.now();
 
-    const sectionalEmbeddings = await generateSectionalEmbeddings(enhancedResume);
+    const [resumeEmbedding, sectionalEmbeddings] = await Promise.all([
+      generateResumeEmbedding(enhancedResume),
+      generateSectionalEmbeddings(enhancedResume),
+    ]);
 
     // Save in the DB
     const dbRes = await prisma.$transaction(async (tx) => {
@@ -122,7 +131,7 @@ export async function POST(
         data: {
           title: resumeTitle,
           type: 'json',
-          json: JSON.stringify(enhancedResume),
+          json: enhancedResume as unknown as Prisma.InputJsonValue,
           applicant_id: applicant.id,
         },
       });
@@ -130,6 +139,11 @@ export async function POST(
       await vectorStorage.storeSectionalEmbeddings(
         newResume.id,
         sectionalEmbeddings,
+        tx,
+      );
+      await vectorStorage.storeResumeEmbedding(
+        newResume.id,
+        resumeEmbedding,
         tx,
       );
 

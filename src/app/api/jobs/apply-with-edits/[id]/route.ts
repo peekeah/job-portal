@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { authMiddleware } from '@/lib/auth-middleware';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { CustomError, errorHandler } from '@/lib/errorHandler';
 import { calculateJobMatchScore } from '@/lib/match-score';
-import { generateResumeEmbedding } from '@/lib/embeddings';
+import {
+  generateResumeEmbedding,
+  generateSectionalEmbeddings,
+} from '@/lib/embeddings';
 import { vectorStorage } from '@/lib/vector-storage';
 import z from 'zod';
 
@@ -79,7 +83,10 @@ export async function POST(
       throw new CustomError('Invalid resume data', 400);
     }
 
-    const resumeEmbedding = await generateResumeEmbedding(resumeJson);
+    const [resumeEmbedding, sectionalEmbeddings] = await Promise.all([
+      generateResumeEmbedding(resumeJson),
+      generateSectionalEmbeddings(resumeJson),
+    ]);
 
     const dbRes = await prisma.$transaction(async (tx) => {
       const updatedResume = await tx.resume.update({
@@ -87,13 +94,18 @@ export async function POST(
           id: payload.resumeId,
         },
         data: {
-          json: JSON.stringify(resumeJson),
+          json: resumeJson as Prisma.InputJsonValue,
         },
       });
 
       await vectorStorage.storeResumeEmbedding(
         updatedResume.id,
         resumeEmbedding,
+        tx,
+      );
+      await vectorStorage.storeSectionalEmbeddings(
+        updatedResume.id,
+        sectionalEmbeddings,
         tx,
       );
 

@@ -2,7 +2,18 @@ import { getEmbeddings } from './ai';
 
 type JsonRecord = Record<string, unknown>;
 
-export type SectionName = 'experience' | 'skills' | 'projects' | 'education' | 'summary';
+export type SectionName =
+  | 'experience'
+  | 'skills'
+  | 'projects'
+  | 'education'
+  | 'summary';
+
+export type SectionalEmbedding = {
+  section: SectionName;
+  text: string;
+  embedding: number[];
+};
 
 const isRecord = (value: unknown): value is JsonRecord =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -36,7 +47,13 @@ export const extractResumeSections = (
   resumeJson: unknown,
 ): Record<SectionName, string> => {
   if (!isRecord(resumeJson)) {
-    return { experience: '', skills: '', projects: '', education: '', summary: '' };
+    return {
+      experience: '',
+      skills: '',
+      projects: '',
+      education: '',
+      summary: '',
+    };
   }
 
   const sections: Record<SectionName, string> = {
@@ -103,7 +120,8 @@ export const extractResumeSections = (
 
       const graduationYear =
         asNumber(edu.graduationYear)?.toString() || asString(edu.date);
-      if (graduationYear) eduSections.push(`Graduation Year: ${graduationYear}`);
+      if (graduationYear)
+        eduSections.push(`Graduation Year: ${graduationYear}`);
       if (edu.gpa) eduSections.push(`GPA: ${asString(edu.gpa)}`);
       appendStringList(eduSections, edu.descriptions);
     });
@@ -355,33 +373,18 @@ export const generateResumeEmbedding = async (
  */
 export const generateSectionalEmbeddings = async (
   resumeJson: unknown,
-): Promise<Record<SectionName, number[]>> => {
+): Promise<SectionalEmbedding[]> => {
   const sections = extractResumeSections(resumeJson);
 
-  const embeddings: Record<SectionName, number[]> = {
-    experience: [],
-    skills: [],
-    projects: [],
-    education: [],
-    summary: [],
-  };
-
-  // Generate embedding for each section that has content
-  const embeddingPromises: Promise<void>[] = [];
-
-  for (const [sectionName, content] of Object.entries(sections)) {
-    if (content.trim()) {
-      embeddingPromises.push(
-        getEmbeddings(content).then((embedding) => {
-          embeddings[sectionName as SectionName] = embedding;
-        }),
-      );
-    }
-  }
-
-  await Promise.all(embeddingPromises);
-
-  return embeddings;
+  return await Promise.all(
+    Object.entries(sections)
+      .filter(([, content]) => content.trim())
+      .map(async ([sectionName, content]) => ({
+        section: sectionName as SectionName,
+        text: content,
+        embedding: await getEmbeddings(content),
+      })),
+  );
 };
 
 /**

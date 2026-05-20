@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from './db';
-import type { SectionName } from './embeddings';
+import type { SectionalEmbedding, SectionName } from './embeddings';
 
 type ResumeWithApplicant = Prisma.ResumeGetPayload<{
   include: { applicant: true };
@@ -25,7 +25,7 @@ export interface VectorStorage {
   ): Promise<void>;
   storeSectionalEmbeddings(
     resumeId: string,
-    embeddings: Record<SectionName, number[]>,
+    embeddings: SectionalEmbedding[],
     tx?: VectorClient,
   ): Promise<void>;
   storeJobEmbedding(
@@ -39,7 +39,9 @@ export interface VectorStorage {
     jobDescriptionEmbedding: number[],
     resumeId: string,
     topK?: number,
-  ): Promise<Array<{ section: SectionName; similarity: number }>>;
+  ): Promise<
+    Array<{ section: SectionName; content: string; similarity: number }>
+  >;
   findSimilarResumes(
     queryEmbedding: number[],
     limit?: number,
@@ -98,7 +100,7 @@ class PgVectorStorage implements VectorStorage {
 
   async storeSectionalEmbeddings(
     resumeId: string,
-    embeddings: Record<SectionName, number[]>,
+    embeddings: SectionalEmbedding[],
     tx?: VectorClient,
   ): Promise<void> {
     const client = tx || prisma;
@@ -109,17 +111,22 @@ class PgVectorStorage implements VectorStorage {
       WHERE resume_id = ${resumeId} AND section != 'full'
     `;
 
-    // Insert new sectional embeddings
-    for (const [sectionName, embedding] of Object.entries(embeddings)) {
-      if (embedding.length === 0) continue; // Skip empty embeddings
+    // Insert new sectional embeddings with the source text used for retrieval.
+    for (const sectionEmbedding of embeddings) {
+      if (sectionEmbedding.embedding.length === 0) continue;
 
-      validateEmbedding(embedding);
-      const vectorString = `[${embedding.join(',')}]`;
+      validateEmbedding(sectionEmbedding.embedding);
+      const vectorString = `[${sectionEmbedding.embedding.join(',')}]`;
       const embeddingId = crypto.randomUUID();
 
       await client.$executeRaw`
-        INSERT INTO "ResumeEmbedding" (id, resume_id, section, embedding, created_at, updated_at)
-        VALUES (${embeddingId}, ${resumeId}, ${sectionName}::"ResumeSection", ${vectorString}::vector, NOW(), NOW())
+        INSERT INTO "ResumeEmbedding" (id, resume_id, section, section_text, embedding, created_at, updated_at)
+        VALUES (${embeddingId}, ${resumeId}, ${sectionEmbedding.section}::"ResumeSection", ${sectionEmbedding.text}, ${vectorString}::vector, NOW(), NOW())
+        ON CONFLICT (resume_id, section)
+        DO UPDATE SET
+          section_text = ${sectionEmbedding.text},
+          embedding = ${vectorString}::vector,
+          updated_at = NOW()
       `;
     }
   }
@@ -143,7 +150,11 @@ class PgVectorStorage implements VectorStorage {
 
   async getResumeEmbedding(resumeId: string): Promise<number[] | null> {
     const result = await prisma.$queryRaw<Array<{ embedding: string }>>(
-      Prisma.sql`SELECT embedding::text as embedding FROM "ResumeEmbedding" WHERE resume_id = ${resumeId}`,
+      Prisma.sql`
+        SELECT embedding::text as embedding
+        FROM "ResumeEmbedding"
+        WHERE resume_id = ${resumeId} AND section = 'full'
+      `,
     );
 
     if (!result[0]) return null;
@@ -186,21 +197,28 @@ class PgVectorStorage implements VectorStorage {
     jobDescriptionEmbedding: number[],
     resumeId: string,
     topK: number = 3,
-  ): Promise<Array<{ section: SectionName; similarity: number }>> {
+  ): Promise<
+    Array<{ section: SectionName; content: string; similarity: number }>
+  > {
     validateEmbedding(jobDescriptionEmbedding);
     const vectorParams = Prisma.join(jobDescriptionEmbedding);
 
     const results = await prisma.$queryRaw<
       Array<{
         section: string;
+        section_text: string;
         similarity: number;
       }>
     >(
       Prisma.sql`
         SELECT section,
+               section_text,
                1 - (embedding <=> ARRAY[${vectorParams}]::vector) as similarity
         FROM "ResumeEmbedding"
-        WHERE resume_id = ${resumeId} AND section != 'full'
+        WHERE resume_id = ${resumeId}
+          AND section != 'full'
+          AND section_text IS NOT NULL
+          AND btrim(section_text) != ''
         ORDER BY embedding <=> ARRAY[${vectorParams}]::vector
         LIMIT ${topK}
       `,
@@ -208,6 +226,7 @@ class PgVectorStorage implements VectorStorage {
 
     return results.map((result) => ({
       section: result.section as SectionName,
+      content: result.section_text,
       similarity: result.similarity,
     }));
   }
@@ -232,6 +251,7 @@ class PgVectorStorage implements VectorStorage {
                1 - (re.embedding <=> ARRAY[${vectorParams}]::vector) as similarity
         FROM "Resume" r
         JOIN "ResumeEmbedding" re ON r.id = re.resume_id
+        WHERE re.section = 'full'
         ORDER BY re.embedding <=> ARRAY[${vectorParams}]::vector
         LIMIT ${limit}
       `,

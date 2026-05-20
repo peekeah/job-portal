@@ -38,6 +38,7 @@ const findLatestEmbeddedResumeId = async (
       FROM "Resume" r
       JOIN "ResumeEmbedding" re ON re.resume_id = r.id
       WHERE r.applicant_id = ${applicantId}
+        AND re.section = 'full'
         AND (
           ${excludeResumeId ?? null} IS NULL
           OR r.id <> ${excludeResumeId ?? null}

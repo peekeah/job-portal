@@ -139,7 +139,11 @@ export const getCoverLetterPrompt = ({
   jobTitle: string;
   companyName: string;
   jobDescription: string;
-  retrievedSections: Array<{ section: string; content: string; similarity: number }>;
+  retrievedSections: Array<{
+    section: string;
+    content: string;
+    similarity?: number;
+  }>;
 }) => `
 You are a professional cover letter writer. Create a compelling, personalized cover letter for the job application below.
 
@@ -150,11 +154,15 @@ Job Details:
 
 Candidate Resume Sections (retrieved by relevance):
 ${retrievedSections
-  .map(
-    (rs) =>
-      `${rs.section.toUpperCase()} (relevance: ${(rs.similarity * 100).toFixed(1)}%):
-${rs.content}`,
-  )
+  .map((rs) => {
+    const relevance =
+      typeof rs.similarity === 'number'
+        ? ` (relevance: ${(rs.similarity * 100).toFixed(1)}%)`
+        : '';
+
+    return `${rs.section.toUpperCase()}${relevance}:
+${rs.content}`;
+  })
   .join('\n\n')}
 
 Instructions:

@@ -5,7 +5,10 @@ import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
 import { UTApi } from 'uploadthing/server';
 import { parseResumeFromPdf } from '@/lib/resume-parser';
-import { generateSectionalEmbeddings } from '@/lib/embeddings';
+import {
+  generateResumeEmbedding,
+  generateSectionalEmbeddings,
+} from '@/lib/embeddings';
 import { vectorStorage } from '@/lib/vector-storage';
 
 const utapi = new UTApi();
@@ -75,16 +78,29 @@ async function postResume(req: NextRequest) {
         data: { json: parsedResume as Prisma.InputJsonValue },
       });
 
-      // Generate sectional embeddings from parsed content
+      // Generate full and sectional embeddings from parsed content
+      let resumeEmbedding;
       let sectionalEmbeddings;
       try {
-        sectionalEmbeddings = await generateSectionalEmbeddings(parsedResume);
+        [resumeEmbedding, sectionalEmbeddings] = await Promise.all([
+          generateResumeEmbedding(parsedResume),
+          generateSectionalEmbeddings(parsedResume),
+        ]);
       } catch (_embeddingError) {
         throw new CustomError('Failed to generate resume embeddings', 500);
       }
 
-      // Store sectional embeddings using vector storage abstraction
-      await vectorStorage.storeSectionalEmbeddings(newResume.id, sectionalEmbeddings, tx);
+      // Store embeddings using vector storage abstraction
+      await vectorStorage.storeResumeEmbedding(
+        newResume.id,
+        resumeEmbedding,
+        tx,
+      );
+      await vectorStorage.storeSectionalEmbeddings(
+        newResume.id,
+        sectionalEmbeddings,
+        tx,
+      );
 
       // Update applicant's active resume if needed
       if (!student.active_resume_id) {
