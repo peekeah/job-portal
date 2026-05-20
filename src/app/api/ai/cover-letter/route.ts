@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type {
+  ChatCompletionMessageFunctionToolCall,
+  ChatCompletionMessageParam,
+  ChatCompletionMessageToolCall,
+  ChatCompletionTool,
+} from 'openai/resources/chat/completions';
 import { z } from 'zod';
 
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
 import { CustomError, errorHandler } from '@/lib/errorHandler';
 import { parseResumeFromPdf } from '@/lib/resume-parser';
-import { createChatCompletionStream } from '@/lib/ai';
+import { createChatCompletionStream, createToolCallingStream } from '@/lib/ai';
 import { getCoverLetterPrompt } from '@/constant/ai-prompts';
 import {
   extractResumeSections,
@@ -18,6 +24,33 @@ const requestSchema = z.object({
   jobId: z.string(),
   resumeId: z.string(),
 });
+
+const relevantExperienceToolName = 'get_relevant_experience';
+
+const relevantExperienceToolInputSchema = z.object({
+  job_description: z.string().min(1),
+});
+
+const relevantExperienceTool: ChatCompletionTool = {
+  type: 'function',
+  function: {
+    name: relevantExperienceToolName,
+    description:
+      'Retrieve the resume sections that are most relevant to the provided job description.',
+    parameters: {
+      type: 'object',
+      properties: {
+        job_description: {
+          type: 'string',
+          description:
+            'The exact job description to use when retrieving relevant resume sections.',
+        },
+      },
+      required: ['job_description'],
+      additionalProperties: false,
+    },
+  },
+};
 
 const parseStoredResumeJson = (value: unknown) => {
   if (typeof value !== 'string') return value;
@@ -56,6 +89,34 @@ const getFallbackResumeSections = (resumeJson: unknown) => {
   }
 
   return [];
+};
+
+const findRelevantExperienceToolCall = (
+  toolCalls?: ChatCompletionMessageToolCall[],
+): ChatCompletionMessageFunctionToolCall | undefined =>
+  toolCalls?.find(
+    (toolCall): toolCall is ChatCompletionMessageFunctionToolCall =>
+      toolCall.type === 'function' &&
+      toolCall.function.name === relevantExperienceToolName,
+  );
+
+const getToolJobDescription = (
+  toolCall: ChatCompletionMessageFunctionToolCall,
+  fallbackJobDescription: string,
+) => {
+  try {
+    const parsedArguments = relevantExperienceToolInputSchema.safeParse(
+      JSON.parse(toolCall.function.arguments),
+    );
+
+    if (parsedArguments.success) {
+      return parsedArguments.data.job_description;
+    }
+  } catch (_err) {
+    return fallbackJobDescription;
+  }
+
+  return fallbackJobDescription;
 };
 
 export async function POST(req: NextRequest) {
@@ -104,27 +165,62 @@ export async function POST(req: NextRequest) {
       resumeJson = await parseResumeFromPdf(resume.url);
     }
 
-    // Generate job description embedding
-    const jobEmbedding = await generateJobEmbedding({
-      job_role: job.job_role,
-      description: job.description,
-      skills_required: job.skills_required,
-      location: job.location,
-      ctc: job.ctc,
-      stipend: job.stipend,
-    });
+    const retrieveSectionsForJob = async (jobDescription: string) => {
+      const jobEmbedding = await generateJobEmbedding({
+        job_role: job.job_role,
+        description: jobDescription,
+        skills_required: job.skills_required,
+        location: job.location,
+        ctc: job.ctc,
+        stipend: job.stipend,
+      });
 
-    // Retrieve top-3 most relevant resume sections
-    const relevantSections = await vectorStorage.retrieveRelevantSections(
-      jobEmbedding,
-      resumeId,
-      3,
-    );
+      const relevantSections = await vectorStorage.retrieveRelevantSections(
+        jobEmbedding,
+        resumeId,
+        3,
+      );
 
-    const resumeSections =
-      relevantSections.length > 0
+      return relevantSections.length > 0
         ? relevantSections
         : getFallbackResumeSections(resumeJson);
+    };
+
+    const toolMessages: ChatCompletionMessageParam[] = [
+      {
+        role: 'system',
+        content:
+          'You prepare context for cover letters. Before writing anything, call get_relevant_experience with the exact job description.',
+      },
+      {
+        role: 'user',
+        content: `Find the candidate resume sections most relevant to this role.
+
+Position: ${job.job_role}
+Company: ${job.company.name}
+Job Description:
+${job.description}`,
+      },
+    ];
+
+    const toolResponse = await createToolCallingStream(
+      toolMessages,
+      [relevantExperienceTool],
+      'gpt-4o-mini',
+      0.2,
+      0.1,
+      {
+        type: 'function',
+        function: { name: relevantExperienceToolName },
+      },
+    );
+
+    const toolCall = findRelevantExperienceToolCall(toolResponse.tool_calls);
+    const resumeSections = await retrieveSectionsForJob(
+      toolCall
+        ? getToolJobDescription(toolCall, job.description)
+        : job.description,
+    );
 
     const prompt = getCoverLetterPrompt({
       jobTitle: job.job_role,
@@ -133,8 +229,25 @@ export async function POST(req: NextRequest) {
       retrievedSections: resumeSections,
     });
 
+    const finalMessages: ChatCompletionMessageParam[] = toolCall
+      ? [
+          ...toolMessages,
+          {
+            role: 'assistant',
+            content: toolResponse.content,
+            tool_calls: [toolCall],
+          },
+          {
+            role: 'tool',
+            tool_call_id: toolCall.id,
+            content: JSON.stringify({ sections: resumeSections }),
+          },
+          { role: 'user', content: prompt },
+        ]
+      : [{ role: 'user', content: prompt }];
+
     const stream = await createChatCompletionStream(
-      [{ role: 'user', content: prompt }],
+      finalMessages,
       'gpt-4o-mini',
       0.7,
       0.1,

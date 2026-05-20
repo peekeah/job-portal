@@ -1,4 +1,10 @@
 import OpenAI from 'openai';
+import type {
+  ChatCompletionMessage,
+  ChatCompletionMessageParam,
+  ChatCompletionTool,
+  ChatCompletionToolChoiceOption,
+} from 'openai/resources/chat/completions';
 import { ResponsesModel } from 'openai/resources/shared';
 import { getEnv } from './config';
 
@@ -46,18 +52,18 @@ export const getEmbeddings = async (
 };
 
 export const createChatCompletionStream = async (
-  messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
+  messages: ChatCompletionMessageParam[],
   model: string = 'gpt-4o',
   temperature: number = 0.3,
   topP: number = 0.85,
 ) => {
-  const stream = (await client.chat.completions.create({
+  const stream = await client.chat.completions.create({
     model,
     messages,
     temperature,
     top_p: topP,
     stream: true,
-  })) as AsyncIterable<any>;
+  });
 
   const encoder = new TextEncoder();
 
@@ -77,4 +83,26 @@ export const createChatCompletionStream = async (
       }
     },
   });
+};
+
+export const createToolCallingStream = async (
+  messages: ChatCompletionMessageParam[],
+  tools: ChatCompletionTool[],
+  model: string = 'gpt-4o',
+  temperature: number = 0.3,
+  topP: number = 0.85,
+  toolChoice: ChatCompletionToolChoiceOption = 'auto',
+): Promise<ChatCompletionMessage> => {
+  const completion = await client.chat.completions.create({
+    model,
+    messages,
+    tools,
+    tool_choice: toolChoice,
+    parallel_tool_calls: false,
+    temperature,
+    top_p: topP,
+    stream: false,
+  });
+
+  return completion.choices[0].message;
 };
