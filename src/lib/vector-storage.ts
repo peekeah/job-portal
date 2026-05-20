@@ -61,6 +61,8 @@ const validateEmbedding = (embedding: number[]) => {
   }
 };
 
+const toVectorString = (embedding: number[]) => `[${embedding.join(',')}]`;
+
 const parsePgVectorText = (vectorText: string): number[] => {
   const trimmed = vectorText.trim();
   const normalized =
@@ -87,7 +89,7 @@ class PgVectorStorage implements VectorStorage {
     tx?: VectorClient,
   ): Promise<void> {
     validateEmbedding(embedding);
-    const vectorString = `[${embedding.join(',')}]`;
+    const vectorString = toVectorString(embedding);
     const embeddingId = crypto.randomUUID();
     const client = tx || prisma;
     await client.$executeRaw`
@@ -116,7 +118,7 @@ class PgVectorStorage implements VectorStorage {
       if (sectionEmbedding.embedding.length === 0) continue;
 
       validateEmbedding(sectionEmbedding.embedding);
-      const vectorString = `[${sectionEmbedding.embedding.join(',')}]`;
+      const vectorString = toVectorString(sectionEmbedding.embedding);
       const embeddingId = crypto.randomUUID();
 
       await client.$executeRaw`
@@ -137,7 +139,7 @@ class PgVectorStorage implements VectorStorage {
     tx?: VectorClient,
   ): Promise<void> {
     validateEmbedding(embedding);
-    const vectorString = `[${embedding.join(',')}]`;
+    const vectorString = toVectorString(embedding);
     const embeddingId = crypto.randomUUID();
     const client = tx || prisma;
     await client.$executeRaw`
@@ -201,7 +203,7 @@ class PgVectorStorage implements VectorStorage {
     Array<{ section: SectionName; content: string; similarity: number }>
   > {
     validateEmbedding(jobDescriptionEmbedding);
-    const vectorParams = Prisma.join(jobDescriptionEmbedding);
+    const vectorString = toVectorString(jobDescriptionEmbedding);
 
     const results = await prisma.$queryRaw<
       Array<{
@@ -213,13 +215,13 @@ class PgVectorStorage implements VectorStorage {
       Prisma.sql`
         SELECT section,
                section_text,
-               1 - (embedding <=> ARRAY[${vectorParams}]::vector) as similarity
+               1 - (embedding <=> ${vectorString}::vector) as similarity
         FROM "ResumeEmbedding"
         WHERE resume_id = ${resumeId}
           AND section != 'full'
           AND section_text IS NOT NULL
           AND btrim(section_text) != ''
-        ORDER BY embedding <=> ARRAY[${vectorParams}]::vector
+        ORDER BY embedding <=> ${vectorString}::vector
         LIMIT ${topK}
       `,
     );
@@ -236,7 +238,7 @@ class PgVectorStorage implements VectorStorage {
     limit: number = 10,
   ): Promise<Array<{ resume: ResumeWithApplicant; similarity: number }>> {
     validateEmbedding(queryEmbedding);
-    const vectorParams = Prisma.join(queryEmbedding);
+    const vectorString = toVectorString(queryEmbedding);
 
     const results = await prisma.$queryRaw<
       Array<{
@@ -248,11 +250,11 @@ class PgVectorStorage implements VectorStorage {
     >(
       Prisma.sql`
         SELECT r.id, r.title, r.applicant_id,
-               1 - (re.embedding <=> ARRAY[${vectorParams}]::vector) as similarity
+               1 - (re.embedding <=> ${vectorString}::vector) as similarity
         FROM "Resume" r
         JOIN "ResumeEmbedding" re ON r.id = re.resume_id
         WHERE re.section = 'full'
-        ORDER BY re.embedding <=> ARRAY[${vectorParams}]::vector
+        ORDER BY re.embedding <=> ${vectorString}::vector
         LIMIT ${limit}
       `,
     );
@@ -282,7 +284,7 @@ class PgVectorStorage implements VectorStorage {
     limit: number = 10,
   ): Promise<Array<{ job: JobWithCompany; similarity: number }>> {
     validateEmbedding(queryEmbedding);
-    const vectorParams = Prisma.join(queryEmbedding);
+    const vectorString = toVectorString(queryEmbedding);
 
     const results = await prisma.$queryRaw<
       Array<{
@@ -294,10 +296,10 @@ class PgVectorStorage implements VectorStorage {
     >(
       Prisma.sql`
         SELECT j.id, j.job_role, j.company_id,
-               1 - (je.embedding <=> ARRAY[${vectorParams}]::vector) as similarity
+               1 - (je.embedding <=> ${vectorString}::vector) as similarity
         FROM "Job" j
         JOIN "JobEmbedding" je ON j.id = je.job_id
-        ORDER BY je.embedding <=> ARRAY[${vectorParams}]::vector
+        ORDER BY je.embedding <=> ${vectorString}::vector
         LIMIT ${limit}
       `,
     );

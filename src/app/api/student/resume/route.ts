@@ -14,6 +14,8 @@ import { vectorStorage } from '@/lib/vector-storage';
 const utapi = new UTApi();
 
 async function postResume(req: NextRequest) {
+  let uploadedFileKey: string | null = null;
+
   try {
     const token = await authMiddleware(req, 'applicant');
 
@@ -49,6 +51,7 @@ async function postResume(req: NextRequest) {
     if (response.error) {
       throw new CustomError('Failed to upload file', 500);
     }
+    uploadedFileKey = response.data.key;
 
     const filename = `${student.id}-${Date.now()}-${file.name}`;
 
@@ -113,8 +116,17 @@ async function postResume(req: NextRequest) {
       return newResume;
     });
 
+    uploadedFileKey = null;
     return NextResponse.json({ status: true, data: result }, { status: 200 });
   } catch (err) {
+    if (uploadedFileKey) {
+      try {
+        await utapi.deleteFiles(uploadedFileKey);
+      } catch (_cleanupError) {
+        // Best-effort cleanup; preserve the original upload/parse/embed error.
+      }
+    }
+
     const [res, status] = errorHandler(err);
     return NextResponse.json(res, status);
   }
