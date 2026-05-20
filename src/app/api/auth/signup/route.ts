@@ -6,6 +6,7 @@ import { errorHandler } from '@/lib/errorHandler';
 import { prisma } from '@/lib/db';
 import { UserType } from '@prisma/client';
 import { companySchema } from '@/lib/schema';
+import { protectAuthRoute } from '@/lib/arcjet';
 
 const payloadSchema = z.object({
   email: z.email().min(5).max(50),
@@ -26,6 +27,8 @@ const applicantSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    await protectAuthRoute(req);
+
     const payload = await req.json();
     const { email, password: rawPwd, user_type } = payloadSchema.parse(payload);
 

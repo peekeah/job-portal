@@ -191,7 +191,7 @@ Merges to `main` use `ff-only` to keep history linear. Vercel deploys from `main
 - [ ] Agentic cover letter pipeline tool-calling loop for context-aware, multi-step generation
 - [ ] Google OAuth
 - [ ] Email verification with OTP
-- [ ] Rate limiting on auth endpoints
+- [x] Rate limiting on auth endpoints (Implemented using Arcjet)
 
 ## Contributing
 

@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import z from 'zod';
 import { Resend } from 'resend';
 
-import { CustomError, errorHandler } from '@/lib/errorHandler';
+import { errorHandler } from '@/lib/errorHandler';
 import { prisma } from '@/lib/db';
 import { signToken } from '@/lib/jwt';
 import { getEnv } from '@/lib/config';
+import { protectAuthRoute } from '@/lib/arcjet';
 
 function getEmailText(name: string, hash: string) {
   const CLIENT_HOST = getEnv('CLIENT_HOST', 'http://localhost:3000');
@@ -20,6 +21,8 @@ const payloadSchema = z.object({
 
 async function forgotPassword(req: NextRequest) {
   try {
+    await protectAuthRoute(req);
+
     const payload = await req.json();
     const { email } = payloadSchema.parse(payload);
 
@@ -30,7 +33,7 @@ async function forgotPassword(req: NextRequest) {
     });
 
     if (!existUser) {
-      throw new CustomError('user doest not exist', 403);
+      throw new Error('user doest not exist');
     }
 
     // Generate random password
@@ -67,7 +70,7 @@ async function forgotPassword(req: NextRequest) {
     });
 
     if (error) {
-      throw new CustomError('error password reset', 500);
+      throw new Error('error password reset');
     }
 
     return NextResponse.json({

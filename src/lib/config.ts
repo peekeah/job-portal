@@ -9,6 +9,7 @@ export type Environment = {
   UPLOADTHING_TOKEN: string;
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
+  ARCJET_KEY?: string;
 };
 
 export const getEnv = <K extends keyof Environment>(

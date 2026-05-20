@@ -1,8 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from './lib/token';
+import { authAj } from './lib/arcjet';
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
+
+  // Rate limit NextAuth routes (which we don't control directly)
+  if (
+    process.env.NODE_ENV === 'production' &&
+    authAj &&
+    (path.startsWith('/api/auth/callback/credentials') ||
+      path.startsWith('/api/auth/signin/credentials'))
+  ) {
+    const decision = await authAj.protect(req);
+
+    if (decision.isDenied()) {
+      if (decision.reason.isRateLimit()) {
+        return NextResponse.json(
+          { status: false, message: 'Too many requests. Please try again later.' },
+          { status: 429 },
+        );
+      } else if (decision.reason.isBot()) {
+        return NextResponse.json(
+          { status: false, message: 'Bot detected' },
+          { status: 403 },
+        );
+      }
+      return NextResponse.json(
+        { status: false, message: 'Forbidden' },
+        { status: 403 },
+      );
+    }
+  }
+
   const params = req.nextUrl.searchParams;
   const token = await getToken(req);
 
@@ -39,5 +69,13 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/', '/login', '/signup', '/reset-password', '/onboard'],
+  matcher: [
+    '/dashboard/:path*',
+    '/',
+    '/login',
+    '/signup',
+    '/reset-password',
+    '/onboard',
+    '/api/auth/:path*',
+  ],
 };

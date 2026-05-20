@@ -5,6 +5,7 @@ import { verifyToken } from '@/lib/jwt';
 import { JwtPayload } from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
 import z from 'zod';
+import { protectAuthRoute } from '@/lib/arcjet';
 
 const schema = z.object({
   token: z.string(),
@@ -13,6 +14,8 @@ const schema = z.object({
 
 const resetPassword = async (req: NextRequest) => {
   try {
+    await protectAuthRoute(req);
+
     const rawPayload = await req.json();
     const payload = schema.parse(rawPayload);
 
