@@ -1,14 +1,15 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AxiosError } from 'axios';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { IconBriefcaseFilled } from '@tabler/icons-react';
+import { IconBriefcaseFilled, IconBrandGoogle } from '@tabler/icons-react';
+import { setAuthCookies } from '@/lib/auth-utils';
 
 export default function Login() {
   const [user, setUser] = useState({
@@ -17,6 +18,22 @@ export default function Login() {
   });
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error === 'OAuthAccountExists') {
+      toast.error(
+        'An account already exists with these credentials. Please sign in with your password.',
+      );
+    } else if (error === 'UserNotFound') {
+      toast.error(
+        'No account found with this Google email. Please sign up first.',
+      );
+    } else if (error) {
+      toast.error(error);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async () => {
     try {
@@ -36,10 +53,14 @@ export default function Login() {
       if (err instanceof AxiosError) {
         msg = err?.response?.data?.error;
       }
-      toast.success(msg);
+      toast.error(msg);
     }
   };
 
+  const handleGoogleSignIn = () => {
+    setAuthCookies('login');
+    signIn('google', { callbackUrl: '/dashboard' });
+  };
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUser((prevUser) => ({
@@ -62,7 +83,27 @@ export default function Login() {
             <p className="text-sm">Welcome back! Sign in to continue</p>
           </div>
 
-          <div className="mt-6 space-y-6">
+          <div className="mt-6 space-y-4">
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2"
+              onClick={handleGoogleSignIn}
+            >
+              <IconBrandGoogle className="size-5" />
+              Continue with Google
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or continue with email
+                </span>
+              </div>
+            </div>
+
             <Input
               required
               name="email"

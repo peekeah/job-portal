@@ -26,6 +26,7 @@ type JobWithMatchScore = JobWithCompany & {
 
 export async function GET(req: NextRequest) {
   try {
+
     const token = await authMiddleware(req);
 
     let jobs: JobWithCompany[] | JobWithMatchScore[];

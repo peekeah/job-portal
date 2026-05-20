@@ -29,6 +29,7 @@ export type Job = {
   stipend: number;
   location: string;
   matchScore: number;
+  hasResumeEmbedding?: boolean;
   company: {
     name: string;
     profile_pic?: string;
@@ -211,6 +212,13 @@ const Jobs = () => {
     }
   };
 
+  useEffect(() => {
+    if (enhancingError) {
+      setSmartApplyJobId('');
+      setSmartApplyOption(null);
+    }
+  }, [enhancingError]);
+
   if (error || (!isLoading && !resData)) {
     return (
       <div className="mx-auto mt-32 grid h-full w-full">
@@ -248,13 +256,6 @@ const Jobs = () => {
       mutate('/api/jobs');
     }
   };
-
-  useEffect(() => {
-    if (enhancingError) {
-      setSmartApplyJobId('');
-      setSmartApplyOption(null);
-    }
-  }, [enhancingError]);
 
   return (
     <div className="h-full w-full p-5 sm:p-7 md:px-10 lg:px-5">
@@ -294,12 +295,26 @@ const Jobs = () => {
                     </div>
                   </div>
 
-                  <Badge
-                    variant={'outline'}
-                    className="border-green-500 text-green-500 bg-green-100 rounded-xl"
-                  >
-                    {job.matchScore}% Match
-                  </Badge>
+                  {job.hasResumeEmbedding ? (
+                    <Badge
+                      variant={'outline'}
+                      className="border-green-500 text-green-500 bg-green-100 rounded-xl"
+                    >
+                      {job.matchScore}% Match
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant={'outline'}
+                      className="border-blue-400 text-blue-500 bg-blue-50 rounded-xl cursor-help"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push('/dashboard/profile');
+                      }}
+                      title="Upload resume in profile to unlock match score"
+                    >
+                      Match Pending
+                    </Badge>
+                  )}
                 </div>
                 <Heading variant="h4">{job.job_role}</Heading>
                 <Text className="line-clamp-2 text-neutral-500">

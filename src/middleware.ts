@@ -7,9 +7,18 @@ export async function middleware(req: NextRequest) {
   const token = await getToken(req);
 
   const isProtectedRoute = path.startsWith('/dashboard');
+  const isOnboardRoute = path.startsWith('/onboard');
 
   const isPublicRoute =
     path === '/' || path.startsWith('/login') || path.startsWith('/signup');
+
+  if (token && token.needsOnboarding && !isOnboardRoute) {
+    return NextResponse.redirect(new URL('/onboard', req.url));
+  }
+
+  if (token && !token.needsOnboarding && isOnboardRoute) {
+    return NextResponse.redirect(new URL('/dashboard', req.url));
+  }
 
   if (isProtectedRoute && !token) {
     return NextResponse.redirect(new URL('/login', req.url));
@@ -30,5 +39,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/', '/login', '/signup', '/reset-password'],
+  matcher: ['/dashboard/:path*', '/', '/login', '/signup', '/reset-password', '/onboard'],
 };

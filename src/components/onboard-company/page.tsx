@@ -12,7 +12,7 @@ import { Card, CardContent } from '../ui/card';
 import useSWRMutation from 'swr/mutation';
 import { Spinner } from '../ui/spinner';
 import * as z from 'zod';
-import { CompanySize } from '@prisma/client';
+import { CompanySize, UserType } from '@prisma/client';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -24,6 +24,8 @@ import {
   CompanySignupPayload,
 } from './types';
 import { toast } from 'sonner';
+import { IconBrandGoogle } from '@tabler/icons-react';
+import { signIn } from 'next-auth/react';
 
 const initialFormData: CompanySignupPayload = {
   name: '',
@@ -79,6 +81,8 @@ const signupApiCall = async (
     founding_year: +arg.payload.founding_year,
   });
 };
+
+import { setAuthCookies } from '@/lib/auth-utils';
 
 const OnboardCompany = () => {
   const router = useRouter();
@@ -141,6 +145,33 @@ const OnboardCompany = () => {
         <div className="text-2xl leading-none font-semibold tracking-tight">
           Onboard Company
         </div>
+
+        <div className="mt-6">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full flex items-center justify-center gap-2"
+            onClick={() => {
+              setAuthCookies('signup', UserType.company);
+              signIn('google', { callbackUrl: '/onboard?type=company' });
+            }}
+          >
+            <IconBrandGoogle className="size-5" />
+            Continue with Google
+          </Button>
+        </div>
+
+        <div className="relative mt-6">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">
+              Or continue with email
+            </span>
+          </div>
+        </div>
+
         <div className="mx-auto my-8 flex items-center">
           {steps.map((step) => (
             <React.Fragment key={step.id}>

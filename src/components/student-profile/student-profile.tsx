@@ -17,8 +17,6 @@ import { Profile, resumeSchema, profileSchema } from './schema';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import useSWRMutation from 'swr/mutation';
-import { Resume } from '@/mock/resume';
-import type { Resume as ResumeResponse } from '@prisma/client';
 import { toast } from 'sonner';
 import { useUploadThing } from '@/lib/uploadthing-client';
 import { z } from 'zod';

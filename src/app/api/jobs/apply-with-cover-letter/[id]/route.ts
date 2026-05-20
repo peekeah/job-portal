@@ -6,7 +6,6 @@ import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
 import {
   calculateJobMatchScore,
-  getApplicantResumeEmbedding,
 } from '@/lib/match-score';
 
 const requestSchema = z.object({

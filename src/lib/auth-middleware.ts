@@ -10,6 +10,10 @@ export async function authMiddleware(req: NextRequest, role?: Role) {
     throw new CustomError('unauthorized', 401);
   }
 
+  if (!token.email) {
+    throw new CustomError('Token missing email', 401);
+  }
+
   if (role && token.user_type !== role) {
     throw new CustomError('you are not authorized', 401);
   }

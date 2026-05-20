@@ -1,4 +1,8 @@
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { 
+  PrismaClientKnownRequestError, 
+  PrismaClientUnknownRequestError, 
+  PrismaClientValidationError 
+} from '@prisma/client/runtime/library';
 import { treeifyError, ZodError } from 'zod';
 
 export class CustomError extends Error {
@@ -39,9 +43,7 @@ export const errorHandler = (err: unknown): [ResponseOut, Status] => {
     response.error = treeifyError(err);
     response.message = 'validationErrors';
     response.status = 422;
-  }
-
-  if (err instanceof PrismaClientKnownRequestError) {
+  } else if (err instanceof PrismaClientKnownRequestError) {
     response.status = 400;
     response.error = err.meta;
     switch (err.code) {
@@ -56,17 +58,28 @@ export const errorHandler = (err: unknown): [ResponseOut, Status] => {
       case 'P2025':
         // Record not found
         response.message = 'Record not found';
+        break;
       default:
         response.message = `Prisma error: ${err.code}`;
     }
-  }
-
-  if (err instanceof CustomError) {
+  } else if (err instanceof PrismaClientValidationError) {
+    response.status = 400;
+    response.message = 'Database validation error';
+    response.error = err.message;
+  } else if (err instanceof PrismaClientUnknownRequestError) {
+    response.status = 500;
+    response.message = 'Database unknown error';
+    response.error = err.message;
+  } else if (err instanceof CustomError) {
     response.message = err.message;
     response.status = err.status;
+  } else if (err instanceof Error) {
+    response.message = err.message;
+    response.error = err.stack;
   }
+
   /* eslint-disable no-console */
-  console.log('error:', err);
+  console.error('Error handled by errorHandler:', err);
 
   return [
     {

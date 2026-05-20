@@ -50,12 +50,14 @@ enum ResumeSection {
 // USER MODEL
 // =========================
 model Auth {
-  id         String   @id @default(uuid())
-  email      String   @unique
-  password   String
-  user_type  UserType @default(applicant)
-  user_id    String?
-  reset_hash String?
+  id                 String   @id @default(uuid())
+  email              String   @unique
+  password           String?
+  provider           String   @default("credentials")
+  providerAccountId String?
+  user_type          UserType @default(applicant)
+  user_id            String?
+  reset_hash         String?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

@@ -40,8 +40,8 @@ const findLatestEmbeddedResumeId = async (
       WHERE r.applicant_id = ${applicantId}
         AND re.section = 'full'
         AND (
-          ${excludeResumeId ?? null} IS NULL
-          OR r.id <> ${excludeResumeId ?? null}
+          ${excludeResumeId ?? null}::text IS NULL
+          OR r.id <> ${excludeResumeId ?? null}::text
         )
       ORDER BY r.updated_at DESC
       LIMIT 1

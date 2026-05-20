@@ -9,7 +9,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import useSWRMutation from 'swr/mutation';
 import { Spinner } from './ui/spinner';
 import { toast } from 'sonner';
-import { IconBriefcaseFilled } from '@tabler/icons-react';
+import { IconBriefcaseFilled, IconBrandGoogle } from '@tabler/icons-react';
+import { signIn } from 'next-auth/react';
 
 const initialFormValues = {
   name: '',
@@ -75,6 +76,9 @@ const signupApiCall = async (
   }
 };
 
+import { setAuthCookies } from '@/lib/auth-utils';
+import { UserType } from '@prisma/client';
+
 export default function SignUpPage() {
   const router = useRouter();
 
@@ -105,6 +109,11 @@ export default function SignUpPage() {
     }
   };
 
+  const handleGoogleSignIn = () => {
+    setAuthCookies('signup', UserType.applicant);
+    signIn('google', { callbackUrl: '/onboard?type=applicant' });
+  };
+
   return (
     <section className="mt-12 flex h-full p-5 md:mt-28 dark:bg-transparent">
       <form
@@ -121,7 +130,28 @@ export default function SignUpPage() {
             <p className="text-sm">Welcome! Create account to proceed</p>
           </div>
 
-          <div className="mt-6 space-y-6">
+          <div className="mt-6 space-y-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2"
+              onClick={handleGoogleSignIn}
+            >
+              <IconBrandGoogle className="size-5" />
+              Continue with Google
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or continue with email
+                </span>
+              </div>
+            </div>
+
             <Controller
               name="name"
               control={form.control}

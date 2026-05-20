@@ -7,6 +7,8 @@ export type Environment = {
   CLIENT_HOST: string;
   OPENAI_API_KEY: string;
   UPLOADTHING_TOKEN: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
 };
 
 export const getEnv = <K extends keyof Environment>(
