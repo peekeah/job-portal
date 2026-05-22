@@ -5,7 +5,10 @@ import { protectAuthRoute } from '@/lib/arcjet';
 
 const handler = NextAuth(authOptions);
 
-async function authHandler(req: NextRequest, context: any) {
+async function authHandler(
+  req: NextRequest,
+  context: { params: Promise<Record<string, string | string[]>> },
+) {
   const path = req.nextUrl.pathname;
 
   // Protect sensitive auth routes with Arcjet
@@ -15,10 +18,11 @@ async function authHandler(req: NextRequest, context: any) {
   ) {
     try {
       await protectAuthRoute(req);
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as { message?: string; status?: number };
       return NextResponse.json(
-        { status: false, message: err.message || 'Forbidden' },
-        { status: err.status || 403 },
+        { status: false, message: error.message || 'Forbidden' },
+        { status: error.status || 403 },
       );
     }
   }

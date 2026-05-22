@@ -13,11 +13,11 @@ export async function middleware(req: NextRequest) {
   const isPublicRoute =
     path === '/' || path.startsWith('/login') || path.startsWith('/signup');
 
-  if (token && (token as any).needsOnboarding && !isOnboardRoute) {
+  if (token && token.needsOnboarding && !isOnboardRoute) {
     return NextResponse.redirect(new URL('/onboard', req.url));
   }
 
-  if (token && !(token as any).needsOnboarding && isOnboardRoute) {
+  if (token && !token.needsOnboarding && isOnboardRoute) {
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 

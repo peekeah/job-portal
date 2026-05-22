@@ -9,39 +9,6 @@ import { getEnv } from './config';
 import { UserType } from '@prisma/client';
 import { AUTH_INTENT_COOKIE, AUTH_TYPE_COOKIE } from './auth-utils';
 
-declare module 'next-auth' {
-  interface Session {
-    user: {
-      id: string;
-      email: string;
-      name?: string | null;
-      user_type: string;
-      provider: string;
-      needsOnboarding: boolean;
-    };
-  }
-
-  interface User {
-    id: string;
-    email: string;
-    name?: string | null;
-    user_type: string;
-    provider: string;
-    needsOnboarding: boolean;
-  }
-}
-
-declare module 'next-auth/jwt' {
-  interface JWT {
-    id: string;
-    email?: string;
-    name?: string | null;
-    user_type: string;
-    provider: string;
-    needsOnboarding: boolean;
-  }
-}
-
 export const authOptions = {
   providers: [
     GoogleProvider({
