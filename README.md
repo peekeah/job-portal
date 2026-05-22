@@ -9,59 +9,59 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black)](https://vercel.com)
 
-[Live Demo](https://nexthire.vercel.app) · [Report a Bug](https://github.com/peekeah/nexthire/issues) · [Request a Feature](https://github.com/peekeah/nexthire/issues)
+[Live Demo](https://nexthire-app.vercel.app) · [Report a Bug](https://github.com/peekeah/nexthire/issues) · [Request a Feature](https://github.com/peekeah/nexthire/issues)
 
 </div>
 
-## About
+## Overview
 
 Most job boards stop at discovery. NextHire picks up where they leave off.
 
-Upload your resume once. When you apply to a role, NextHire parses it, runs it against the job description via an LLM and surfaces targeted alignment suggestions—missing keywords, scope mismatches, weak framing. You review an editable preview in-browser, approve or tweak the changes and submit. Your original resume stays untouched.
+Upload your resume once. When you apply to a role, NextHire parses it, runs it against the job description via a multi-pass LLM pipeline and surfaces targeted alignment suggestions covering missing keywords, scope mismatches and weak framing. You review an editable preview in-browser, approve or tweak the changes and submit. Your original resume stays untouched.
 
-Beyond enhancement, NextHire scores how well your resume actually fits the role using **pgvector cosine similarity** on OpenAI embeddings so you know before you apply. It also runs a structured AI critique of your resume and generates a personalized, streaming cover letter grounded in your actual experience and the job requirements using a **RAG-based agentic pipeline**.
+Beyond enhancement, NextHire scores how well your resume fits the role using pgvector cosine similarity on OpenAI embeddings so you know before you apply. It also runs a structured AI critique of your resume and generates a personalized, streaming cover letter grounded in your actual experience and the job requirements using a RAG-based agentic pipeline.
 
-The goal is to make every application feel as intentional as the job search itself.
+## Features
 
-## Core Features
+### AI Resume Intelligence
 
-### 🧠 AI Resume Intelligence
-- **Multi-Pass PDF Parsing**: Automatically extracts and normalizes content from PDFs into structured JSON.
-- **Sectional Embeddings**: Independently embeds experience, skills, and projects for high-precision semantic retrieval.
-- **AI-Powered ATS Alignment**: Rewrites resumes in two phases—structural normalization followed by content polish with ATS keyword alignment.
-- **Editable AI Previews**: Review and modify the AI-enhanced resume section by section before submission.
-- **Semantic Match Scoring**: Calculates real-time cosine similarity between resume and job description embeddings.
+- **Multi-pass PDF parsing:** Extracts and normalizes content from PDFs into structured JSON
+- **Sectional embeddings:** Independently embeds experience, skills and projects for high-precision semantic retrieval
+- **ATS alignment:** Rewrites resumes in two phases: structural normalization followed by content polish with keyword alignment
+- **Editable previews:** Review and modify the AI-enhanced resume section by section before submission
+- **Semantic match scoring:** Real-time cosine similarity between resume and job description embeddings
 
-### 🤖 Agentic AI Workflows
-- **RAG-based Cover Letter Agent**: A streaming, personalized generator that retrieves the top-k relevant experience sections using vector search before drafting.
-- **Tool-Calling Pipeline**: Uses an agentic loop to search the candidate's history for context-aware, multi-step cover letter generation.
-- **Resume Critique Agent**: Provides structured, streaming feedback on strengths, weaknesses, and specific improvements, with results cached for performance.
+### Agentic Workflows
 
-### 🛡️ Security & Performance
-- **Arcjet Integration**: Production-grade protection including:
-  - **Rate Limiting**: Protects auth endpoints (Login, Signup, Forgot Password) from brute-force attacks.
-  - **Bot Protection**: Identifies and blocks automated scrapers and malicious bots.
-  - **Shield**: WAF-like protection against SQL injection, XSS, and common web attacks.
-- **Secure Authentication**: NextAuth.js integration supporting both **Google OAuth** and credentials-based login with bcrypt hashing.
-- **Cloud File Storage**: Enterprise-ready PDF storage via **UploadThing**.
+- **RAG-based cover letter agent:** A streaming, personalized generator that retrieves the top-k relevant experience sections using vector search before drafting
+- **Tool-calling pipeline:** An agentic ReAct loop that searches candidate history for context-aware, multi-step cover letter generation
+- **Resume critique agent:** Structured, streaming feedback on strengths, weaknesses and specific improvements with results cached per resume
 
-### 💼 Application Flow
-- **Smart Apply**: Seamless choice between resume-only enhancement or a full resume + cover letter package.
-- **Dual-Sided Marketplace**: Complete workflows for both Applicants (profile, resume mgmt, applications) and Recruiters (job posting, candidate selection, applicant tracking).
+### Security
+
+- **Rate limiting:** Protects auth endpoints from brute-force attacks via Arcjet fixed-window rules
+- **Bot protection:** Identifies and blocks automated scrapers and malicious bots
+- **Shield:** WAF-style protection against SQL injection, XSS, and common web attacks
+- **Secure authentication:** NextAuth.js with Google OAuth and credentials-based login with bcrypt hashed passwords
+
+### Application Flow
+
+- **Smart apply:** choose between resume-only enhancement or a full resume and cover letter package before submitting
+- **Dual-sided marketplace:** complete workflows for both applicants (profile, resume management, applications) and recruiters (job posting, candidate selection, applicant tracking)
 
 ## Tech Stack
 
-| Layer          | Technology                                          |
-| -------------- | --------------------------------------------------- |
-| **Framework**  | Next.js 15 (App Router)                             |
-| **Database**   | PostgreSQL via [Neon](https://neon.tech)            |
-| **Vector DB**  | pgvector for high-performance similarity search      |
-| **ORM**        | Prisma                                              |
-| **Security**   | [Arcjet](https://arcjet.com) (Rate Limiting, Bot Detection, Shield) |
-| **Auth**       | NextAuth.js (JWT strategy, Google OAuth)            |
-| **AI Models**  | OpenAI (GPT-4o, GPT-4o-mini, text-embedding-3-small) |
-| **Storage**    | UploadThing                                         |
-| **UI**         | Tailwind CSS + Radix UI + Framer Motion             |
+| Layer | Technology |
+| --- | --- |
+| Framework | Next.js 16 (App Router) |
+| Database | PostgreSQL via [Neon](https://neon.tech) |
+| Vector search | pgvector (cosine similarity) |
+| ORM | Prisma |
+| Security | [Arcjet](https://arcjet.com) |
+| Auth | NextAuth.js (JWT, Google OAuth) |
+| AI models | OpenAI (GPT-4o, GPT-4o-mini, gpt-5.2, text-embedding-3-small) |
+| Storage | UploadThing |
+| UI | Tailwind CSS, Radix UI, Framer Motion |
 
 ## Getting Started
 
@@ -69,53 +69,53 @@ The goal is to make every application feel as intentional as the job search itse
 
 - Node.js 18+
 - pnpm
-- PostgreSQL database with **pgvector** enabled.
+- PostgreSQL with the `vector` extension enabled
 
-### Local Setup
+### Setup
 
-1. **Clone & Install**
-   ```bash
-   git clone https://github.com/peekeah/nexthire.git
-   cd nexthire
-   pnpm install
-   ```
+```bash
+git clone https://github.com/peekeah/nexthire.git
+cd nexthire
+pnpm install
+```
 
-2. **Environment Configuration**
-   Copy `.env.example` to `.env` and fill in your keys:
-   ```env
-   DATABASE_URL=
-   NEXTAUTH_SECRET=
-   NEXTAUTH_URL=http://localhost:3000
-   OPENAI_API_KEY=
-   UPLOADTHING_SECRET=
-   ARCJET_KEY= # Optional in development
-   ```
+Copy `.env.example` to `.env` and fill in your keys:
 
-3. **Database Initialization**
-   ```bash
-   pnpm db:push
-   pnpm dev
-   ```
+```env
+DATABASE_URL=
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=http://localhost:3000
+OPENAI_API_KEY=
+UPLOADTHING_SECRET=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+ARCJET_KEY=
+```
+
+```bash
+pnpm db:push
+pnpm dev
+```
 
 ## Project Structure
 
-```text
+```
 nexthire/
 ├── src/
 │   ├── app/
-│   │   ├── (auth)/         # Login, signup, verification flows
-│   │   ├── (dashboard)/    # Applicant and recruiter dashboards
-│   │   └── api/            # AI, Auth, and Job management routes
+│   │   ├── (auth)/              # Login, signup, verification flows
+│   │   ├── (dashboard)/         # Applicant and recruiter dashboards
+│   │   └── api/                 # AI, auth, and job management routes
 │   ├── components/
-│   │   ├── ai/             # CoverLetter, Critique, and SmartApply components
-│   │   └── ui/             # Radix-based design primitives
+│   │   ├── ai/                  # CoverLetter, Critique, and SmartApply components
+│   │   └── ui/                  # Radix-based design primitives
 │   ├── lib/
-│   │   ├── arcjet.ts       # Security middleware & rate limiting
-│   │   ├── embeddings.ts   # Sectional embedding generation logic
-│   │   ├── vector-storage.ts# pgvector retrieval and storage
-│   │   └── resume-parser/  # Custom PDF extraction engine
-│   └── constant/           # Prompt engineering and AI system messages
-└── prisma/                 # Schema and migrations
+│   │   ├── ai.ts                # OpenAI client and streaming utilities
+│   │   ├── embeddings.ts        # Sectional embedding generation logic
+│   │   ├── vector-storage.ts    # pgvector retrieval and storage abstraction
+│   │   └── resume-parser/       # Custom PDF extraction engine
+│   └── constant/                # Prompt engineering and AI system messages
+└── prisma/                      # Schema and migrations
 ```
 
 ## Contributing
@@ -124,4 +124,4 @@ Contributions are welcome. Please open an issue first to discuss significant cha
 
 ## License
 
-This project is licensed under the **GNU General Public License v3.0**.
+GNU General Public License v3.0
