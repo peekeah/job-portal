@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
-import { CustomError, errorHandler } from '@/lib/errorHandler';
+import { errorHandler } from '@/lib/errorHandler';
 import { parseResumeFromPdf } from '@/lib/resume-parser';
 import { createChatCompletionStream } from '@/lib/ai';
 import { getResumeCritiquePrompt } from '@/constant/ai-prompts';
+import { CustomError } from '@/lib/errors';
 
 export async function POST(req: NextRequest) {
   try {

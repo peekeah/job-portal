@@ -3,7 +3,8 @@ import type { Prisma } from '@prisma/client';
 
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
-import { errorHandler, CustomError } from '@/lib/errorHandler';
+import { errorHandler } from '@/lib/errorHandler';
+import { CustomError } from '@/lib/errors';
 import { jobSchema } from '@/lib/schema';
 import { generateJobEmbedding } from '@/lib/embeddings';
 import { vectorStorage } from '@/lib/vector-storage';

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import z from 'zod';
 
-import { CustomError, errorHandler } from '@/lib/errorHandler';
+import { errorHandler } from '@/lib/errorHandler';
+import { CustomError } from '@/lib/errors';
 import { prisma } from '@/lib/db';
 import { authMiddleware } from '@/lib/auth-middleware';
 

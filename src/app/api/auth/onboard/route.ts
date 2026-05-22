@@ -5,8 +5,9 @@ import { UserType } from '@prisma/client';
 
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { errorHandler, CustomError } from '@/lib/errorHandler';
+import { errorHandler } from '@/lib/errorHandler';
 import { companySchema } from '@/lib/schema';
+import { CustomError } from '@/lib/errors';
 
 const applicantOnboardingSchema = z.object({
   name: z.string().min(1),

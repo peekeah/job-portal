@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
-import { CustomError } from './errorHandler';
 import { getToken } from './token';
+import { CustomError } from './errors';
 
 export type Role = 'company' | 'applicant' | 'admin';
 

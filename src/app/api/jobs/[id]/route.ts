@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { authMiddleware } from '@/lib/auth-middleware';
-import { CustomError, errorHandler } from '@/lib/errorHandler';
+import { errorHandler } from '@/lib/errorHandler';
+import { CustomError } from '@/lib/errors';
 import { prisma } from '@/lib/db';
 import { JobStatus as Status } from '@prisma/client';
 import { JWT } from 'next-auth/jwt';

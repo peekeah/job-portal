@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { hashPassword } from '@/lib/bcrypt';
-import { errorHandler, CustomError } from '@/lib/errorHandler';
+import { errorHandler } from '@/lib/errorHandler';
+import { CustomError } from '@/lib/errors';
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
 

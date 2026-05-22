@@ -1,11 +1,12 @@
 import { hashPassword } from '@/lib/bcrypt';
 import { prisma } from '@/lib/db';
-import { CustomError, errorHandler } from '@/lib/errorHandler';
+import { errorHandler } from '@/lib/errorHandler';
 import { verifyToken } from '@/lib/jwt';
 import { JwtPayload } from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
 import z from 'zod';
 import { protectAuthRoute } from '@/lib/arcjet';
+import { CustomError } from '@/lib/errors';
 
 const schema = z.object({
   token: z.string(),

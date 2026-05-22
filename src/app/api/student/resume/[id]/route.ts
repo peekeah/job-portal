@@ -1,8 +1,9 @@
 import { prisma } from '@/lib/db';
-import { CustomError, errorHandler } from '@/lib/errorHandler';
+import { errorHandler } from '@/lib/errorHandler';
 import { authMiddleware } from '@/lib/auth-middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { UTApi } from 'uploadthing/server';
+import { CustomError } from '@/lib/errors';
 
 const utapi = new UTApi();
 

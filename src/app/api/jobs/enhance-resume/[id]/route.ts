@@ -3,7 +3,8 @@ import type { Prisma } from '@prisma/client';
 
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
-import { CustomError, errorHandler } from '@/lib/errorHandler';
+import { errorHandler } from '@/lib/errorHandler';
+import { CustomError } from '@/lib/errors';
 import { groupTextItemsIntoLines } from '@/lib/resume-parser/group-text-items-into-lines';
 import { groupLinesIntoSections } from '@/lib/resume-parser/group-lines-into-sections';
 import { extractResumeFromSections } from '@/lib/resume-parser/extract-resume-from-sections';

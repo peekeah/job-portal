@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authMiddleware } from '@/lib/auth-middleware';
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
-import { CustomError, errorHandler } from '@/lib/errorHandler';
+import { errorHandler } from '@/lib/errorHandler';
+import { CustomError } from '@/lib/errors';
 import { calculateJobMatchScore } from '@/lib/match-score';
 import {
   generateResumeEmbedding,

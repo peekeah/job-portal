@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
-import { errorHandler, CustomError } from '@/lib/errorHandler';
+import { errorHandler } from '@/lib/errorHandler';
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
 import { UTApi } from 'uploadthing/server';
@@ -10,6 +10,7 @@ import {
   generateSectionalEmbeddings,
 } from '@/lib/embeddings';
 import { vectorStorage } from '@/lib/vector-storage';
+import { CustomError } from '@/lib/errors';
 
 const utapi = new UTApi();
 

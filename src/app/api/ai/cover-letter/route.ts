@@ -9,7 +9,7 @@ import { z } from 'zod';
 
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
-import { CustomError, errorHandler } from '@/lib/errorHandler';
+import { errorHandler } from '@/lib/errorHandler';
 import { parseResumeFromPdf } from '@/lib/resume-parser';
 import { createChatCompletionStream, createToolCallingStream } from '@/lib/ai';
 import { getCoverLetterPrompt } from '@/constant/ai-prompts';
@@ -19,6 +19,7 @@ import {
   prepareResumeContent,
 } from '@/lib/embeddings';
 import { vectorStorage } from '@/lib/vector-storage';
+import { CustomError } from '@/lib/errors';
 
 const requestSchema = z.object({
   jobId: z.string(),
