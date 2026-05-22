@@ -1,6 +1,6 @@
-import { BULLET_POINTS } from '@/lib/resume-parser/extract-resume-from-sections/lib/bullet-points';
-import { isBold } from '@/lib/resume-parser/extract-resume-from-sections/lib/common-features';
-import type { Lines, Line, Subsections } from '@/lib/resume-parser/types';
+import { BULLET_POINTS } from './bullet-points';
+import { isBold } from './common-features';
+import type { Lines, Line, Subsections } from '../types';
 
 /**
  * Divide lines into subsections based on difference in line gap or bold text.

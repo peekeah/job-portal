@@ -8,8 +8,9 @@ export const getSectionLinesByKeywords = (
   keywords: string[],
 ) => {
   for (const sectionName in sections) {
+    const normalizedName = sectionName.replace(/\s/g, '').toLowerCase();
     const hasKeyWord = keywords.some((keyword) =>
-      sectionName.toLowerCase().includes(keyword),
+      normalizedName.includes(keyword.toLowerCase()),
     );
     if (hasKeyWord) {
       return sections[sectionName];

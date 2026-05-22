@@ -63,7 +63,7 @@ export default function EnhancedJobPreviewModal({
 
   useEffect(() => {
     if (enhancedResume?.json) {
-      setEditedResume(JSON.parse(enhancedResume.json as string));
+      setEditedResume(enhancedResume.json);
     }
   }, [enhancedResume]);
 
@@ -73,7 +73,7 @@ export default function EnhancedJobPreviewModal({
 
   const handleCancel = () => {
     if (enhancedResume?.json) {
-      setEditedResume(JSON.parse(enhancedResume.json as string));
+      setEditedResume(enhancedResume.json);
     }
     setIsEditing(false);
   };

@@ -235,16 +235,22 @@ ${job.description}`,
       retrievedSections,
     );
 
-    const response = await callLLm(llmInput, 'gpt-5.2', 0.3, 0.85);
+    const response = await callLLm(llmInput, 'gpt-4o', 0.3, 0.85);
 
     const output = response.output[0].content[0].text;
-    const cleanedOutput = output
-      .replace(/```json/gi, '')
-      .replace(/```/g, '')
-      .trim();
 
     const extractJsonPayload = (text: string) => {
-      const firstBrace = text.indexOf('{');
+      try {
+        // Try to find the first '{' and last '}'
+        const firstBrace = text.indexOf('{');
+        const lastBrace = text.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+          return text.slice(firstBrace, lastBrace + 1);
+        }
+      } catch (_e) {
+        // Fallback to existing logic
+      }
+
       const firstBracket = text.indexOf('[');
       const startIndex = [firstBrace, firstBracket]
         .filter((index) => index !== -1)
@@ -262,8 +268,9 @@ ${job.description}`,
     };
 
     let enhancedResume: Resume;
+    const jsonPayload = extractJsonPayload(output);
     try {
-      enhancedResume = JSON.parse(extractJsonPayload(cleanedOutput)) as Resume;
+      enhancedResume = JSON.parse(jsonPayload) as Resume;
     } catch (_err) {
       throw new CustomError('LLM returned unparseable response', 502);
     }
