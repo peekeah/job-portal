@@ -1,11 +1,38 @@
 export const getResumeBuilderPrompt = (
   resumeInput: string,
   jobDescription: string,
+  retrievedSections?: Array<{
+    section: string;
+    content: string;
+    similarity?: number;
+  }>,
 ) => `
 You are a senior resume processing agent used in production.
 
 You MUST follow the phases below IN ORDER.
 Do NOT skip or merge phases.
+
+${
+  retrievedSections && retrievedSections.length > 0
+    ? `
+====================================
+RETRIEVED CONTEXT (RAG)
+====================================
+The following resume sections were identified as highly relevant to the job description.
+Use these to inform Phase 2 alignment:
+${retrievedSections
+  .map((rs) => {
+    const relevance =
+      typeof rs.similarity === 'number'
+        ? ` (relevance: ${(rs.similarity * 100).toFixed(1)}%)`
+        : '';
+    return `${rs.section.toUpperCase()}${relevance}:
+${rs.content}`;
+  })
+  .join('\n\n')}
+`
+    : ''
+}
 
 ====================================
 PHASE 1 — STRICT NORMALIZATION (NO REWRITING)

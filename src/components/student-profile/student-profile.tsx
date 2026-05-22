@@ -122,13 +122,9 @@ function StudentProfile() {
     if (!file) return;
 
     // Validate file type
-    const validTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ];
+    const validTypes = ['application/pdf'];
     if (!validTypes.includes(file.type)) {
-      toast.error('Only PDF and Word documents are allowed');
+      toast.error('Only PDF documents are allowed');
       return;
     }
 
@@ -398,7 +394,7 @@ function StudentProfile() {
                   <label className="relative flex w-full cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-300 p-6 transition hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-900">
                     <input
                       type="file"
-                      accept=".pdf,.doc,.docx"
+                      accept=".pdf"
                       onChange={handleResumeUpload}
                       disabled={isUploadingResume}
                       className="hidden"
@@ -410,7 +406,7 @@ function StudentProfile() {
                           Click to upload resume
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          PDF or Word documents (Max 5MB)
+                          PDF documents (Max 5MB)
                         </p>
                       </div>
                     </div>

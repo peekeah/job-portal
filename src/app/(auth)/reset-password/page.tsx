@@ -5,10 +5,10 @@ import { IconBriefcaseFilled } from '@tabler/icons-react';
 import axios from 'axios';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ChangeEventHandler, FormEventHandler, useState } from 'react';
+import { ChangeEventHandler, FormEventHandler, Suspense, useState } from 'react';
 import { toast } from 'sonner';
 
-const ResetPassword = () => {
+const ResetPasswordForm = () => {
   const params = useSearchParams();
   const token = params.get('token');
   const router = useRouter();
@@ -101,6 +101,14 @@ const ResetPassword = () => {
         </div>
       </form>
     </section>
+  );
+};
+
+const ResetPassword = () => {
+  return (
+    <Suspense>
+      <ResetPasswordForm />
+    </Suspense>
   );
 };
 

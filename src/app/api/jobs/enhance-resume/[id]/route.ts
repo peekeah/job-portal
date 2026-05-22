@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
+import type {
+  ChatCompletionMessageFunctionToolCall,
+  ChatCompletionMessageParam,
+  ChatCompletionMessageToolCall,
+  ChatCompletionTool,
+} from 'openai/resources/chat/completions';
+import { z } from 'zod';
 
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
@@ -9,14 +16,101 @@ import { groupTextItemsIntoLines } from '@/lib/resume-parser/group-text-items-in
 import { groupLinesIntoSections } from '@/lib/resume-parser/group-lines-into-sections';
 import { extractResumeFromSections } from '@/lib/resume-parser/extract-resume-from-sections';
 import { readPdf } from '@/lib/resume-parser/read-pdf';
-import { callLLm } from '@/lib/ai';
+import { callLLm, createToolCallingStream } from '@/lib/ai';
 import { getResumeBuilderPrompt } from '@/constant/ai-prompts';
 import { initialResume, Resume } from '@/mock/resume';
 import {
   generateResumeEmbedding,
   generateSectionalEmbeddings,
+  generateJobEmbedding,
+  extractResumeSections,
+  prepareResumeContent,
 } from '@/lib/embeddings';
 import { vectorStorage } from '@/lib/vector-storage';
+
+const relevantExperienceToolName = 'get_relevant_experience';
+
+const relevantExperienceToolInputSchema = z.object({
+  job_description: z.string().min(1),
+});
+
+const relevantExperienceTool: ChatCompletionTool = {
+  type: 'function',
+  function: {
+    name: relevantExperienceToolName,
+    description:
+      'Retrieve the resume sections that are most relevant to the provided job description.',
+    parameters: {
+      type: 'object',
+      properties: {
+        job_description: {
+          type: 'string',
+          description:
+            'The exact job description to use when retrieving relevant resume sections.',
+        },
+      },
+      required: ['job_description'],
+      additionalProperties: false,
+    },
+  },
+};
+
+const stringifyResumeJson = (value: unknown) => {
+  if (typeof value === 'string') return value;
+  return JSON.stringify(value, null, 2) ?? '';
+};
+
+const getFallbackResumeSections = (resumeJson: unknown) => {
+  const extractedSections = extractResumeSections(resumeJson);
+  const sections = Object.entries(extractedSections)
+    .map(([section, content]) => ({
+      section,
+      content,
+    }))
+    .filter((section) => section.content.trim().length > 0);
+
+  if (sections.length > 0) return sections;
+
+  const fullResumeContent = prepareResumeContent(resumeJson);
+  if (fullResumeContent.trim()) {
+    return [{ section: 'resume', content: fullResumeContent }];
+  }
+
+  const resumeJsonContent = stringifyResumeJson(resumeJson);
+  if (resumeJsonContent.trim()) {
+    return [{ section: 'resume_json', content: resumeJsonContent }];
+  }
+
+  return [];
+};
+
+const findRelevantExperienceToolCall = (
+  toolCalls?: ChatCompletionMessageToolCall[],
+): ChatCompletionMessageFunctionToolCall | undefined =>
+  toolCalls?.find(
+    (toolCall): toolCall is ChatCompletionMessageFunctionToolCall =>
+      toolCall.type === 'function' &&
+      toolCall.function.name === relevantExperienceToolName,
+  );
+
+const getToolJobDescription = (
+  toolCall: ChatCompletionMessageFunctionToolCall,
+  fallbackJobDescription: string,
+) => {
+  try {
+    const parsedArguments = relevantExperienceToolInputSchema.safeParse(
+      JSON.parse(toolCall.function.arguments),
+    );
+
+    if (parsedArguments.success) {
+      return parsedArguments.data.job_description;
+    }
+  } catch (_err) {
+    return fallbackJobDescription;
+  }
+
+  return fallbackJobDescription;
+};
 
 export async function POST(
   req: NextRequest,
@@ -35,7 +129,10 @@ export async function POST(
     if (!applicant) throw new CustomError('Applicant not found', 404);
 
     // Validate job exists
-    const job = await prisma.job.findUnique({ where: { id: jobId } });
+    const job = await prisma.job.findUnique({
+      where: { id: jobId },
+      include: { company: true },
+    });
     if (!job) throw new CustomError('Job not found', 404);
 
     // validate if jobs is applied
@@ -69,15 +166,73 @@ export async function POST(
     // Resume parser: Parse the resume & exctract the content
     const lines = groupTextItemsIntoLines(pdfContent);
     const sections = groupLinesIntoSections(lines);
-    const resume = extractResumeFromSections(sections);
+    const resumeJson = extractResumeFromSections(sections);
 
-    const profile = { ...resume.profile };
-    resume.profile = { ...initialResume.profile };
-    resume.profile.summary = profile.summary;
+    const profile = { ...resumeJson.profile };
+    resumeJson.profile = { ...initialResume.profile };
+    resumeJson.profile.summary = profile.summary;
+
+    const retrieveSectionsForJob = async (jobDescription: string) => {
+      const jobEmbedding = await generateJobEmbedding({
+        job_role: job.job_role,
+        description: jobDescription,
+        skills_required: job.skills_required,
+        location: job.location,
+        ctc: job.ctc,
+        stipend: job.stipend,
+      });
+
+      const relevantSections = await vectorStorage.retrieveRelevantSections(
+        jobEmbedding,
+        existResume.id,
+        3,
+      );
+
+      return relevantSections.length > 0
+        ? relevantSections
+        : getFallbackResumeSections(resumeJson);
+    };
+
+    const toolMessages: ChatCompletionMessageParam[] = [
+      {
+        role: 'system',
+        content:
+          'You prepare context for resume enhancement. Before continuing, call get_relevant_experience with the exact job description.',
+      },
+      {
+        role: 'user',
+        content: `Find the candidate resume sections most relevant to this role.
+
+Position: ${job.job_role}
+Company: ${job.company.name}
+Job Description:
+${job.description}`,
+      },
+    ];
+
+    const toolResponse = await createToolCallingStream(
+      toolMessages,
+      [relevantExperienceTool],
+      'gpt-4o-mini',
+      0.2,
+      0.1,
+      {
+        type: 'function',
+        function: { name: relevantExperienceToolName },
+      },
+    );
+
+    const toolCall = findRelevantExperienceToolCall(toolResponse.tool_calls);
+    const retrievedSections = await retrieveSectionsForJob(
+      toolCall
+        ? getToolJobDescription(toolCall, job.description)
+        : job.description,
+    );
 
     const llmInput = getResumeBuilderPrompt(
-      JSON.stringify(resume),
+      JSON.stringify(resumeJson),
       job.description,
+      retrievedSections,
     );
 
     const response = await callLLm(llmInput, 'gpt-5.2', 0.3, 0.85);
@@ -128,6 +283,17 @@ export async function POST(
 
     // Save in the DB
     const dbRes = await prisma.$transaction(async (tx) => {
+      // Cleanup orphaned json resumes (not used in any application)
+      await tx.resume.deleteMany({
+        where: {
+          applicant_id: applicant.id,
+          type: 'json',
+          appliedJobs: {
+            none: {},
+          },
+        },
+      });
+
       const newResume = await tx.resume.create({
         data: {
           title: resumeTitle,

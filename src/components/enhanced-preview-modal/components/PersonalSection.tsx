@@ -1,10 +1,11 @@
+import { Dispatch, SetStateAction } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Resume } from '@/mock/resume';
 
 type Props = {
   data: Resume;
-  setData: (resume: Resume) => void;
+  setData: Dispatch<SetStateAction<Resume>>;
 };
 
 export const PersonalSection = ({ data, setData }: Props) => {
