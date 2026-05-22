@@ -1,6 +1,6 @@
 import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/next";
 import { NextRequest } from "next/server";
-import { CustomError } from "./errorHandler";
+import { CustomError } from "./errors";
 
 const ARCJET_KEY = process.env.ARCJET_KEY;
 const isProd = process.env.NODE_ENV === "production";
