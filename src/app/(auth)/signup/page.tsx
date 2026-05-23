@@ -1,8 +1,8 @@
 'use client';
 import SignUpPage from '@/components/signup';
 
-const Singup = () => {
+const Signup = () => {
   return <SignUpPage />;
 };
 
-export default Singup;
+export default Signup;

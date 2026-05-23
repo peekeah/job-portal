@@ -63,7 +63,7 @@ export default function EnhancedJobPreviewModal({
 
   useEffect(() => {
     if (enhancedResume?.json) {
-      setEditedResume(enhancedResume.json);
+      setEditedResume(enhancedResume.json as unknown as Resume);
     }
   }, [enhancedResume]);
 

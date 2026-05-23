@@ -54,11 +54,11 @@ export const companySchema = z.object({
     .optional()
     .nullable(),
 });
-
 export const jobSchema = z.object({
+  id: z.string().optional(),
   job_role: z
     .string({ error: 'Job role is required' })
-    .min(2, { message: 'Job role must be at least 2 characters long' }),
+    .min(3, { message: 'Job role must be at least 3 characters long' }),
 
   description: z
     .string({ error: 'Description is required' })
@@ -77,10 +77,5 @@ export const jobSchema = z.object({
     .min(1, { message: 'At least one skill is required' }),
 });
 
-export const resumeUploadSchema = z.object({
-  resume_url: z.string().url('Invalid URL').min(1, 'Resume URL is required'),
-});
+export const postedJobSchema = jobSchema;
 
-export const resumeDeleteSchema = z.object({
-  resume_url: z.string().url('Invalid URL'),
-});

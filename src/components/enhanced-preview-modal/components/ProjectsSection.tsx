@@ -10,7 +10,11 @@ type Props = {
 };
 
 export const ProjectsSection = ({ data, setData }: Props) => {
-  const handleProjectChange = (idx: number, field: string, value: string) => {
+  const handleProjectChange = (
+    idx: number,
+    field: keyof Resume['projects'][number],
+    value: string,
+  ) => {
     const updated = data.projects.map((project, i) =>
       i === idx ? { ...project, [field]: value } : project,
     );

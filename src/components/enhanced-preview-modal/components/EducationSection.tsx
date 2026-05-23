@@ -10,7 +10,11 @@ type Props = {
 };
 
 export const EducationSection = ({ data, setData }: Props) => {
-  const handleEduChange = (idx: number, field: string, value: string) => {
+  const handleEduChange = (
+    idx: number,
+    field: keyof Resume['educations'][number],
+    value: string,
+  ) => {
     const updated = data.educations.map((edu, i) =>
       i === idx ? { ...edu, [field]: value } : edu,
     );
