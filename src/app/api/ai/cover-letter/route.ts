@@ -172,11 +172,20 @@ export async function POST(req: NextRequest) {
 
     const app = workflow.compile();
 
+    const profile = (resumeJson as any)?.profile || {};
+
     // 4. Execute Graph
     const systemPrompt = new SystemMessage(
-      'You are a professional cover letter writer. ' +
-      'First, call get_relevant_experience with the job description to find matching skills. ' +
-      'Then, use the retrieved sections to write a tailored, professional cover letter.'
+      `You are a professional cover letter writer for ${profile.name || 'a candidate'}. ` +
+      `Candidate Details:
+       - Name: ${profile.name || ''}
+       - Email: ${profile.email || ''}
+       - Phone: ${profile.phone || ''}
+       - Location: ${profile.location || ''}
+      
+      First, call get_relevant_experience with the job description to find matching skills. ` +
+      'Then, use the retrieved sections and the candidate details provided above to write a tailored, professional cover letter. ' +
+      'DO NOT use placeholders like [Your Name], [Your Email], or [Date] if you can avoid it; use the provided details or leave them out if they would look like a placeholder.'
     );
 
     const userMessage = new HumanMessage(

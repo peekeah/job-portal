@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
 import { toast } from 'sonner';
-import { IconX, IconDownload, IconCopy } from '@tabler/icons-react';
+import { IconDownload, IconCopy } from '@tabler/icons-react';
 
 type ResumeItem = {
   id: string;
@@ -137,16 +137,13 @@ export default function CoverLetterGenerator({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col gap-4">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between gap-4">
+          <DialogTitle>
             <div>
               <div className="text-lg font-semibold">Generate Cover Letter</div>
               <div className="text-sm text-gray-600">
                 {jobTitle} at {companyName}
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
-              <IconX className="h-4 w-4" />
-            </Button>
           </DialogTitle>
         </DialogHeader>
 
