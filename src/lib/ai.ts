@@ -1,3 +1,20 @@
+import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
+import { getEnv } from './config';
+
+// LangChain/LangGraph compatible model instance
+export const llm = new ChatOpenAI({
+  apiKey: getEnv('OPENAI_API_KEY'),
+  modelName: 'gpt-4o',
+  temperature: 0.3,
+});
+
+// LangChain compatible embeddings instance
+export const embeddings = new OpenAIEmbeddings({
+  apiKey: getEnv('OPENAI_API_KEY'),
+  modelName: 'text-embedding-3-small',
+});
+
+// Keep existing exports for backward compatibility during migration
 import OpenAI from 'openai';
 import type {
   ChatCompletionMessage,
@@ -6,7 +23,6 @@ import type {
   ChatCompletionToolChoiceOption,
 } from 'openai/resources/chat/completions';
 import { ResponsesModel } from 'openai/resources/shared';
-import { getEnv } from './config';
 
 const client = new OpenAI({
   apiKey: getEnv('OPENAI_API_KEY'),

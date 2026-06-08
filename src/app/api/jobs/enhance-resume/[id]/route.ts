@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
-import type {
-  ChatCompletionMessageFunctionToolCall,
-  ChatCompletionMessageParam,
-  ChatCompletionMessageToolCall,
-  ChatCompletionTool,
-} from 'openai/resources/chat/completions';
 import { z } from 'zod';
+import { tool } from '@langchain/core/tools';
+import { StateGraph, MessagesAnnotation } from '@langchain/langgraph';
+import { ToolNode } from '@langchain/langgraph/prebuilt';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
@@ -16,9 +14,10 @@ import { groupTextItemsIntoLines } from '@/lib/resume-parser/group-text-items-in
 import { groupLinesIntoSections } from '@/lib/resume-parser/group-lines-into-sections';
 import { extractResumeFromSections } from '@/lib/resume-parser/extract-resume-from-sections';
 import { readPdf } from '@/lib/resume-parser/read-pdf';
-import { callLLm, createToolCallingStream } from '@/lib/ai';
+import { llm } from '@/lib/ai';
 import { getResumeBuilderPrompt } from '@/constant/ai-prompts';
 import { initialResume, Resume } from '@/mock/resume';
+import { resumeSchema } from '@/lib/resume-schema';
 import {
   generateResumeEmbedding,
   generateSectionalEmbeddings,
@@ -27,90 +26,6 @@ import {
   prepareResumeContent,
 } from '@/lib/embeddings';
 import { vectorStorage } from '@/lib/vector-storage';
-
-const relevantExperienceToolName = 'get_relevant_experience';
-
-const relevantExperienceToolInputSchema = z.object({
-  job_description: z.string().min(1),
-});
-
-const relevantExperienceTool: ChatCompletionTool = {
-  type: 'function',
-  function: {
-    name: relevantExperienceToolName,
-    description:
-      'Retrieve the resume sections that are most relevant to the provided job description.',
-    parameters: {
-      type: 'object',
-      properties: {
-        job_description: {
-          type: 'string',
-          description:
-            'The exact job description to use when retrieving relevant resume sections.',
-        },
-      },
-      required: ['job_description'],
-      additionalProperties: false,
-    },
-  },
-};
-
-const stringifyResumeJson = (value: unknown) => {
-  if (typeof value === 'string') return value;
-  return JSON.stringify(value, null, 2) ?? '';
-};
-
-const getFallbackResumeSections = (resumeJson: unknown) => {
-  const extractedSections = extractResumeSections(resumeJson);
-  const sections = Object.entries(extractedSections)
-    .map(([section, content]) => ({
-      section,
-      content,
-    }))
-    .filter((section) => section.content.trim().length > 0);
-
-  if (sections.length > 0) return sections;
-
-  const fullResumeContent = prepareResumeContent(resumeJson);
-  if (fullResumeContent.trim()) {
-    return [{ section: 'resume', content: fullResumeContent }];
-  }
-
-  const resumeJsonContent = stringifyResumeJson(resumeJson);
-  if (resumeJsonContent.trim()) {
-    return [{ section: 'resume_json', content: resumeJsonContent }];
-  }
-
-  return [];
-};
-
-const findRelevantExperienceToolCall = (
-  toolCalls?: ChatCompletionMessageToolCall[],
-): ChatCompletionMessageFunctionToolCall | undefined =>
-  toolCalls?.find(
-    (toolCall): toolCall is ChatCompletionMessageFunctionToolCall =>
-      toolCall.type === 'function' &&
-      toolCall.function.name === relevantExperienceToolName,
-  );
-
-const getToolJobDescription = (
-  toolCall: ChatCompletionMessageFunctionToolCall,
-  fallbackJobDescription: string,
-) => {
-  try {
-    const parsedArguments = relevantExperienceToolInputSchema.safeParse(
-      JSON.parse(toolCall.function.arguments),
-    );
-
-    if (parsedArguments.success) {
-      return parsedArguments.data.job_description;
-    }
-  } catch (_err) {
-    return fallbackJobDescription;
-  }
-
-  return fallbackJobDescription;
-};
 
 export async function POST(
   req: NextRequest,
@@ -163,141 +78,137 @@ export async function POST(
 
     const pdfContent = await readPdf(existResume?.url);
 
-    // Resume parser: Parse the resume & exctract the content
+    // Resume parser: Parse the resume & extract the content
     const lines = groupTextItemsIntoLines(pdfContent);
     const sections = groupLinesIntoSections(lines);
     const resumeJson = extractResumeFromSections(sections);
 
-    const profile = { ...resumeJson.profile };
+    const profileOriginal = { ...resumeJson.profile };
     resumeJson.profile = { ...initialResume.profile };
-    resumeJson.profile.summary = profile.summary;
+    resumeJson.profile.summary = profileOriginal.summary;
 
-    const retrieveSectionsForJob = async (jobDescription: string) => {
-      const jobEmbedding = await generateJobEmbedding({
-        job_role: job.job_role,
-        description: jobDescription,
-        skills_required: job.skills_required,
-        location: job.location,
-        ctc: job.ctc,
-        stipend: job.stipend,
-      });
+    // --- LangGraph Implementation ---
 
-      const relevantSections = await vectorStorage.retrieveRelevantSections(
-        jobEmbedding,
-        existResume.id,
-        3,
-      );
+    // 1. Define Retrieval Tool
+    const relevantExperienceTool = tool(
+      async ({ job_description }) => {
+        const jobEmbedding = await generateJobEmbedding({
+          job_role: job.job_role,
+          description: job_description,
+          skills_required: job.skills_required,
+          location: job.location,
+          ctc: job.ctc,
+          stipend: job.stipend,
+        });
 
-      return relevantSections.length > 0
-        ? relevantSections
-        : getFallbackResumeSections(resumeJson);
+        const relevantSections = await vectorStorage.retrieveRelevantSections(
+          jobEmbedding,
+          existResume.id,
+          3,
+        );
+
+        const sections = relevantSections.length > 0
+          ? relevantSections
+          : (() => {
+              const extractedSections = extractResumeSections(resumeJson);
+              const sections = Object.entries(extractedSections)
+                .map(([section, content]) => ({
+                  section,
+                  content,
+                }))
+                .filter((section) => section.content.trim().length > 0);
+
+              if (sections.length > 0) return sections;
+
+              const fullResumeContent = prepareResumeContent(resumeJson);
+              return [{ section: 'resume', content: fullResumeContent }];
+            })();
+
+        return JSON.stringify({ sections });
+      },
+      {
+        name: 'get_relevant_experience',
+        description: 'Retrieve relevant resume sections for enhancement.',
+        schema: z.object({
+          job_description: z.string().describe('The job description to use for retrieval.'),
+        }),
+      }
+    );
+
+    const tools = [relevantExperienceTool];
+    const toolNode = new ToolNode(tools);
+    const modelWithTools = llm.bindTools(tools);
+
+    // 2. Graph Nodes
+    const callModel = async (state: typeof MessagesAnnotation.State) => {
+      const response = await modelWithTools.invoke(state.messages);
+      return { messages: [response] };
     };
 
-    const toolMessages: ChatCompletionMessageParam[] = [
-      {
-        role: 'system',
-        content:
-          'You prepare context for resume enhancement. Before continuing, call get_relevant_experience with the exact job description.',
-      },
-      {
-        role: 'user',
-        content: `Find the candidate resume sections most relevant to this role.
+    const shouldContinue = (state: typeof MessagesAnnotation.State) => {
+      const { messages } = state;
+      const lastMessage = messages[messages.length - 1];
+      if ('tool_calls' in lastMessage && Array.isArray(lastMessage.tool_calls) && lastMessage.tool_calls.length > 0) {
+        return 'tools';
+      }
+      return '__end__';
+    };
 
-Position: ${job.job_role}
-Company: ${job.company.name}
-Job Description:
-${job.description}`,
-      },
-    ];
+    // 3. Define Graph
+    const workflow = new StateGraph(MessagesAnnotation)
+      .addNode('agent', callModel)
+      .addNode('tools', toolNode)
+      .addEdge('__start__', 'agent')
+      .addConditionalEdges('agent', shouldContinue)
+      .addEdge('tools', 'agent');
 
-    const toolResponse = await createToolCallingStream(
-      toolMessages,
-      [relevantExperienceTool],
-      'gpt-4o-mini',
-      0.2,
-      0.1,
-      {
-        type: 'function',
-        function: { name: relevantExperienceToolName },
-      },
-    );
+    const app = workflow.compile();
 
-    const toolCall = findRelevantExperienceToolCall(toolResponse.tool_calls);
-    const retrievedSections = await retrieveSectionsForJob(
-      toolCall
-        ? getToolJobDescription(toolCall, job.description)
-        : job.description,
-    );
+    // 4. Run Graph to get context
+    const finalState = await app.invoke({
+      messages: [
+        new SystemMessage('You prepare context for resume enhancement. Call get_relevant_experience first.'),
+        new HumanMessage(`Find sections for: ${job.job_role}\n\n${job.description}`)
+      ]
+    });
 
-    const llmInput = getResumeBuilderPrompt(
+    // Extract sections from tool output
+    const toolMessage = finalState.messages.find(m => m.getType() === 'tool');
+    const retrievedSections = toolMessage ? JSON.parse(toolMessage.content as string).sections : [];
+
+    // 5. Final Generation with Structured Output
+    const prompt = getResumeBuilderPrompt(
       JSON.stringify(resumeJson),
       job.description,
-      retrievedSections,
+      retrievedSections
     );
 
-    const response = await callLLm(llmInput, 'gpt-4o', 0.3, 0.85);
+    const structuredLlm = llm.withStructuredOutput(resumeSchema);
+    const enhancedResume = await structuredLlm.invoke([
+      new SystemMessage('You are an expert resume optimizer. Return ONLY the enhanced resume JSON.'),
+      new HumanMessage(prompt)
+    ]) as Resume;
 
-    const output = response.output[0].content[0].text;
+    // --- Post-Processing & Storage ---
+    enhancedResume.profile.name = profileOriginal.name;
+    enhancedResume.profile.email = profileOriginal.email;
+    enhancedResume.profile.phone = profileOriginal.phone;
+    enhancedResume.profile.url = profileOriginal.url;
+    enhancedResume.profile.location = profileOriginal.location;
 
-    const extractJsonPayload = (text: string) => {
-      try {
-        // Try to find the first '{' and last '}'
-        const firstBrace = text.indexOf('{');
-        const lastBrace = text.lastIndexOf('}');
-        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-          return text.slice(firstBrace, lastBrace + 1);
-        }
-      } catch (_e) {
-        // Fallback to existing logic
-      }
-
-      const firstBracket = text.indexOf('[');
-      const startIndex = [firstBrace, firstBracket]
-        .filter((index) => index !== -1)
-        .sort((a, b) => a - b)[0];
-
-      if (startIndex === undefined) return text;
-
-      const endBrace = text.lastIndexOf('}');
-      const endBracket = text.lastIndexOf(']');
-      const endIndex = Math.max(endBrace, endBracket);
-
-      return endIndex > startIndex
-        ? text.slice(startIndex, endIndex + 1)
-        : text;
-    };
-
-    let enhancedResume: Resume;
-    const jsonPayload = extractJsonPayload(output);
-    try {
-      enhancedResume = JSON.parse(jsonPayload) as Resume;
-    } catch (_err) {
-      throw new CustomError('LLM returned unparseable response', 502);
-    }
-
-    enhancedResume.profile.name = profile.name;
-    enhancedResume.profile.email = profile.email;
-    enhancedResume.profile.phone = profile.phone;
-    enhancedResume.profile.url = profile.url;
-    enhancedResume.profile.location = profile.location;
-
-    const resumeTitle = existResume.title.replace('.pdf', '') + Date.now();
+    const resumeTitle = existResume.title.replace('.pdf', '') + '-' + Date.now();
 
     const [resumeEmbedding, sectionalEmbeddings] = await Promise.all([
       generateResumeEmbedding(enhancedResume),
       generateSectionalEmbeddings(enhancedResume),
     ]);
 
-    // Save in the DB
     const dbRes = await prisma.$transaction(async (tx) => {
-      // Cleanup orphaned json resumes (not used in any application)
       await tx.resume.deleteMany({
         where: {
           applicant_id: applicant.id,
           type: 'json',
-          appliedJobs: {
-            none: {},
-          },
+          appliedJobs: { none: {} },
         },
       });
 
@@ -310,16 +221,8 @@ ${job.description}`,
         },
       });
 
-      await vectorStorage.storeSectionalEmbeddings(
-        newResume.id,
-        sectionalEmbeddings,
-        tx,
-      );
-      await vectorStorage.storeResumeEmbedding(
-        newResume.id,
-        resumeEmbedding,
-        tx,
-      );
+      await vectorStorage.storeSectionalEmbeddings(newResume.id, sectionalEmbeddings, tx);
+      await vectorStorage.storeResumeEmbedding(newResume.id, resumeEmbedding, tx);
 
       return newResume;
     });
