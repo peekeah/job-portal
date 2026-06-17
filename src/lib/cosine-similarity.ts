@@ -1,13 +1,3 @@
-import type { Prisma } from '@prisma/client';
-
-type JobWithCompany = Prisma.JobGetPayload<{
-  include: { company: true };
-}>;
-
-type ResumeWithApplicant = Prisma.ResumeGetPayload<{
-  include: { applicant: true };
-}>;
-
 /**
  * Calculate cosine similarity between two vectors (fallback for non-pgvector operations)
  */

@@ -73,7 +73,7 @@ export default function EnhancedJobPreviewModal({
 
   const handleCancel = () => {
     if (enhancedResume?.json) {
-      setEditedResume(enhancedResume.json);
+      setEditedResume(enhancedResume.json as unknown as Resume);
     }
     setIsEditing(false);
   };

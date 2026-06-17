@@ -75,7 +75,7 @@ export const authOptions = {
   },
   secret: getEnv('NEXTAUTH_SECRET'),
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === 'google') {
         const existUser = await prisma.auth.findUnique({
           where: { email: user.email! },

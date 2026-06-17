@@ -1,4 +1,4 @@
-import { getEmbeddings } from './ai';
+import { embeddings } from './ai';
 
 type JsonRecord = Record<string, unknown>;
 
@@ -365,7 +365,7 @@ export const generateResumeEmbedding = async (
     throw new Error('No content available for embedding generation');
   }
 
-  return await getEmbeddings(content);
+  return await embeddings.embedQuery(content);
 };
 
 /**
@@ -382,7 +382,7 @@ export const generateSectionalEmbeddings = async (
       .map(async ([sectionName, content]) => ({
         section: sectionName as SectionName,
         text: content,
-        embedding: await getEmbeddings(content),
+        embedding: await embeddings.embedQuery(content),
       })),
   );
 };
@@ -403,5 +403,5 @@ export const generateJobEmbedding = async (job: {
     throw new Error('No content available for embedding generation');
   }
 
-  return await getEmbeddings(content);
+  return await embeddings.embedQuery(content);
 };

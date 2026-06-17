@@ -247,7 +247,7 @@ export function JobDetails() {
     }
   };
 
-  const onEnhanceAndApply = (jobId: string) => {
+  const onEnhanceAndApply = () => {
     if (applicantProfile?.data.active_resume_id) {
       setSmartApplyOption(null);
       setIsSmartApplyDialogOpen(true);
@@ -388,7 +388,7 @@ export function JobDetails() {
                         </Button>
                         <Button
                           className="lg:text-md bg-white font-semibold text-blue-600 transition-colors hover:bg-blue-50 lg:p-5"
-                          onClick={() => onEnhanceAndApply(jobData.id)}
+                          onClick={onEnhanceAndApply}
                         >
                           Smart Apply
                         </Button>
@@ -494,7 +494,6 @@ export function JobDetails() {
                 jobId={jobData.id}
                 jobTitle={jobData.job_role}
                 companyName={jobData.company.name}
-                jobDescription={jobData.description}
                 resumes={[enhancedResume.data]}
                 open={isCoverLetterOpen}
                 onOpenChange={setIsCoverLetterOpen}

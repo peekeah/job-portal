@@ -376,7 +376,6 @@ const Jobs = () => {
           jobId={smartApplyJobId}
           jobTitle={selectedJob.job_role}
           companyName={selectedJob.company.name}
-          jobDescription={selectedJob.description}
           resumes={[enhancedResume.data]}
           open={isCoverLetterOpen}
           onOpenChange={setIsCoverLetterOpen}

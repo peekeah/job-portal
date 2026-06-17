@@ -30,12 +30,11 @@ export default function CoverLetterGenerator({
   jobId,
   jobTitle,
   companyName,
-  jobDescription,
   resumes,
   open,
   onOpenChange,
   onApplyWithCoverLetter,
-}: CoverLetterGeneratorProps) {
+}: Omit<CoverLetterGeneratorProps, 'jobDescription'>) {
   const [selectedResumeId, setSelectedResumeId] = useState('');
   const [coverLetter, setCoverLetter] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -89,8 +88,7 @@ export default function CoverLetterGenerator({
         const chunk = decoder.decode(value);
         setCoverLetter(prev => prev + chunk);
       }
-    } catch (error) {
-      console.error('Cover letter generation failed', error);
+    } catch (_error) {
       toast.error('Failed to generate cover letter. Try again.');
     } finally {
       setIsGenerating(false);
@@ -101,7 +99,7 @@ export default function CoverLetterGenerator({
     try {
       await navigator.clipboard.writeText(coverLetter);
       toast.success('Cover letter copied to clipboard');
-    } catch (error) {
+    } catch (_error) {
       toast.error('Unable to copy cover letter');
     }
   };
@@ -127,8 +125,7 @@ export default function CoverLetterGenerator({
     try {
       await onApplyWithCoverLetter(selectedResumeId, coverLetter);
       onOpenChange(false);
-    } catch (error) {
-      console.error('Failed to apply with cover letter:', error);
+    } catch (_error) {
       toast.error('Failed to apply. Please try again.');
     }
   };

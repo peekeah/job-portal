@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { StateGraph, MessagesAnnotation } from '@langchain/langgraph';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 import { authMiddleware } from '@/lib/auth-middleware';
@@ -51,44 +50,30 @@ export async function POST(req: NextRequest) {
       parsedResume = await parseResumeFromPdf(resume.url);
     }
 
-    // --- LangGraph Implementation ---
+    // --- LangChain Implementation ---
 
-    // 1. Define Logic Node
-    const critiqueNode = async (state: typeof MessagesAnnotation.State) => {
-      const response = await llm.invoke(state.messages);
-      return { messages: [response] };
-    };
-
-    // 2. Build Simple Graph (No tools needed for critique currently, but using graph for consistency)
-    const workflow = new StateGraph(MessagesAnnotation)
-      .addNode('critique', critiqueNode)
-      .addEdge('__start__', 'critique')
-      .addEdge('critique', '__end__');
-
-    const app = workflow.compile();
-
-    // 3. Execute with Streaming
+    // Execute with Streaming
     const prompt = getResumeCritiquePrompt(JSON.stringify(parsedResume));
     
-    const stream = await app.streamEvents(
-      { 
-        messages: [
-          new SystemMessage('You are a professional resume critic. Provide a detailed, constructive critique.'),
-          new HumanMessage(prompt)
-        ] 
-      },
-      { version: 'v2' }
-    );
+    const stream = await llm.stream([
+      new SystemMessage('You are a professional resume critic. Provide a detailed, constructive critique.'),
+      new HumanMessage(prompt)
+    ]);
 
     const encoder = new TextEncoder();
     const readableStream = new ReadableStream({
       async start(controller) {
-        for await (const { event, data } of stream) {
-          if (event === 'on_chat_model_stream' && data.chunk?.content) {
-            controller.enqueue(encoder.encode(data.chunk.content));
+        try {
+          for await (const chunk of stream) {
+            if (chunk.content) {
+              controller.enqueue(encoder.encode(chunk.content as string));
+            }
           }
+        } catch (error) {
+          controller.error(error);
+        } finally {
+          controller.close();
         }
-        controller.close();
       },
     });
 
