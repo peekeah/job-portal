@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { tool } from '@langchain/core/tools';
-import { StateGraph, MessagesAnnotation } from '@langchain/langgraph';
-import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 import { authMiddleware } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
 import { errorHandler } from '@/lib/errorHandler';
 import { parseResumeFromPdf } from '@/lib/resume-parser';
-import { llm } from '@/lib/ai';
+import { createReActAgent } from '@/lib/langgraph';
 import {
   extractResumeSections,
   generateJobEmbedding,
@@ -143,38 +141,11 @@ export async function POST(req: NextRequest) {
     );
 
     const tools = [relevantExperienceTool];
-    const toolNode = new ToolNode(tools);
-    const modelWithTools = llm.bindTools(tools);
+    const app = createReActAgent(tools);
 
-    // 2. Define Graph Logic
-    const callModel = async (state: typeof MessagesAnnotation.State) => {
-      const { messages } = state;
-      const response = await modelWithTools.invoke(messages);
-      return { messages: [response] };
-    };
+    const profile = (resumeJson as { profile?: Record<string, string> })?.profile || {};
 
-    const shouldContinue = (state: typeof MessagesAnnotation.State) => {
-      const { messages } = state;
-      const lastMessage = messages[messages.length - 1];
-      if ('tool_calls' in lastMessage && Array.isArray(lastMessage.tool_calls) && lastMessage.tool_calls.length > 0) {
-        return 'tools';
-      }
-      return '__end__';
-    };
-
-    // 3. Build Graph
-    const workflow = new StateGraph(MessagesAnnotation)
-      .addNode('agent', callModel)
-      .addNode('tools', toolNode)
-      .addEdge('__start__', 'agent')
-      .addConditionalEdges('agent', shouldContinue)
-      .addEdge('tools', 'agent');
-
-    const app = workflow.compile();
-
-    const profile = (resumeJson as any)?.profile || {};
-
-    // 4. Execute Graph
+    // 2. Execute Graph
     const systemPrompt = new SystemMessage(
       `You are a professional cover letter writer for ${profile.name || 'a candidate'}. ` +
       `Candidate Details:
@@ -206,8 +177,12 @@ export async function POST(req: NextRequest) {
       async start(controller) {
         for await (const { event, data } of stream) {
           if (event === 'on_chat_model_stream' && data.chunk?.content) {
-            // Only stream back the final assistant's content to the client
-            controller.enqueue(encoder.encode(data.chunk.content));
+            // Only stream back the final assistant's content to the client.
+            // Skip chunks that are part of a tool call.
+            const isToolCall = data.chunk.tool_call_chunks && data.chunk.tool_call_chunks.length > 0;
+            if (!isToolCall) {
+              controller.enqueue(encoder.encode(data.chunk.content));
+            }
           }
         }
         controller.close();

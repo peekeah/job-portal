@@ -24,6 +24,7 @@ import type {
 } from 'openai/resources/chat/completions';
 import { ResponsesModel } from 'openai/resources/shared';
 
+/** @deprecated Use LangChain `llm` instance instead */
 const client = new OpenAI({
   apiKey: getEnv('OPENAI_API_KEY'),
 });
@@ -40,6 +41,7 @@ interface OpenAIResponse extends Omit<OpenAI.Responses.Response, 'output'> {
   output: Content[];
 }
 
+/** @deprecated Use LangChain `llm.invoke()` or `llm.stream()` instead */
 export const callLLm = async (
   input: string,
   model: ResponsesModel = 'gpt-4o',
@@ -54,6 +56,7 @@ export const callLLm = async (
   }) as Promise<OpenAIResponse>;
 };
 
+/** @deprecated Use LangChain `embeddings` instance instead */
 export const getEmbeddings = async (
   input: string,
   model?: string,
@@ -67,6 +70,7 @@ export const getEmbeddings = async (
   return response.data[0].embedding;
 };
 
+/** @deprecated Use LangChain `llm.stream()` instead */
 export const createChatCompletionStream = async (
   messages: ChatCompletionMessageParam[],
   model: string = 'gpt-4o',
@@ -101,6 +105,7 @@ export const createChatCompletionStream = async (
   });
 };
 
+/** @deprecated Use LangGraph `createReActAgent` or `llm.bindTools()` instead */
 export const createToolCallingStream = async (
   messages: ChatCompletionMessageParam[],
   tools: ChatCompletionTool[],

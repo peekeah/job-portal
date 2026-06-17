@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { tool } from '@langchain/core/tools';
-import { StateGraph, MessagesAnnotation } from '@langchain/langgraph';
-import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 import { authMiddleware } from '@/lib/auth-middleware';
@@ -15,6 +13,7 @@ import { groupLinesIntoSections } from '@/lib/resume-parser/group-lines-into-sec
 import { extractResumeFromSections } from '@/lib/resume-parser/extract-resume-from-sections';
 import { readPdf } from '@/lib/resume-parser/read-pdf';
 import { llm } from '@/lib/ai';
+import { createReActAgent } from '@/lib/langgraph';
 import { getResumeBuilderPrompt } from '@/constant/ai-prompts';
 import { initialResume, Resume } from '@/mock/resume';
 import { resumeSchema } from '@/lib/resume-schema';
@@ -136,35 +135,9 @@ export async function POST(
     );
 
     const tools = [relevantExperienceTool];
-    const toolNode = new ToolNode(tools);
-    const modelWithTools = llm.bindTools(tools);
+    const app = createReActAgent(tools);
 
-    // 2. Graph Nodes
-    const callModel = async (state: typeof MessagesAnnotation.State) => {
-      const response = await modelWithTools.invoke(state.messages);
-      return { messages: [response] };
-    };
-
-    const shouldContinue = (state: typeof MessagesAnnotation.State) => {
-      const { messages } = state;
-      const lastMessage = messages[messages.length - 1];
-      if ('tool_calls' in lastMessage && Array.isArray(lastMessage.tool_calls) && lastMessage.tool_calls.length > 0) {
-        return 'tools';
-      }
-      return '__end__';
-    };
-
-    // 3. Define Graph
-    const workflow = new StateGraph(MessagesAnnotation)
-      .addNode('agent', callModel)
-      .addNode('tools', toolNode)
-      .addEdge('__start__', 'agent')
-      .addConditionalEdges('agent', shouldContinue)
-      .addEdge('tools', 'agent');
-
-    const app = workflow.compile();
-
-    // 4. Run Graph to get context
+    // 2. Run Graph to get context
     const finalState = await app.invoke({
       messages: [
         new SystemMessage('You prepare context for resume enhancement. Call get_relevant_experience first.'),
@@ -172,11 +145,14 @@ export async function POST(
       ]
     });
 
-    // Extract sections from tool output
-    const toolMessage = finalState.messages.find(m => m.getType() === 'tool');
-    const retrievedSections = toolMessage ? JSON.parse(toolMessage.content as string).sections : [];
+    // Extract sections from tool output (safer parsing for multi-turn)
+    const toolMessages = finalState.messages.filter(m => m.getType() === 'tool');
+    const lastToolMessage = toolMessages[toolMessages.length - 1];
+    const retrievedSections = lastToolMessage 
+      ? JSON.parse(lastToolMessage.content as string).sections 
+      : [];
 
-    // 5. Final Generation with Structured Output
+    // 3. Final Generation with Structured Output
     const prompt = getResumeBuilderPrompt(
       JSON.stringify(resumeJson),
       job.description,

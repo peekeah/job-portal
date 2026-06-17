@@ -1,5 +1,0 @@
-{
-  "hooksConfig": {
-    "disabled": ["rtk-hook-gemini.sh"]
-  }
-}
